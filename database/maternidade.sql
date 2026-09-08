@@ -1,4 +1,4 @@
-CREATE DATABASE maternidade
+CREATE DATABASE maternidade;
 USE maternidade;
 
 /*usuario*/
@@ -21,8 +21,9 @@ CREATE TABLE crianca (
     peso_nascimento DECIMAL(5,2),
     altura_nascimento DECIMAL(5,2),
     observacoes TEXT
+); -- CORRIGIDO: Fechamento da tabela adicionado
 
-  /*criança e usuario --> relação*/
+/*criança e usuario --> relação*/
 CREATE TABLE usuario_crianca (
     id_usuario INT NOT NULL,
     id_crianca INT NOT NULL,
@@ -36,7 +37,7 @@ CREATE TABLE usuario_crianca (
 
     FOREIGN KEY (id_crianca)
         REFERENCES crianca(id_crianca)
-        ON DELETE CASCADE /*Se deletar um usuário, apaga automaticamente os vínculos desse usuário na tabela associativa --> A criança continua viva na tabela crianca, só perdeu o vínculo com aquele usuário que foi excluído.*/
+        ON DELETE CASCADE
 );
 
 /*crescimento*/ 
@@ -65,7 +66,7 @@ CREATE TABLE alimentacao (
         'ALIMENTACAO_SOLIDA',
         'OUTRO'
     ) NOT NULL,
-    quantidade DECIMAL(6,2), -- Ex: 120.00, 15.50
+    quantidade DECIMAL(6,2),
     unidade_medida ENUM('ML', 'G', 'MINUTOS', 'PORCAO', 'UNIDADE'), 
     observacao TEXT,
 
@@ -75,7 +76,6 @@ CREATE TABLE alimentacao (
 );
 
 /*sono*/
-
 CREATE TABLE sono (
     id_sono INT AUTO_INCREMENT PRIMARY KEY,
     id_crianca INT NOT NULL,
@@ -95,8 +95,8 @@ CREATE TABLE desenvolvimento (
     id_crianca INT NOT NULL,
     data_registro DATE NOT NULL,
     categoria ENUM('MOTOR', 'LINGUAGEM', 'COGNITIVO', 'SOCIAL', 'OUTRO') NOT NULL,
-    titulo VARCHAR(100) NOT NULL,  /*"Primeiros passos", "Primeira palavra"*/
-    descricao TEXT,                /*Ex: "Deu 5 passos em direção ao pai na sala"*/
+    titulo VARCHAR(100) NOT NULL,
+    descricao TEXT,
 
     FOREIGN KEY (id_crianca)
         REFERENCES crianca(id_crianca)
@@ -134,7 +134,6 @@ CREATE TABLE produto (
         ON DELETE SET NULL
 );
 
-
 CREATE TABLE produto_loja (
     id_produto INT NOT NULL,
     id_loja INT NOT NULL,
@@ -155,7 +154,7 @@ CREATE TABLE produto_loja (
 CREATE TABLE produto_favorito (
     id_usuario INT NOT NULL,
     id_produto INT NOT NULL,
-    data_favorito DATETIME DEFAULT CURRENT_TIMESTAMP, /*importante pq espero ver o que eu favorite mais recentemente primeiro*/
+    data_favorito DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     PRIMARY KEY (id_usuario, id_produto),
 
@@ -202,7 +201,7 @@ CREATE TABLE chat_usuario (
 CREATE TABLE mensagem (
     id_mensagem INT AUTO_INCREMENT PRIMARY KEY,
     id_chat INT NOT NULL,
-    id_usuario INT  NULL, /*mesmo se um usuário deletar a sua conta as mensagens que ele evia não são apagadas --> apenas o seu nome na conversa*/
+    id_usuario INT NULL,
     mensagem TEXT NOT NULL,
     data_envio DATETIME DEFAULT CURRENT_TIMESTAMP,
 
@@ -212,12 +211,10 @@ CREATE TABLE mensagem (
 
     FOREIGN KEY (id_usuario)
         REFERENCES usuario(id_usuario)
-        ON DELETE CASCADE
+        ON DELETE SET NULL -- CORRIGIDO: Alterado para SET NULL para atender a regra descrita no comentário
 );
 
 /*biblioteca*/
-
-
 CREATE TABLE categoria_livro (
     id_categoria INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -226,23 +223,17 @@ CREATE TABLE categoria_livro (
 
 CREATE TABLE livro (
     id_livro INT AUTO_INCREMENT PRIMARY KEY,
-    categoria ENUM(
-        'PARENTALIDADE',
-        'SONO_ROTINA',
-        'ALIMENTACAO',
-        'DESENVOLVIMENTO',
-        'HISTORIAS_INFANTIS',
-        'SENSORIAL',
-        'EMOCOES',
-        'OUTRO'
-    ) NOT NULL,
+    id_categoria INT, -- AJUSTADO: Vinculado à tabela categoria_livro em vez de usar ENUM
     titulo VARCHAR(200) NOT NULL,
     autor VARCHAR(150),
     descricao TEXT,
     imagem VARCHAR(255),
     link VARCHAR(500),
-    idade_minima_meses INT NULL,
-   
+    idade_minima_meses INT NULL, -- CORRIGIDO: Vírgula final removida
+
+    FOREIGN KEY (id_categoria)
+        REFERENCES categoria_livro(id_categoria)
+        ON DELETE SET NULL
 );
 
 CREATE TABLE livro_favorito (
@@ -300,7 +291,7 @@ CREATE TABLE especialista_especialidade (
 CREATE TABLE compromisso (
     id_compromisso INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
-    id_crianca INT, /*pode ser um compromisso da mãe*/
+    id_crianca INT,
     id_especialista INT,
 
     titulo VARCHAR(150) NOT NULL,
@@ -437,7 +428,6 @@ CREATE TABLE categoria_conteudo (
     descricao TEXT
 );
 
-
 CREATE TABLE conteudo (
     id_conteudo INT AUTO_INCREMENT PRIMARY KEY,
     id_categoria INT,
@@ -470,7 +460,6 @@ CREATE TABLE conteudo_favorito (
 );
 
 /*primeiros socorros*/
-
 CREATE TABLE primeiros_socorros (
     id_primeiros_socorros INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(200) NOT NULL,
@@ -487,5 +476,3 @@ CREATE TABLE emergencia (
     telefone VARCHAR(30) NOT NULL,
     descricao TEXT
 );
-
-
