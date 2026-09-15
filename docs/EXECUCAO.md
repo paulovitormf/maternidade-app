@@ -6,17 +6,19 @@
 
 Suba o banco de dados, a API e a aplicação web seguindo este passo a passo.
 
-[![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](#-pré-requisitos) [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-API-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](#️-2-executar-o-back-end) [![React](https://img.shields.io/badge/React-Front--end-61DAFB?style=for-the-badge&logo=react&logoColor=black)](#-3-executar-o-front-end) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Banco-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](#️-1-subir-o-banco-de-dados)
+[![Docker Compose](https://img.shields.io/badge/Docker%20Compose-Stack%20completa-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-1-execução-completa-via-docker-compose) [![HMR](https://img.shields.io/badge/Front--end-HMR-F24E1E?style=for-the-badge&logo=vite&logoColor=white)](#-2-abordagem-mista-com-devtools-e-hmr) [![DevTools](https://img.shields.io/badge/Spring%20Boot-DevTools-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](#-2-abordagem-mista-com-devtools-e-hmr)
 
 </div>
 
 ## 📚 Sumário
 
 - [✅ Pré-requisitos](#-pré-requisitos)
-- [⚡ Execução rápida](#-execução-rápida)
-- [🗄️ 1. Subir o banco de dados](#️-1-subir-o-banco-de-dados)
-- [⚙️ 2. Executar o back-end](#️-2-executar-o-back-end)
-- [💻 3. Executar o front-end](#-3-executar-o-front-end)
+- [⚡ Escolha da abordagem](#-escolha-da-abordagem)
+- [🐳 1. Execução completa via Docker Compose](#-1-execução-completa-via-docker-compose)
+- [⚡ 2. Abordagem mista com DevTools e HMR](#-2-abordagem-mista-com-devtools-e-hmr)
+- [🗄️ 3. Subir apenas o banco de dados](#️-3-subir-apenas-o-banco-de-dados)
+- [⚙️ 4. Executar o back-end no host](#️-4-executar-o-back-end-no-host)
+- [💻 5. Executar o front-end no host](#-5-executar-o-front-end-no-host)
 - [🔎 Validar a execução](#-validar-a-execução)
 - [🧯 Solução de problemas](#-solução-de-problemas)
 - [⏹️ Encerrar os serviços](#️-encerrar-os-serviços)
@@ -34,32 +36,66 @@ Instale as ferramentas abaixo antes de começar:
 
 > 💡 O Docker Desktop precisa estar aberto e em execução antes de criar o banco.
 
-## ⚡ Execução rápida
+## ⚡ Escolha da abordagem
 
-Abra **três terminais**, na raiz do projeto, e execute os serviços nesta ordem:
-
-| Terminal | Pasta | Comando | Serviço |
+| Abordagem | Indicada para | O que roda no Docker | O que roda na máquina host |
 | --- | --- | --- | --- |
-| 1 | raiz do projeto | comando do [banco](#️-1-subir-o-banco-de-dados) | PostgreSQL |
-| 2 | `backend` | `mvn spring-boot:run` | API Spring Boot |
-| 3 | `frontend` | `npm run dev` | React + Vite |
+| 🐳 **Docker Compose** | Produção, entregas, apresentações e testes de integração | PostgreSQL, API e front-end | Nada além do Docker |
+| ⚡ **DevTools + HMR** | Desenvolvimento do dia a dia | PostgreSQL | API e front-end |
 
-> 🚦 Não avance para o próximo terminal antes de confirmar que o serviço anterior iniciou corretamente.
+## 🐳 1. Execução completa via Docker Compose
 
-## 🗄️ 1. Subir o banco de dados
+Esta opção executa toda a stack em containers isolados e é ideal para apresentar o projeto à banca ou ao professor, fazer entregas e validar a integração sem instalar as dependências da aplicação na máquina.
 
-Crie um container PostgreSQL com as configurações usadas pela aplicação:
+### Pré-requisito
+
+- Docker ou Docker Desktop instalado e em execução.
+
+Na raiz do projeto, execute:
 
 ```bash
-docker run --name postgres-maternidade \
-  -e POSTGRES_DB=maternidade_db \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -p 5432:5432 \
-  -d postgres:latest
+docker compose up --build
 ```
 
-Confirme se o container está ativo:
+O comando cria as imagens quando necessário, inicia o PostgreSQL, aguarda o banco ficar saudável e sobe a API e o front-end.
+
+### Endereços de acesso
+
+| Serviço | Endereço |
+| --- | --- |
+| Front-end | <http://localhost:5173> |
+| Back-end (API) | <http://localhost:8080> |
+| PostgreSQL | `localhost:5432` |
+
+O front-end também pode usar a porta `3000` caso o `vite.config.ts` e o mapeamento do Compose sejam configurados para ela. A configuração atual do projeto usa `5173`.
+
+Para executar em segundo plano:
+
+```bash
+docker compose up --build -d
+```
+
+## ⚡ 2. Abordagem mista com DevTools e HMR
+
+Nesta opção, somente o banco de dados roda isolado no Docker. A API Spring Boot e o front-end React/Vite rodam nativamente na máquina, o que torna o ciclo de alteração e teste mais rápido.
+
+### Vantagens
+
+- **HMR no front-end:** alterações em React/Vite aparecem instantaneamente no navegador, sem reload completo.
+- **Spring Boot DevTools:** alterações no código Java provocam recompilação e reinicialização automática da API, normalmente em poucos segundos.
+- Menor consumo de memória e execução mais ágil para o desenvolvimento diário.
+
+Antes de começar, instale Docker, Java 17 ou superior, Maven 3.9 ou superior e Node.js 18 ou superior.
+
+## 🗄️ 3. Subir apenas o banco de dados
+
+Na raiz do projeto, inicie somente o serviço `postgres-db`:
+
+```bash
+docker compose up postgres-db
+```
+
+Confirme se o container está ativo em outro terminal:
 
 ```bash
 docker ps
@@ -71,23 +107,7 @@ Se o container já existir e estiver parado, use:
 docker start postgres-maternidade
 ```
 
-### 🖱️ Criar pelo Docker Desktop
-
-1. Abra o **Docker Desktop**.
-2. Acesse **Images**, procure por `postgres` e clique em **Run**.
-3. Em **Optional settings**, informe os valores abaixo:
-
-   | Configuração | Valor |
-   | --- | --- |
-   | Container name | `postgres-maternidade` |
-   | Host port | `5432` |
-   | `POSTGRES_DB` | `maternidade_db` |
-   | `POSTGRES_USER` | `postgres` |
-   | `POSTGRES_PASSWORD` | `postgres` |
-
-4. Clique em **Run**.
-
-## ⚙️ 2. Executar o back-end
+## ⚙️ 4. Executar o back-end no host
 
 Em um novo terminal, entre na pasta do back-end:
 
@@ -95,7 +115,13 @@ Em um novo terminal, entre na pasta do back-end:
 cd backend
 ```
 
-Execute a API com o Maven:
+Execute a API com o Maven Wrapper, quando ele estiver disponível no checkout:
+
+```bash
+./mvnw spring-boot:run
+```
+
+Como o Maven Wrapper ainda não está versionado neste projeto, use:
 
 ```bash
 mvn spring-boot:run
@@ -117,7 +143,7 @@ Se o projeto possuir o Maven Wrapper, também é possível usar:
 
 ✅ Quando a inicialização terminar, a API estará disponível em <http://localhost:8080>.
 
-## 💻 3. Executar o front-end
+## 💻 5. Executar o front-end no host
 
 Em outro terminal, entre na pasta da aplicação web:
 
