@@ -9,7 +9,8 @@ CREATE TABLE usuario (
     senha VARCHAR(100) NOT NULL,
     data_nascimento DATE,
     telefone VARCHAR(20),
-    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    qnt_gestacao
 );
 
 /*criança*/
@@ -475,4 +476,16 @@ CREATE TABLE emergencia (
     nome VARCHAR(150) NOT NULL,
     telefone VARCHAR(30) NOT NULL,
     descricao TEXT
+);
+
+CREATE TABLE gestacao (
+    id_gestacao,
+    id_usuario,
+    ultima_mestruacao DATE NOT NULL,
+    idade_gestacional INT,
+    dada_parto DATE,
+    tipo_gestacao TEXT,
+    pre_natal BOOLEAN
+
+
 );
