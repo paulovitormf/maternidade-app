@@ -1,7 +1,7 @@
 CREATE DATABASE maternidade;
 USE maternidade;
 
-/*usuario*/
+/*usuario pai,mae ou responsavel*/
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -9,18 +9,21 @@ CREATE TABLE usuario (
     senha VARCHAR(100) NOT NULL,
     data_nascimento DATE,
     telefone VARCHAR(20),
-    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
+    qnt_gestacao
 );
 
-/*criança*/
+/*crianca*/
 CREATE TABLE crianca (
     id_crianca INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(250) NOT NULL,
     data_nascimento DATE NOT NULL,
+    hora_nascimento DATE NOT NULL,
     sexo ENUM('F', 'M'),
     peso_nascimento DECIMAL(5,2),
     altura_nascimento DECIMAL(5,2),
-    observacoes TEXT
+    observacoes TEXT,
+    previsão_nascimento DATE NOT NULL
 ); -- CORRIGIDO: Fechamento da tabela adicionado
 
 /*criança e usuario --> relação*/
@@ -475,4 +478,16 @@ CREATE TABLE emergencia (
     nome VARCHAR(150) NOT NULL,
     telefone VARCHAR(30) NOT NULL,
     descricao TEXT
+);
+
+CREATE TABLE gestacao (
+    id_gestacao,
+    id_usuario,
+    ultima_mestruacao DATE NOT NULL,
+    idade_gestacional INT,
+    dada_parto DATE,
+    tipo_gestacao TEXT,
+    pre_natal BOOLEAN
+
+
 );

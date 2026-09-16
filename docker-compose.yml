@@ -1,41 +1,45 @@
 services:
-  postgres-db:
-    image: postgres:latest
-    container_name: postgres-maternidade
+  # 1. Banco de Dados MySQL
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-maternidade
     environment:
-      POSTGRES_DB: maternidade_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${MYSQL_PORT}:3306"
     volumes:
-      - pgdata:/var/lib/postgresql
+      - mysqldata:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d maternidade_db"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  # 2. Back-end Spring Boot (Java 21)
   backend:
     build: ./backend
     container_name: maternidade-backend
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT}:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/maternidade_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/${MYSQL_DATABASE}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
     depends_on:
-      postgres-db:
+      mysql-db:
         condition: service_healthy
 
+  # 3. Front-end React/Vite
   frontend:
     build: ./frontend
     container_name: maternidade-frontend
     ports:
-      - "5173:5173"  # Mapeia a porta 5173 do seu PC para o container
+      - "${FRONTEND_PORT}:5173"
     depends_on:
       - backend
 
 volumes:
-  pgdata:
+  mysqldata:
