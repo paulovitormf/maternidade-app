@@ -16,7 +16,7 @@ Suba o banco de dados, a API e a aplicação web seguindo este passo a passo.
 - [⚡ Escolha da abordagem](#-escolha-da-abordagem)
 - [🐳 1. Execução completa via Docker Compose](#-1-execução-completa-via-docker-compose)
 - [⚡ 2. Abordagem mista com DevTools e HMR](#-2-abordagem-mista-com-devtools-e-hmr)
-- [🗄️ 3. Subir apenas o banco de dados](#️-3-subir-apenas-o-banco-de-dados)
+- [🗄️ 3. Subir o banco de dados](#️-3-subir-o-banco-de-dados)
 - [⚙️ 4. Executar o back-end no host](#️-4-executar-o-back-end-no-host)
 - [💻 5. Executar o front-end no host](#-5-executar-o-front-end-no-host)
 - [🔎 Validar a execução](#-validar-a-execução)
@@ -40,8 +40,8 @@ Instale as ferramentas abaixo antes de começar:
 
 | Abordagem | Indicada para | O que roda no Docker | O que roda na máquina host |
 | --- | --- | --- | --- |
-| 🐳 **Docker Compose** | Produção, entregas, apresentações e testes de integração | PostgreSQL, API e front-end | Nada além do Docker |
-| ⚡ **DevTools + HMR** | Desenvolvimento do dia a dia | PostgreSQL | API e front-end |
+| 🐳 **Docker Compose** | Produção, entregas, apresentações e testes de integração | MySQL 8, API e front-end | Nada além do Docker |
+| ⚡ **DevTools + HMR** | Desenvolvimento do dia a dia | MySQL 8 | API e front-end |
 
 ## 🐳 1. Execução completa via Docker Compose
 
@@ -54,10 +54,11 @@ Esta opção executa toda a stack em containers isolados e é ideal para apresen
 Na raiz do projeto, execute:
 
 ```bash
+cp .env.example .env
 docker compose up --build
 ```
 
-O comando cria as imagens quando necessário, inicia o PostgreSQL, aguarda o banco ficar saudável e sobe a API e o front-end.
+O arquivo `.env` define o banco `maternidade_db`, o usuário e as portas usadas pelo Compose. O comando cria as imagens quando necessário, inicia o MySQL 8, aguarda o banco ficar saudável e sobe a API e o front-end.
 
 ### Endereços de acesso
 
@@ -65,7 +66,7 @@ O comando cria as imagens quando necessário, inicia o PostgreSQL, aguarda o ban
 | --- | --- |
 | Front-end | <http://localhost:5173> |
 | Back-end (API) | <http://localhost:8080> |
-| PostgreSQL | `localhost:5432` |
+| MySQL | `localhost:3306` |
 
 O front-end também pode usar a porta `3000` caso o `vite.config.ts` e o mapeamento do Compose sejam configurados para ela. A configuração atual do projeto usa `5173`.
 
@@ -87,12 +88,17 @@ Nesta opção, somente o banco de dados roda isolado no Docker. A API Spring Boo
 
 Antes de começar, instale Docker, Java 17 ou superior, Maven 3.9 ou superior e Node.js 18 ou superior.
 
-## 🗄️ 3. Subir apenas o banco de dados
+## 🗄️ 3. Subir o banco de dados
 
-Na raiz do projeto, inicie somente o serviço `postgres-db`:
+Há duas formas de executar o MySQL: pelo container do projeto ou instalado diretamente na máquina.
+
+### Opção A: MySQL no Docker
+
+Na raiz do projeto, crie o arquivo de ambiente caso ainda não exista e inicie somente o serviço `mysql-db`:
 
 ```bash
-docker compose up postgres-db
+cp .env.example .env
+docker compose up mysql-db
 ```
 
 Confirme se o container está ativo em outro terminal:
@@ -104,8 +110,41 @@ docker ps
 Se o container já existir e estiver parado, use:
 
 ```bash
-docker start postgres-maternidade
+docker start mysql-maternidade
 ```
+
+O banco ficará disponível em `localhost:3306`, com os valores padrão do `.env.example`:
+
+| Configuração | Valor padrão |
+| --- | --- |
+| Banco | `maternidade_db` |
+| Usuário | `root` |
+| Senha | `1234` |
+
+### Opção B: MySQL instalado na máquina
+
+Instale o [MySQL Community Server](https://dev.mysql.com/downloads/mysql/) e o cliente `mysql`. No Linux, o serviço pode ser iniciado com:
+
+```bash
+sudo systemctl start mysql
+sudo systemctl enable mysql
+```
+
+Crie o banco e o usuário usados pelo back-end local:
+
+```bash
+mysql -u root -p
+```
+
+```sql
+CREATE DATABASE IF NOT EXISTS maternidade_db;
+CREATE USER IF NOT EXISTS 'maternidade_user'@'localhost' IDENTIFIED BY 'maternidade_password';
+GRANT ALL PRIVILEGES ON maternidade_db.* TO 'maternidade_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+O back-end já usa esses valores como padrão quando executado fora do Docker. Se o MySQL estiver em outra porta ou com credenciais diferentes, exporte `DB_HOST`, `MYSQL_PORT`, `MYSQL_DATABASE`, `MYSQL_USER` e `MYSQL_PASSWORD` antes de iniciar a API.
 
 ## ⚙️ 4. Executar o back-end no host
 
@@ -169,7 +208,7 @@ npm run dev
 
 Antes de começar a usar a aplicação, confira:
 
-- [ ] O container `postgres-maternidade` aparece no comando `docker ps`.
+- [ ] O container `mysql-maternidade` aparece no comando `docker ps` ou o serviço MySQL local está ativo.
 - [ ] A API iniciou sem erros no terminal do back-end.
 - [ ] O endereço <http://localhost:8080> está acessível.
 - [ ] O front-end abriu no endereço informado pelo Vite.
@@ -181,19 +220,26 @@ Antes de começar a usar a aplicação, confira:
 | --- | --- |
 | API Spring Boot | <http://localhost:8080> |
 | Aplicação web | <http://localhost:5173> |
-| PostgreSQL | `localhost:5432` |
+| MySQL | `localhost:3306` |
 
 ## 🧯 Solução de problemas
 
-### ❌ `Connection to localhost:5432 refused`
+### ❌ `Connection to localhost:3306 refused`
 
-O PostgreSQL não está em execução. Inicie o container:
+O MySQL não está em execução. Inicie o container:
 
 ```bash
-docker start postgres-maternidade
+docker start mysql-maternidade
 ```
 
-Se o container ainda não existir, repita o comando de criação da [primeira etapa](#️-1-subir-o-banco-de-dados).
+Se o container ainda não existir, repita o comando de criação da [primeira etapa](#-1-execução-completa-via-docker-compose).
+
+Se estiver usando uma instalação local, verifique o serviço:
+
+```bash
+sudo systemctl status mysql
+sudo systemctl start mysql
+```
 
 ### ❌ `Port 8080 is already in use`
 
@@ -227,16 +273,16 @@ Instale o [Maven](https://maven.apache.org/download.cgi), configure a variável 
 
 Para parar a API e o front-end, pressione `Ctrl + C` nos respectivos terminais.
 
-Para parar o banco sem remover os dados:
+Para parar o banco em Docker sem remover os dados:
 
 ```bash
-docker stop postgres-maternidade
+docker stop mysql-maternidade
 ```
 
 Para remover o container e os dados armazenados nele:
 
 ```bash
-docker rm -f postgres-maternidade
+docker compose down -v
 ```
 
 > ⚠️ O último comando remove o container. Use-o apenas se quiser recriar o banco do zero.
