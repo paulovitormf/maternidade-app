@@ -46,7 +46,7 @@ export default function App() {
         {loading && (
           <div className="flex items-center gap-2 text-sm text-slate-500 my-6">
             <RefreshCw className="w-4 h-4 animate-spin text-pink-500" />
-            <span>Buscando dados no PostgreSQL...</span>
+            <span>Buscando dados no MySQL...</span>
           </div>
         )}
 

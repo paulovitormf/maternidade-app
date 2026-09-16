@@ -6,7 +6,7 @@
 
 Projeto acadêmico desenvolvido em grupo na disciplina de **Engenharia de Software II**.
 
-[![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](#-tecnologias) [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-API-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](#-tecnologias) [![React](https://img.shields.io/badge/React-Front--end-61DAFB?style=for-the-badge&logo=react&logoColor=black)](#-tecnologias) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Banco-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](#-tecnologias) [![Docker](https://img.shields.io/badge/Docker-Ambiente-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-tecnologias)
+[![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](#-tecnologias) [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-API-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](#-tecnologias) [![React](https://img.shields.io/badge/React-Front--end-61DAFB?style=for-the-badge&logo=react&logoColor=black)](#-tecnologias) [![MySQL](https://img.shields.io/badge/MySQL-Banco-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](#-tecnologias) [![Docker](https://img.shields.io/badge/Docker-Ambiente-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-tecnologias)
 <br>
 <h3><a href="docs/EXECUCAO.md">📖&nbsp;&nbsp;Abrir guia de execução&nbsp;&nbsp;→</a></h3>
 
@@ -31,7 +31,7 @@ O projeto está sendo desenvolvido como trabalho acadêmico e aplica conceitos d
 | --- | --- |
 | 🎨 Front-end | React, TypeScript, Vite e Tailwind CSS |
 | ⚙️ Back-end | Java 17, Spring Boot e Spring Data JPA |
-| 🗄️ Banco de dados | PostgreSQL |
+| 🗄️ Banco de dados | MySQL 8 |
 | 📦 Ambiente | Docker e Docker Compose |
 
 ## 🏗️ Arquitetura
@@ -49,11 +49,11 @@ O repositório oferece duas formas de execução, detalhadas no [guia de execuç
 | Abordagem | Indicada para | Resumo |
 | --- | --- | --- |
 | 🐳 **Docker Compose** | Apresentações, entregas e testes de integração | Toda a stack roda em containers isolados. |
-| ⚡ **DevTools + HMR** | Desenvolvimento do dia a dia | PostgreSQL no Docker; API e front-end no host, com atualizações rápidas. |
+| ⚡ **DevTools + HMR** | Desenvolvimento do dia a dia | MySQL no Docker; API e front-end no host, com atualizações rápidas. |
 
 O passo a passo completo, incluindo pré-requisitos, comandos, endereços de acesso e solução de problemas, está no [guia de execução](docs/EXECUCAO.md).
 
-Para uma visão rápida, o Docker Compose inicia PostgreSQL, API e front-end juntos. No desenvolvimento diário, apenas o banco roda em Docker e os demais serviços são iniciados localmente.
+Para uma visão rápida, o Docker Compose inicia MySQL 8, API e front-end juntos. No desenvolvimento diário, apenas o banco roda em Docker e os demais serviços são iniciados localmente.
 
 ## 📁 Estrutura do projeto
 
