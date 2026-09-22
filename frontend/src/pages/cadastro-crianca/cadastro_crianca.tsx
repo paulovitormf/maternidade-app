@@ -23,7 +23,7 @@ export default function Cadastro() {
   ) => {
     const { name, value } = e.target;
 
-    setForm((prev: any) => ({
+    setForm((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -57,6 +57,7 @@ export default function Cadastro() {
         <div className="form-grid">
           <label className="field field-wide">
             <span>Nome completo</span>
+
             <input
               type="text"
               name="nome_completo"
@@ -68,6 +69,7 @@ export default function Cadastro() {
 
           <label className="field">
             <span>CPF</span>
+
             <input
               type="text"
               name="cpf"
@@ -80,6 +82,7 @@ export default function Cadastro() {
 
           <label className="field">
             <span>Nascimento</span>
+            
             <input
               type="date"
               name="nascimento"

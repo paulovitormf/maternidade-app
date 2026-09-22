@@ -1,83 +1,45 @@
-import { useEffect, useState } from 'react';
-import { Baby, CheckCircle2, RefreshCw, AlertCircle } from 'lucide-react';
-
-interface HelloData {
-  id: number;
-  texto: string;
-}
+import React from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import CadastroUsuario from './pages/CadastroCrianca.jsx';
+// import CadastroGestacao from './pages/CadastroGestacao'; // Descomente quando tiver essa tela
 
 export default function App() {
-  const [data, setData] = useState<HelloData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchHello = () => {
-    setLoading(true);
-    setError(null);
-
-    fetch('http://localhost:8080/api/hello')
-      .then((res) => {
-        if (!res.ok) throw new Error('Servidor respondeu com erro');
-        return res.json();
-      })
-      .then((json) => setData(json))
-      .catch(() => setError('Não foi possível conectar com o backend Spring Boot.'))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchHello();
-  }, []);
-
   return (
-    <main className="min-h-screen w-full flex items-center justify-center p-4 bg-slate-100">
-      {/* Container simulando tela de smartphone (Mobile-First) */}
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl border border-slate-200 p-6 text-center flex flex-col items-center">
-        
-        {/* Ícone principal */}
-        <div className="w-16 h-16 bg-pink-100 text-pink-500 rounded-full flex items-center justify-center mb-4 shadow-sm">
-          <Baby className="w-8 h-8" />
+    <BrowserRouter>
+
+      {/* Menu Superior de Navegação */}
+      <nav className="bg-slate-800 text-white p-4 shadow-md">
+        <div className="max-w-6xl mx-auto flex gap-6 font-medium">
+         
+          <Link to="/" 
+          className="hover:text-pink-400 transition">
+            Início
+          </Link>
+
+          <Link to="/cadastrar-usuario" 
+          className="hover:text-pink-400 transition">
+            Cadastrar Mãe
+          </Link>
+
+          <Link to="/cadastrar-bebe" 
+          className="hover:text-pink-400 transition">
+            Cadastrar Bebê
+          </Link>
         </div>
+      </nav>
 
-        <h1 className="text-xl font-bold text-slate-800">App Maternidade</h1>
-        <p className="text-xs text-slate-500 mb-6">Validação de Arquitetura de Software</p>
+      {/* Gerenciador de Rotas (onde os componentes são renderizados) */}
+      <main className="container mx-auto p-4">
+        <Routes>
 
-        {/* Estado de Carregamento */}
-        {loading && (
-          <div className="flex items-center gap-2 text-sm text-slate-500 my-6">
-            <RefreshCw className="w-4 h-4 animate-spin text-pink-500" />
-            <span>Buscando dados no PostgreSQL...</span>
-          </div>
-        )}
-
-        {/* Estado de Erro */}
-        {error && !loading && (
-          <div className="p-3 bg-red-50 text-red-600 rounded-2xl text-xs flex items-center gap-2 mb-6 w-full text-left">
-            <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Exibição da resposta vinda do banco */}
-        {data && !loading && (
-          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl w-full mb-6">
-            <div className="flex items-center justify-center gap-1.5 text-emerald-600 text-xs font-semibold mb-1">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Sucesso! Resposta do Banco:</span>
-            </div>
-            <p className="text-sm font-medium text-slate-700">"{data.texto}"</p>
-          </div>
-        )}
-
-        {/* Botão para testar a requisição */}
-        <button
-          onClick={fetchHello}
-          disabled={loading}
-          className="w-full py-3 px-4 bg-pink-500 hover:bg-pink-600 active:scale-95 disabled:opacity-50 text-white font-medium rounded-xl text-sm transition-all shadow-md shadow-pink-200"
-        >
-          Testar Requisição Novamente
-        </button>
-      </div>
-    </main>
+          <Route path="/" 
+          element=
+          {<h1 className="text-2xl font-bold text-center mt-10 text-slate-800">
+            Painel Principal - Maternidade App</h1>} />
+          <Route path="/cadastrar-usuario" 
+          element={<CadastroUsuario />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
   );
 }
