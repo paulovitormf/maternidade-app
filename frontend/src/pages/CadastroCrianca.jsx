@@ -9,7 +9,6 @@ export default function CadastroCrianca() {
     sexo: 'F',
     peso_nascimento: '',
     altura_nascimento: '',
-    previsao_nascimento: '',
     observacoes: '',
     
     // Campo da Tabela: usuario_crianca
@@ -40,7 +39,6 @@ export default function CadastroCrianca() {
       sexo: formData.sexo,
       peso_nascimento: formData.peso_nascimento ? parseFloat(formData.peso_nascimento) : null,
       altura_nascimento: formData.altura_nascimento ? parseFloat(formData.altura_nascimento) : null,
-      previsao_nascimento: formData.previsao_nascimento,
       observacoes: formData.observacoes || null,
       tipo_relacao: formData.tipo_relacao
     };
@@ -65,7 +63,6 @@ export default function CadastroCrianca() {
           sexo: 'F',
           peso_nascimento: '',
           altura_nascimento: '',
-          previsao_nascimento: '',
           observacoes: '',
           tipo_relacao: 'MAE'
         });
@@ -163,18 +160,7 @@ export default function CadastroCrianca() {
                   </select>
                 </div>
 
-                {/* Previsão do Nascimento */}
-                <div>
-                  <label className="block text-sm font-medium text-slate-700">Previsão do Nascimento *</label>
-                  <input
-                    type="date"
-                    name="previsao_nascimento"
-                    required
-                    value={formData.previsao_nascimento}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
-                  />
-                </div>
+        
 
                 {/* Data de Nascimento Real */}
                 <div>

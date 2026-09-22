@@ -15,7 +15,6 @@ export default function CadastroUsuario() {
     estaGestante: false,
     ultima_mestruacao: '',
     idade_gestacional: '',
-    data_parto: '',
     tipo_gestacao: '',
     pre_natal: false
   });
@@ -57,7 +56,6 @@ export default function CadastroUsuario() {
       gestacao: formData.estaGestante ? {
         ultima_mestruacao: formData.ultima_mestruacao,
         idade_gestacional: formData.idade_gestacional ? parseInt(formData.idade_gestacional, 10) : null,
-        data_parto: formData.data_parto || null,
         tipo_gestacao: formData.tipo_gestacao || null,
         pre_natal: formData.pre_natal
       } : null
@@ -87,7 +85,6 @@ export default function CadastroUsuario() {
           estaGestante: false,
           ultima_mestruacao: '',
           idade_gestacional: '',
-          data_parto: '',
           tipo_gestacao: '',
           pre_natal: false
         });
@@ -271,16 +268,7 @@ export default function CadastroUsuario() {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700">Previsão do Parto</label>
-                    <input
-                      type="date"
-                      name="data_parto"
-                      value={formData.data_parto}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
-                    />
-                  </div>
+                  
 
                   <div>
                     <label className="block text-sm font-medium text-slate-700">Tipo de Gestação</label>

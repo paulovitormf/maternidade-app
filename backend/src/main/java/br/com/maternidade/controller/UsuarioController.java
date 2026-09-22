@@ -30,4 +30,6 @@ public class UsuarioController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao processar o cadastro.");
         }
     }
+
+    
 }
