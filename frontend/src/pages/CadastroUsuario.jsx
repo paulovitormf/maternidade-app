@@ -1,153 +1,331 @@
 import React, { useState } from 'react';
-import api from '../services/api';
 
 export default function CadastroUsuario() {
   const [formData, setFormData] = useState({
+    // Campos da Tabela: usuario
     nome: '',
-    cpf: '',
-    dataNascimento: '',
-    telefone: '',
     email: '',
-    senha: ''
+    senha: '',
+    confirmarSenha: '',
+    data_nascimento: '',
+    telefone: '',
+    qnt_gestacao: 0,
+    
+    // Campos da Tabela: gestacao
+    estaGestante: false,
+    ultima_mestruacao: '',
+    idade_gestacional: '',
+    data_parto: '',
+    tipo_gestacao: '',
+    pre_natal: false
   });
 
-  const [mensagem, setMensagem] = useState({ tipo: '', texto: '' });
-  const [carregando, setCarregando] = useState(false);
+  const [erroSenha, setErroSenha] = useState('');
+  const [mensagemSucesso, setMensagemSucesso] = useState('');
+  const [erroApi, setErroApi] = useState('');
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setCarregando(true);
-    setMensagem({ tipo: '', texto: '' });
+    setErroSenha('');
+    setMensagemSucesso('');
+    setErroApi('');
+
+    // Validação básica de confirmação de senha no Front-end
+    if (formData.senha !== formData.confirmarSenha) {
+      setErroSenha('As senhas não coincidem!');
+      return;
+    }
+
+    // Estrutura do payload no formato esperado pelo UsuarioCadastroDTO no Spring Boot
+    const payload = {
+      usuario: {
+        nome: formData.nome,
+        email: formData.email,
+        senha: formData.senha, // A encriptação com BCrypt ocorre no Back-end
+        data_nascimento: formData.data_nascimento || null,
+        telefone: formData.telefone || null,
+        qnt_gestacao: parseInt(formData.qnt_gestacao, 10) || 0
+      },
+      gestacao: formData.estaGestante ? {
+        ultima_mestruacao: formData.ultima_mestruacao,
+        idade_gestacional: formData.idade_gestacional ? parseInt(formData.idade_gestacional, 10) : null,
+        data_parto: formData.data_parto || null,
+        tipo_gestacao: formData.tipo_gestacao || null,
+        pre_natal: formData.pre_natal
+      } : null
+    };
 
     try {
-      // O endpoint deve corresponder ao configurado no Spring Boot (ex: /usuarios ou /maes)
-      await api.post('/usuarios', formData);
-      setMensagem({ tipo: 'sucesso', texto: 'Usuário cadastrado com sucesso!' });
-      setFormData({ nome: '', cpf: '', dataNascimento: '', telefone: '', email: '', senha: '' });
-    } catch (error) {
-      setMensagem({
-        tipo: 'erro',
-        texto: error.response?.data?.message || 'Erro ao realizar o cadastro. Verifique os dados.'
+      // Envio para a API do Spring Boot
+      const response = await fetch('http://localhost:8080/api/usuarios', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
       });
-    } finally {
-      setCarregando(false);
+
+      if (response.ok) {
+        setMensagemSucesso('Cadastro realizado com sucesso!');
+        // Opcional: Limpar formulário após o sucesso
+        setFormData({
+          nome: '',
+          email: '',
+          senha: '',
+          confirmarSenha: '',
+          data_nascimento: '',
+          telefone: '',
+          qnt_gestacao: 0,
+          estaGestante: false,
+          ultima_mestruacao: '',
+          idade_gestacional: '',
+          data_parto: '',
+          tipo_gestacao: '',
+          pre_natal: false
+        });
+      } else {
+        const erroMsg = await response.text();
+        setErroApi(erroMsg || 'Erro ao realizar o cadastro. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro de conexão:', error);
+      setErroApi('Não foi possível se conectar ao servidor.');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
-        
-        <div className="mb-8 text-center">
-          <h2 className="text-3xl font-bold text-slate-800 mb-2">Cadastro de Usuário</h2>
-          <p className="text-slate-500">Preencha os dados abaixo para criar sua conta no sistema.</p>
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-slate-800">
+          Cadastro da Mãe / Usuário 🌸
+        </h2>
+        <p className="mt-2 text-center text-sm text-slate-600">
+          Crie sua conta para iniciar o acompanhamento gestacional
+        </p>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-slate-200">
+          
+          {mensagemSucesso && (
+            <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md text-sm">
+              {mensagemSucesso}
+            </div>
+          )}
+
+          {erroApi && (
+            <div className="mb-4 p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-md text-sm">
+              {erroApi}
+            </div>
+          )}
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            
+            {/* SEÇÃO 1: DADOS PESSOAIS */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-700 border-b pb-2 mb-4">
+                Dados Pessoais
+              </h3>
+              
+              <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-4">
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700">Nome Completo *</label>
+                  <input
+                    type="text"
+                    name="nome"
+                    required
+                    value={formData.nome}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700">E-mail *</label>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Telefone</label>
+                  <input
+                    type="tel"
+                    name="telefone"
+                    placeholder="(00) 00000-0000"
+                    value={formData.telefone}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Data de Nascimento</label>
+                  <input
+                    type="date"
+                    name="data_nascimento"
+                    value={formData.data_nascimento}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Senha *</label>
+                  <input
+                    type="password"
+                    name="senha"
+                    required
+                    value={formData.senha}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700">Confirmar Senha *</label>
+                  <input
+                    type="password"
+                    name="confirmarSenha"
+                    required
+                    value={formData.confirmarSenha}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-slate-700">Quantidade de Gestações Anteriores</label>
+                  <input
+                    type="number"
+                    name="qnt_gestacao"
+                    min="0"
+                    value={formData.qnt_gestacao}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+
+              {erroSenha && (
+                <p className="mt-2 text-sm text-rose-600 font-medium">{erroSenha}</p>
+              )}
+            </div>
+
+            {/* SEÇÃO 2: DADOS DA GESTAÇÃO */}
+            <div className="pt-4">
+              <div className="flex items-center justify-between border-b pb-2 mb-4">
+                <h3 className="text-lg font-semibold text-slate-700">
+                  Informações da Gestação Atual
+                </h3>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="estaGestante"
+                    checked={formData.estaGestante}
+                    onChange={handleChange}
+                    className="h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
+                  />
+                  <span className="ml-2 text-sm text-slate-600 font-medium">Estou gestante</span>
+                </label>
+              </div>
+
+              {formData.estaGestante && (
+                <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 sm:gap-x-4 bg-rose-50/50 p-4 rounded-lg border border-rose-100">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">Última Menstruação *</label>
+                    <input
+                      type="date"
+                      name="ultima_mestruacao"
+                      required={formData.estaGestante}
+                      value={formData.ultima_mestruacao}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">Idade Gestacional (Semanas)</label>
+                    <input
+                      type="number"
+                      name="idade_gestacional"
+                      min="1"
+                      max="42"
+                      placeholder="Ex: 12"
+                      value={formData.idade_gestacional}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">Previsão do Parto</label>
+                    <input
+                      type="date"
+                      name="data_parto"
+                      value={formData.data_parto}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700">Tipo de Gestação</label>
+                    <select
+                      name="tipo_gestacao"
+                      value={formData.tipo_gestacao}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="Unica">Única</option>
+                      <option value="Gemeos">Gêmeos</option>
+                      <option value="Trigemeos_ou_mais">Trigêmeos ou mais</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2 flex items-center mt-2">
+                    <input
+                      type="checkbox"
+                      id="pre_natal"
+                      name="pre_natal"
+                      checked={formData.pre_natal}
+                      onChange={handleChange}
+                      className="h-4 w-4 rounded border-slate-300 text-rose-600 focus:ring-rose-500"
+                    />
+                    <label htmlFor="pre_natal" className="ml-2 block text-sm text-slate-700">
+                      Já está realizando acompanhamento Pré-natal?
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* BOTÃO DE SUBMIT */}
+            <div>
+              <button
+                type="submit"
+                className="flex w-full justify-center rounded-md border border-transparent bg-rose-600 py-2.5 px-4 text-sm font-medium text-white shadow-sm hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-colors"
+              >
+                Cadastrar Usuário
+              </button>
+            </div>
+
+          </form>
         </div>
-
-        {mensagem.texto && (
-          <div className={`p-4 mb-6 rounded-lg font-medium ${mensagem.tipo === 'sucesso' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-            {mensagem.texto}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Nome Completo */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome Completo</label>
-            <input
-              type="text"
-              name="nome"
-              value={formData.nome}
-              onChange={handleChange}
-              required
-              placeholder="Digite seu nome completo"
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-            />
-          </div>
-
-          {/* Grid para E-mail e Senha */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">E-mail</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                placeholder="seu@email.com"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Senha</label>
-              <input
-                type="password"
-                name="senha"
-                value={formData.senha}
-                onChange={handleChange}
-                required
-                placeholder="Crie uma senha segura"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Grid para CPF e Data de Nascimento */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">CPF</label>
-              <input
-                type="text"
-                name="cpf"
-                value={formData.cpf}
-                onChange={handleChange}
-                required
-                placeholder="000.000.000-00"
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Data de Nascimento</label>
-              <input
-                type="date"
-                name="dataNascimento"
-                value={formData.dataNascimento}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-              />
-            </div>
-          </div>
-
-          {/* Telefone */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Telefone / WhatsApp</label>
-            <input
-              type="tel"
-              name="telefone"
-              value={formData.telefone}
-              onChange={handleChange}
-              placeholder="(00) 00000-0000"
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-            />
-          </div>
-
-          <div className="pt-4">
-            <button
-              type="submit"
-              disabled={carregando}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 rounded-lg shadow-sm transition-colors duration-200"
-            >
-              {carregando ? 'Processando...' : 'Finalizar Cadastro'}
-            </button>
-          </div>
-        </form>
-
       </div>
     </div>
   );

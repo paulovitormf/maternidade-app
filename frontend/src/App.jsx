@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import CadastroUsuario from './pages/CadastroUsuario';
-import CadastroBebe from './pages/CadastroBebe';
+import CadastroBebe from './pages/CadastroCrianca';
 // import CadastroGestacao from './pages/CadastroGestacao'; // Descomente quando tiver essa tela
 
 export default function App() {
