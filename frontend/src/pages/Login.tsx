@@ -1,7 +1,8 @@
+import axios from 'axios';
+import { Heart } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginUsuario } from '../services/usuarioService';
-import axios from 'axios';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -9,21 +10,54 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
+
   const submit = async (event: FormEvent) => {
-    event.preventDefault(); setErro(''); setCarregando(true);
-    try { const usuario = await loginUsuario({ email, senha }); localStorage.setItem('id_usuario', String(usuario.id_usuario)); navigate('/'); }
-    catch (error) {
-      setErro(axios.isAxiosError(error) && typeof error.response?.data === 'string' ? error.response.data : 'E-mail ou senha inválidos.');
-    } finally { setCarregando(false); }
+    event.preventDefault();
+    setErro('');
+    setCarregando(true);
+    try {
+      const usuario = await loginUsuario({ email, senha });
+      localStorage.setItem('id_usuario', String(usuario.id_usuario));
+      navigate('/');
+    } catch (error) {
+      setErro(axios.isAxiosError(error) && typeof error.response?.data === 'string'
+        ? error.response.data
+        : 'E-mail ou senha inválidos.');
+    } finally {
+      setCarregando(false);
+    }
   };
-  return <div className="max-w-md mx-auto my-12 bg-white rounded p-8 shadow">
-    <h1 className="text-3xl font-bold mb-6">Entrar</h1>
-    <form onSubmit={submit} className="space-y-4">
-      <input className="w-full rounded border p-3" type="email" required placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <input className="w-full rounded border p-3" type="password" required placeholder="Senha" value={senha} onChange={(e) => setSenha(e.target.value)} />
-      {erro && <p className="text-rose-600">{erro}</p>}
-      <button className="w-full rounded bg-pink-500 p-3 text-white disabled:opacity-60" disabled={carregando}>{carregando ? 'Entrando...' : 'Entrar'}</button>
-    </form>
-    <Link className="mt-4 block text-pink-600" to="/cadastrar-usuario">Criar conta</Link>
-  </div>;
+
+  return (
+    <div className="auth-layout">
+      <section className="auth-intro">
+        <p className="mb-12 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#FADCE1]"><Heart size={29} strokeWidth={1.6} fill="currentColor" /></p>
+        <p className="eyebrow !text-[#FADCE1]">Seu espaço de cuidado</p>
+        <h1 className="font-display text-5xl font-bold leading-tight">Bem-vinda de volta.</h1>
+        <p className="mt-5 max-w-sm text-base leading-7 text-white/80">
+          Acompanhe sua jornada com leveza, informação e tudo organizado em um só lugar.
+        </p>
+      </section>
+      <section className="auth-card">
+        <p className="eyebrow">Acesso seguro</p>
+        <h1 className="display-title !text-3xl">Entrar na sua conta</h1>
+        <p className="page-subtitle mb-7">Continue acompanhando cada momento importante.</p>
+        <form onSubmit={submit} className="space-y-5">
+          <label className="field">
+            <span className="field-label">E-mail</span>
+            <input className="field-control" type="email" required placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          </label>
+          <label className="field">
+            <span className="field-label">Senha</span>
+            <input className="field-control" type="password" required placeholder="Digite sua senha" value={senha} onChange={(e) => setSenha(e.target.value)} />
+          </label>
+          {erro && <p className="alert-error">{erro}</p>}
+          <button className="primary-button" disabled={carregando}>{carregando ? 'Entrando...' : 'Entrar'}</button>
+        </form>
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Ainda não tem uma conta? <Link className="font-bold text-[#B0435B] hover:underline" to="/cadastrar-usuario">Criar cadastro</Link>
+        </p>
+      </section>
+    </div>
+  );
 }

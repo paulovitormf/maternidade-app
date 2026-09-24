@@ -1,3 +1,319 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --ink: #1e293b;
+    --muted: #64748b;
+    --primary: #c8526b;
+    --primary-dark: #b0435b;
+    --blush: #fadce1;
+    --petrol: #3b7280;
+    --mist: #ebf3f5;
+    --canvas: #fdf7f8;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+    background: var(--canvas);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    background:
+      radial-gradient(circle at 8% 0%, rgba(250, 220, 225, 0.72), transparent 28rem),
+      var(--canvas);
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen;
+  }
+
+  .app-nav {
+    @apply sticky top-0 z-20 border-b border-[#fecdd3]/80 bg-white/90 backdrop-blur;
+  }
+
+  .nav-inner {
+    @apply mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-3 sm:gap-4 sm:px-6 sm:py-4 lg:px-8;
+  }
+
+  .brand {
+    @apply mr-auto flex items-center gap-3 text-slate-800;
+  }
+
+  .brand-mark {
+    @apply flex h-11 w-11 items-center justify-center rounded-[1.1rem] bg-[#FADCE1] text-xl shadow-[0_8px_18px_-12px_rgba(200,82,107,0.8)];
+  }
+
+  .brand-name {
+    font-family: 'Playfair Display', serif;
+    @apply text-xl font-bold tracking-tight sm:text-2xl;
+  }
+
+  .nav-links {
+    @apply hidden w-full gap-1 border-t border-[#fecdd3] pt-3 sm:flex sm:w-auto sm:border-0 sm:pt-0;
+  }
+
+  .nav-link {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-center text-sm font-semibold text-slate-600 transition hover:bg-[#FADCE1] hover:text-[#B0435B] sm:text-left;
+  }
+
+  .nav-link svg,
+  .mobile-bottom-link svg {
+    @apply transition-transform duration-200;
+  }
+
+  .nav-link:hover svg,
+  .mobile-bottom-link:hover svg {
+    @apply -translate-y-0.5;
+  }
+
+  .mobile-menu-button {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#FECDD3] bg-white text-[#3B7280] sm:hidden;
+  }
+
+  .page-main {
+    @apply mx-auto flex min-h-[calc(100vh-5.5rem)] w-full max-w-7xl flex-col px-4 py-6 sm:px-6 sm:py-8 lg:px-8;
+  }
+
+  .page-heading {
+    @apply mb-8;
+  }
+
+  .eyebrow {
+    @apply mb-2 text-xs font-extrabold uppercase tracking-[0.18em] text-[#3B7280];
+  }
+
+  .display-title {
+    font-family: 'Playfair Display', serif;
+    @apply text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl;
+  }
+
+  .page-subtitle {
+    @apply mt-2 max-w-2xl text-base leading-7 text-slate-500;
+  }
+
+  .card {
+    @apply rounded-3xl border border-[#fecdd3]/80 bg-white p-6 shadow-[0_18px_45px_-30px_rgba(200,82,107,0.3)] sm:p-8;
+  }
+
+  .form-card {
+    @apply mx-auto my-auto w-full max-w-2xl;
+  }
+
+  .form-icon {
+    @apply flex h-14 w-14 items-center justify-center rounded-[1.2rem];
+  }
+
+  .form-icon-blue {
+    @apply bg-[#EBF3F5] text-[#3B7280];
+  }
+
+  .form-icon-pink {
+    @apply bg-[#FADCE1] text-[#C8526B];
+  }
+
+  .form-grid {
+    @apply grid gap-5 sm:grid-cols-2;
+  }
+
+  .field {
+    @apply block;
+  }
+
+  .field-wide {
+    @apply sm:col-span-2;
+  }
+
+  .field-label {
+    @apply mb-2 block text-sm font-semibold text-slate-700;
+  }
+
+  .field-control {
+    @apply w-full rounded-2xl border border-[#fecdd3] bg-[#fffdfc] px-4 py-3 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#C8526B] focus:bg-white focus:ring-4 focus:ring-[#fadce1];
+  }
+
+  .primary-button {
+    @apply inline-flex w-full items-center justify-center rounded-2xl bg-[#C8526B] px-5 py-3.5 font-extrabold text-white shadow-lg shadow-[#f1c3cc] transition hover:bg-[#B0435B] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-[#fadce1] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .secondary-button {
+    @apply inline-flex items-center justify-center rounded-2xl border border-[#fecdd3] bg-white px-5 py-3 font-extrabold text-[#B0435B] transition hover:bg-[#FADCE1] focus:outline-none focus:ring-4 focus:ring-[#fadce1];
+  }
+
+  .alert-success {
+    @apply rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700;
+  }
+
+  .alert-error {
+    @apply rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700;
+  }
+
+  .auth-layout {
+    @apply grid min-h-[calc(100vh-8rem)] items-center gap-8 lg:grid-cols-[1fr_0.85fr];
+  }
+
+  .auth-intro {
+    @apply hidden overflow-hidden rounded-[2rem] bg-[#3B7280] p-10 text-white shadow-xl shadow-[#3b7280]/10 lg:block;
+    background-image: radial-gradient(circle at 90% 10%, rgba(250, 220, 225, 0.62), transparent 16rem), linear-gradient(145deg, #3b7280, #5d8c96);
+  }
+
+  .auth-card {
+    @apply card mx-auto w-full max-w-lg;
+  }
+
+  .stat-card {
+    @apply rounded-3xl border border-[#fecdd3]/80 bg-white p-6 shadow-[0_18px_45px_-30px_rgba(200,82,107,0.3)];
+  }
+
+  .dashboard {
+    @apply mx-auto w-full max-w-5xl pb-24;
+  }
+
+  .dashboard-header {
+    @apply mb-6 flex items-start justify-between gap-4;
+  }
+
+  .dashboard-avatar {
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#FADCE1] text-[#C8526B] sm:h-12 sm:w-12;
+  }
+
+  .dashboard-hero {
+    @apply relative mb-8 grid overflow-hidden rounded-[2rem] border border-[#FADCE1] bg-[#EBF3F5] p-6 shadow-[0_20px_50px_-35px_rgba(59,114,128,0.45)] sm:grid-cols-[1fr_0.35fr] sm:p-8;
+  }
+
+  .dashboard-hero::after {
+    content: '';
+    @apply absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[#FADCE1]/70;
+  }
+
+  .dashboard-hero-icon {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-[1.15rem] bg-white text-[#C8526B] shadow-[0_6px_16px_-12px_rgba(30,41,59,0.35)];
+  }
+
+  .dashboard-hero-button {
+    @apply mt-5 inline-flex w-fit items-center gap-2 rounded-2xl bg-[#C8526B] px-4 py-3 text-sm font-extrabold text-white shadow-lg shadow-[#f1c3cc] transition hover:bg-[#B0435B];
+  }
+
+  .dashboard-hero-illustration {
+    @apply relative z-10 mt-5 hidden items-center justify-center text-[#C8526B] sm:flex;
+  }
+
+  .dashboard-hero-illustration::before {
+    content: '';
+    @apply absolute h-44 w-44 rounded-full border-[18px] border-white/70 bg-[#FADCE1]/80;
+  }
+
+  .dashboard-hero-illustration svg {
+    @apply relative z-10;
+  }
+
+  .section-heading {
+    @apply mb-4;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    @apply text-2xl font-bold text-slate-800;
+  }
+
+  .quick-actions {
+    @apply grid gap-3 md:grid-cols-2;
+  }
+
+  .quick-action {
+    @apply flex min-h-24 items-center gap-4 rounded-3xl border bg-white p-4 shadow-[0_15px_35px_-30px_rgba(30,41,59,0.45)] transition hover:-translate-y-0.5 sm:p-5;
+  }
+
+  .quick-action > span:nth-child(2) {
+    @apply flex min-w-0 flex-1 flex-col gap-1;
+  }
+
+  .quick-action strong {
+    @apply text-sm font-extrabold text-slate-800;
+  }
+
+  .quick-action small {
+    @apply text-xs leading-5 text-slate-500;
+  }
+
+  .quick-action > svg {
+    @apply text-slate-400 transition group-hover:translate-x-1;
+  }
+
+  .quick-action-blue {
+    @apply border-[#D6E9ED] hover:border-[#3B7280];
+  }
+
+  .quick-action-pink {
+    @apply border-[#FADCE1] hover:border-[#C8526B];
+  }
+
+  .quick-action-blue .quick-action-icon {
+    @apply bg-[#EBF3F5] text-[#3B7280];
+  }
+
+  .quick-action-pink .quick-action-icon {
+    @apply bg-[#FADCE1] text-[#C8526B];
+  }
+
+  .quick-action-icon {
+    @apply flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem];
+  }
+
+  .dashboard-tip {
+    @apply mt-5 flex items-center gap-3 rounded-3xl border border-[#FADCE1] bg-white/80 p-4;
+  }
+
+  .dashboard-tip-icon {
+    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FADCE1] text-xl text-[#C8526B];
+  }
+
+  .dashboard-tip strong {
+    @apply text-sm font-extrabold text-slate-800;
+  }
+
+  .dashboard-tip p {
+    @apply mt-1 text-xs text-slate-500;
+  }
+
+  .mobile-bottom-nav {
+    @apply fixed bottom-3 left-3 right-3 z-30 grid grid-cols-5 items-center rounded-3xl border border-white/80 bg-white/95 px-2 py-2 shadow-[0_15px_45px_-18px_rgba(30,41,59,0.4)] backdrop-blur sm:hidden;
+  }
+
+  .mobile-bottom-link {
+    @apply flex flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[10px] font-bold text-slate-400;
+  }
+
+  .mobile-bottom-link.active {
+    @apply bg-[#FADCE1] text-[#C8526B];
+  }
+
+  .mobile-bottom-link.active svg {
+    @apply scale-110;
+  }
+
+  .mobile-add-button {
+    @apply mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#C8526B] text-white shadow-lg shadow-[#f1c3cc] transition hover:bg-[#B0435B];
+  }
+
+  @media (min-width: 640px) {
+    .mobile-menu-button {
+      display: none;
+    }
+  }
+}
