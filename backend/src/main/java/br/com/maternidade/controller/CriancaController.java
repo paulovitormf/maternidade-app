@@ -9,7 +9,6 @@ import br.com.maternidade.services.CriancaService;
 
 @RestController
 @RequestMapping("/api/criancas")
-@CrossOrigin(origins = "*") // Permite chamadas do React
 public class CriancaController {
 
     private final CriancaService criancaService;

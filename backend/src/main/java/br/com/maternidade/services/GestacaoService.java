@@ -10,6 +10,7 @@ import br.com.maternidade.repository.GestacaoRepository;
 import br.com.maternidade.repository.UsuarioRepository;
 
 import java.util.List;
+import java.time.LocalDate;
 
 @Service
 public class GestacaoService {
@@ -24,6 +25,19 @@ public class GestacaoService {
 
     @Transactional
     public Gestacao cadastrarGestacao(GestacaoDTO dto) {
+        if (dto == null || dto.id_usuario() == null) {
+            throw new IllegalArgumentException("Usuário é obrigatório.");
+        }
+        if (dto.ultima_mestruacao() == null) {
+            throw new IllegalArgumentException("DUM é obrigatória.");
+        }
+        if (dto.ultima_mestruacao().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("A DUM não pode estar no futuro.");
+        }
+        if (dto.idade_gestacional() != null
+                && (dto.idade_gestacional() < 0 || dto.idade_gestacional() > 42)) {
+            throw new IllegalArgumentException("A idade gestacional deve estar entre 0 e 42 semanas.");
+        }
         // 1. Busca o usuário (mãe) pelo ID fornecido no DTO
         Usuario usuario = usuarioRepository.findById(dto.id_usuario())
                 .orElseThrow(() -> new IllegalArgumentException("Usuário (Mãe) não encontrado com o ID: " + dto.id_usuario()));
@@ -33,7 +47,7 @@ public class GestacaoService {
         gestacao.setUsuario(usuario);
         gestacao.setUltimaMestruacao(dto.ultima_mestruacao());
         gestacao.setIdadeGestacional(dto.idade_gestacional());
-        gestacao.setDataParto(dto.data_parto());
+        gestacao.setDataParto(dto.ultima_mestruacao().plusDays(280));
         gestacao.setTipoGestacao(dto.tipo_gestacao());
         gestacao.setPreNatal(dto.pre_natal());
 

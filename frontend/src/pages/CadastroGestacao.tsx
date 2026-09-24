@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import { FormEvent, useState } from 'react';
+import type React from 'react';
+import api from '../services/api';
 
-export default function CadastroGestacao({ idUsuario }) {
+export default function CadastroGestacao({ idUsuario }: { idUsuario?: number }) {
   const [formData, setFormData] = useState({
     ultima_mestruacao: '',
     idade_gestacional: '',
@@ -11,7 +13,7 @@ export default function CadastroGestacao({ idUsuario }) {
   const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [erroApi, setErroApi] = useState('');
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -19,29 +21,26 @@ export default function CadastroGestacao({ idUsuario }) {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setMensagemSucesso('');
     setErroApi('');
 
     const payload = {
-      id_usuario: idUsuario, // ID da mãe autenticada
+      id_usuario: idUsuario ?? Number(localStorage.getItem('id_usuario')),
       ultima_mestruacao: formData.ultima_mestruacao,
       idade_gestacional: formData.idade_gestacional ? parseInt(formData.idade_gestacional, 10) : null,
       tipo_gestacao: formData.tipo_gestacao || 'Unica',
       pre_natal: formData.pre_natal
     };
+    if (!Number.isInteger(payload.id_usuario) || payload.id_usuario <= 0) {
+      setErroApi('Faça login antes de cadastrar uma gestação.');
+      return;
+    }
 
     try {
-      const response = await fetch('http://localhost:8080/api/gestacoes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (response.ok) {
+      await api.post('/gestacoes', payload);
+      {
         setMensagemSucesso('Dados da gestação salvos com sucesso!');
         setFormData({
           ultima_mestruacao: '',
@@ -49,12 +48,8 @@ export default function CadastroGestacao({ idUsuario }) {
           tipo_gestacao: 'Unica',
           pre_natal: false
         });
-      } else {
-        const erroMsg = await response.text();
-        setErroApi(erroMsg || 'Erro ao salvar os dados da gestação.');
       }
-    } catch (error) {
-      console.error('Erro de conexão:', error);
+    } catch {
       setErroApi('Não foi possível se conectar ao servidor.');
     }
   };
@@ -107,10 +102,6 @@ export default function CadastroGestacao({ idUsuario }) {
               className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 shadow-sm focus:border-rose-500 focus:outline-none focus:ring-rose-500 sm:text-sm"
             />
           </div>
-
-          {/* Data Provável do Parto */}
-          {/*  
-          
 
           {/* Tipo de Gestação */}
           <div className="sm:col-span-2">

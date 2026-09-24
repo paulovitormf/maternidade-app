@@ -43,7 +43,7 @@ O projeto está sendo desenvolvido como trabalho acadêmico e aplica conceitos d
 
 | Camada | Tecnologias |
 | --- | --- |
-| 🎨 Front-end | React, TypeScript, Vite e Tailwind CSS |
+| 🎨 Front-end | React, TypeScript, Vite, Tailwind CSS e Node.js 24 |
 | ⚙️ Back-end | Java 17, Spring Boot e Spring Data JPA |
 | 🗄️ Banco de dados | MySQL 8 |
 | 📦 Ambiente | Docker e Docker Compose |

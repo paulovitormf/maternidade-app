@@ -79,7 +79,7 @@ Utilizamos o padrão **Conventional Commits** para manter o histórico claro, le
 * **Cross-Platform:** Certifique-se de que caminhos de arquivos e dependências sejam compatíveis tanto com Linux (Ubuntu) quanto com Windows.
 
 ### Front-end (React / Vite / Tailwind CSS)
-* **Ambiente Node:** O ambiente oficial está padronizado na versão Node.js v20 LTS.
+* **Ambiente Node:** O ambiente oficial está padronizado na versão Node.js 24.x.
 * **Gerenciamento de Pacotes:** Não adicione dependências pesadas ou experimentais sem consultar a equipe para evitar erros de resolução (ERESOLVE).
 * **Componentização:** Crie componentes funcionais limpos, utilizando Hooks e mantendo as classes utilitárias do Tailwind organizadas.
 

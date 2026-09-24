@@ -22,8 +22,7 @@ CREATE TABLE crianca (
     sexo ENUM('F', 'M'),
     peso_nascimento DECIMAL(5,2),
     altura_nascimento DECIMAL(5,2),
-    observacoes TEXT,
-    previsao_nascimento DATE NOT NULL
+    observacoes TEXT
 ); -- CORRIGIDO: Fechamento da tabela adicionado
 
 /*criança e usuario --> relação*/

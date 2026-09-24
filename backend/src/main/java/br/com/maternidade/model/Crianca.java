@@ -35,9 +35,6 @@ public class Crianca {
     @Column(name = "observacoes", columnDefinition = "TEXT")
     private String observacoes;
 
-    @Column(name = "previsao_nascimento", nullable = false)
-    private LocalDate previsaoNascimento;
-
     public Crianca() {}
 
     // Getters e Setters
@@ -65,6 +62,4 @@ public class Crianca {
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
 
-    public LocalDate getPrevisaoNascimento() { return previsaoNascimento; }
-    public void setPrevisaoNascimento(LocalDate previsaoNascimento) { this.previsaoNascimento = previsaoNascimento; }
 }

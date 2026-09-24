@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.*;
 
 import br.com.maternidade.dto.GestacaoDTO;
 import br.com.maternidade.services.GestacaoService;
+import br.com.maternidade.dto.GestacaoPublicaDTO;
 
 @RestController
 @RequestMapping("/api/gestacoes")
-@CrossOrigin(origins = "*")
 public class GestacaoController {
 
     private final GestacaoService gestacaoService;
@@ -22,7 +22,7 @@ public class GestacaoController {
     public ResponseEntity<?> cadastrar(@RequestBody GestacaoDTO dto) {
         try {
             var gestacaoSalva = gestacaoService.cadastrarGestacao(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(gestacaoSalva);
+            return ResponseEntity.status(HttpStatus.CREATED).body(GestacaoPublicaDTO.from(gestacaoSalva));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

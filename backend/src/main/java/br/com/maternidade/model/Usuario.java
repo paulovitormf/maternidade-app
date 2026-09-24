@@ -1,6 +1,7 @@
 package br.com.maternidade.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -20,6 +21,7 @@ public class Usuario {
     private String email;
 
     @Column(name = "senha", nullable = false, length = 100)
+    @JsonIgnore
     private String senha;
 
     @Column(name = "data_nascimento")

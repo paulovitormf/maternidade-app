@@ -5,12 +5,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import br.com.maternidade.dto.UsuarioCadastroDTO;
-import br.com.maternidade.model.Usuario;
+import br.com.maternidade.dto.LoginDTO;
+import br.com.maternidade.dto.UsuarioPublicoDTO;
 import br.com.maternidade.services.UsuarioService;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "*") // Ajuste a origem de acordo com a URL do Vite/React
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
@@ -22,8 +22,7 @@ public class UsuarioController {
     @PostMapping
     public ResponseEntity<?> cadastrar(@RequestBody UsuarioCadastroDTO dto) {
         try {
-            Usuario usuarioCriado = usuarioService.cadastrarUsuario(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Usuário cadastrado com sucesso! ID: " + usuarioCriado.getIdUsuario());
+            return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioPublicoDTO.from(usuarioService.cadastrarUsuario(dto)));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
@@ -31,5 +30,9 @@ public class UsuarioController {
         }
     }
 
-    
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginDTO dto) {
+        try { return ResponseEntity.ok(UsuarioPublicoDTO.from(usuarioService.autenticar(dto.email(), dto.senha()))); }
+        catch (IllegalArgumentException e) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage()); }
+    }
 }

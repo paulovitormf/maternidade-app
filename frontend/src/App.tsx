@@ -1,14 +1,13 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 
 import Login from './pages/Login';
 import CadastroUsuario from './pages/CadastroUsuario';
 import CadastroBebe from './pages/CadastroCrianca';
+import CadastroGestacao from './pages/CadastroGestacao';
 
 export default function App() {
   return (
     <BrowserRouter>
-
       <nav className="bg-slate-800 text-white p-4">
         <div className="max-w-6xl mx-auto flex gap-6">
           
@@ -22,6 +21,9 @@ export default function App() {
 
           <Link to="/cadastrar-bebe">
             Cadastrar Bebê
+          </Link>
+          <Link to="/cadastrar-gestacao">
+            Cadastrar Gestação
           </Link>
 
         </div>
@@ -53,10 +55,8 @@ export default function App() {
             element={<CadastroUsuario />}
           />
 
-          <Route
-            path="/cadastrar-bebe"
-            element={<CadastroBebe />}
-          />
+          <Route path="/cadastrar-bebe" element={<CadastroBebe />} />
+          <Route path="/cadastrar-gestacao" element={<CadastroGestacao />} />
 
         </Routes>
 

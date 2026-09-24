@@ -18,7 +18,6 @@ public record UsuarioCadastroDTO(
     public record GestacaoData(
         LocalDate ultima_mestruacao,
         Integer idade_gestacional,
-        LocalDate data_parto,
         String tipo_gestacao,
         Boolean pre_natal
     ) {}

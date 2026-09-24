@@ -8,10 +8,18 @@ Este arquivo define as diretrizes de comportamento, contexto de projeto e limite
 
 * **Sobre a Aplicação:** O **Maternidade App** é um sistema web responsivo voltado para a saúde e acompanhamento gestacional (consultas pré-natais, relatórios médicos, suporte a gestantes e profissionais de saúde).
 * **Evolução do Produto:** A aplicação nasceu de um protótipo focado em dispositivos móveis e está evoluindo para uma plataforma desktop/mobile profissional, limpa e ergonômica.
-* **Diretriz de Design:** 
-  * Telas de *Onboarding* e *Login* preservam o estilo acolhedor, ilustrativo e com gradientes do protótipo mobile inicial.
-  * Dashboards e telas operacionais priorizam fundos neutros (`slate-50`, `stone-50`), alto contraste e clareza para uso contínuo em telas desktop (padrão WCAG).
-  * A paleta de cores definitiva está em homologação via laboratório de testes no componente `frontend/src/pages/TestePaletas.jsx`.
+* **Diretriz de Design & Paleta de Cores Oficial:**
+  * **Identidade Visual:** Opção 1 — Rosa Quartzo & Pêssego Pastel (com detalhes funcionais em Azul Serenity/Petróleo).
+  * **Base de Códigos de Cores (Paleta Oficial Mapeada):**
+    * 🌸 **Rosa Quartzo Aveludado (Destaque Principal):** `#C8526B` (Hover: `#B0435B`)
+    * 🍥 **Rosa Pastel Suave (Superfícies/Cards):** `#FADCE1`
+    * 🌊 **Azul Petróleo / Serenity (Destaque Suporte/Avisos):** `#3B7280`
+    * ☁️ **Azul Pastel (Fundo de Cards de Consulta):** `#EBF3F5`
+    * 🪨 **Bordas Delicadas:** `#FECDD3` (Rosa-200) / `#E2E8F0` (Slate-200)
+    * ◽ **Fundo Neutro da Aplicação:** `#FDF7F8` (Off-white aveludado) ou `#F8FAFC` (`slate-50`)
+  * **Aplicação Prática:**
+    * *Onboarding, Login e Destaques:* Utilizam tons aveludados em Rosa Quartzo (`#C8526B`) e fundos suaves (`#FADCE1`).
+    * *Dashboards e Formulários Operacionais:* Telas limpas em fundo `#FDF7F8`, cards organizados, entradas de formulário com bordas suaves e foco ring em `#C8526B`.
 
 ---
 
@@ -20,7 +28,7 @@ Este arquivo define as diretrizes de comportamento, contexto de projeto e limite
 * **Back-end:** Java 21 LTS, Spring Boot 3.2.3, RESTful API, arquitetura em camadas (`Controller`, `Service`, `Repository`, `Model`/`DTO`).
 * **Banco de Dados:** MySQL 8.0 rodando via Docker (`docker-compose.yml`).
 * **Front-end:** React 18+, Vite 5.4.11, Tailwind CSS, `react-router-dom`.
-* **Ambiente Executivo:** Node.js v20 LTS. Paridade e compatibilidade total entre **Linux (Ubuntu)** e **Windows**.
+* **Ambiente Executivo:** Node.js 24.x. Paridade e compatibilidade total entre **Linux (Ubuntu)** e **Windows**.
 * **Segurança:** Variações de ambiente isoladas em `.env` ou `application.properties`. **Proibido inserir senhas, tokens ou credenciais fixas no código (*hardcoded*)**.
 
 ---
