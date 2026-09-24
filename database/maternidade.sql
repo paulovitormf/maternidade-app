@@ -10,7 +10,7 @@ CREATE TABLE usuario (
     data_nascimento DATE,
     telefone VARCHAR(20),
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    qnt_gestacao INT DEFAULT 0,
+    qnt_gestacao INT DEFAULT 0
 );
 
 /*crianca*/
