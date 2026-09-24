@@ -10,7 +10,7 @@ CREATE TABLE usuario (
     data_nascimento DATE,
     telefone VARCHAR(20),
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    qnt_gestacao
+    qnt_gestacao INT DEFAULT 0
 );
 
 /*crianca*/
@@ -18,12 +18,11 @@ CREATE TABLE crianca (
     id_crianca INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(250) NOT NULL,
     data_nascimento DATE NOT NULL,
-    hora_nascimento DATE NOT NULL,
+    hora_nascimento TIME NOT NULL,
     sexo ENUM('F', 'M'),
     peso_nascimento DECIMAL(5,2),
     altura_nascimento DECIMAL(5,2),
-    observacoes TEXT,
-    previsão_nascimento DATE NOT NULL
+    observacoes TEXT
 ); -- CORRIGIDO: Fechamento da tabela adicionado
 
 /*criança e usuario --> relação*/
@@ -481,13 +480,12 @@ CREATE TABLE emergencia (
 );
 
 CREATE TABLE gestacao (
-    id_gestacao,
-    id_usuario,
+    id_gestacao INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    id_usuario INT NOT NULL,
     ultima_mestruacao DATE NOT NULL,
     idade_gestacional INT,
-    dada_parto DATE,
+    data_parto DATE,
     tipo_gestacao TEXT,
-    pre_natal BOOLEAN
-
-
+    pre_natal BOOLEAN,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
 );

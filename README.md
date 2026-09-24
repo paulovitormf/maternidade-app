@@ -8,7 +8,21 @@ Projeto acadêmico desenvolvido em grupo na disciplina de **Engenharia de Softwa
 
 [![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](#-tecnologias) [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-API-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](#-tecnologias) [![React](https://img.shields.io/badge/React-Front--end-61DAFB?style=for-the-badge&logo=react&logoColor=black)](#-tecnologias) [![MySQL](https://img.shields.io/badge/MySQL-Banco-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](#-tecnologias) [![Docker](https://img.shields.io/badge/Docker-Ambiente-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-tecnologias)
 <br>
-<h3><a href="docs/EXECUCAO.md">📖&nbsp;&nbsp;Abrir guia de execução&nbsp;&nbsp;→</a></h3>
+<div align="center">
+
+### 📖 Central de Documentação
+
+<a href="./docs/EXECUCAO.md">
+  <img src="https://img.shields.io/badge/🚀_Guia_de_Execução-4c1d95?style=for-the-badge&logo=docker&logoColor=white" alt="Guia de Execução" />
+</a>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="./docs/CONTRIBUICAO.md">
+  <img src="https://img.shields.io/badge/🌸_Guia_de_Contribuição-be185d?style=for-the-badge&logo=github&logoColor=white" alt="Guia de Contribuição" />
+</a>
+
+<br />
+</div>
+</p>
 
 </div>
 
@@ -29,7 +43,7 @@ O projeto está sendo desenvolvido como trabalho acadêmico e aplica conceitos d
 
 | Camada | Tecnologias |
 | --- | --- |
-| 🎨 Front-end | React, TypeScript, Vite e Tailwind CSS |
+| 🎨 Front-end | React, TypeScript, Vite, Tailwind CSS e Node.js 24 |
 | ⚙️ Back-end | Java 17, Spring Boot e Spring Data JPA |
 | 🗄️ Banco de dados | MySQL 8 |
 | 📦 Ambiente | Docker e Docker Compose |

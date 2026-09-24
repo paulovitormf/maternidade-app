@@ -1,83 +1,110 @@
-import { useEffect, useState } from 'react';
-import { Baby, CheckCircle2, RefreshCw, AlertCircle } from 'lucide-react';
+import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
+import { Baby, CalendarDays, ChevronRight, CircleUserRound, Heart, HeartHandshake, Home, Menu, Plus, Sparkles } from 'lucide-react';
 
-interface HelloData {
-  id: number;
-  texto: string;
-}
+import CadastroBebe from './pages/CadastroCrianca';
+import CadastroGestacao from './pages/CadastroGestacao';
+import CadastroUsuario from './pages/CadastroUsuario';
+import Login from './pages/Login';
 
 export default function App() {
-  const [data, setData] = useState<HelloData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <BrowserRouter>
+      <AppLayout />
+    </BrowserRouter>
+  );
+}
 
-  const fetchHello = () => {
-    setLoading(true);
-    setError(null);
-
-    fetch('http://localhost:8080/api/hello')
-      .then((res) => {
-        if (!res.ok) throw new Error('Servidor respondeu com erro');
-        return res.json();
-      })
-      .then((json) => setData(json))
-      .catch(() => setError('Não foi possível conectar com o backend Spring Boot.'))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchHello();
-  }, []);
+function AppLayout() {
+  const location = useLocation();
+  const isHome = location.pathname === '/';
 
   return (
-    <main className="min-h-screen w-full flex items-center justify-center p-4 bg-slate-100">
-      {/* Container simulando tela de smartphone (Mobile-First) */}
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl border border-slate-200 p-6 text-center flex flex-col items-center">
-        
-        {/* Ícone principal */}
-        <div className="w-16 h-16 bg-pink-100 text-pink-500 rounded-full flex items-center justify-center mb-4 shadow-sm">
-          <Baby className="w-8 h-8" />
+    <div className="app-shell">
+      <nav className="app-nav">
+        <div className="nav-inner">
+          <Link to="/" className="brand">
+            <span className="brand-mark text-[#C8526B]"><Heart size={21} strokeWidth={1.8} fill="currentColor" /></span>
+            <span className="brand-name">Maternidade</span>
+          </Link>
+          <div className="nav-links">
+            <Link className="nav-link" to="/"><Home size={16} strokeWidth={1.8} />Início</Link>
+            <Link className="nav-link" to="/cadastrar-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Gestação</Link>
+            <Link className="nav-link" to="/cadastrar-bebe"><Baby size={16} strokeWidth={1.8} />Bebê</Link>
+            <Link className="nav-link" to="/login"><CircleUserRound size={16} strokeWidth={1.8} />Entrar</Link>
+          </div>
+          <button className="mobile-menu-button" type="button" aria-label="Abrir menu"><Menu size={21} /></button>
         </div>
+      </nav>
 
-        <h1 className="text-xl font-bold text-slate-800">App Maternidade</h1>
-        <p className="text-xs text-slate-500 mb-6">Validação de Arquitetura de Software</p>
+      <main className="page-main">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/cadastrar-usuario" element={<CadastroUsuario />} />
+          <Route path="/cadastrar-bebe" element={<CadastroBebe />} />
+          <Route path="/cadastrar-gestacao" element={<CadastroGestacao />} />
+          <Route path="/" element={<HomeDashboard />} />
+        </Routes>
+      </main>
 
-        {/* Estado de Carregamento */}
-        {loading && (
-          <div className="flex items-center gap-2 text-sm text-slate-500 my-6">
-            <RefreshCw className="w-4 h-4 animate-spin text-pink-500" />
-            <span>Buscando dados no MySQL...</span>
-          </div>
-        )}
+      {isHome && (
+        <nav className="mobile-bottom-nav" aria-label="Navegação principal">
+          <Link className="mobile-bottom-link active" to="/"><Home size={19} strokeWidth={1.8} /><span>Início</span></Link>
+          <Link className="mobile-bottom-link" to="/cadastrar-gestacao"><CalendarDays size={19} strokeWidth={1.8} /><span>Gestação</span></Link>
+          <Link className="mobile-add-button" to="/cadastrar-gestacao" aria-label="Adicionar gestação"><Plus size={23} strokeWidth={1.8} /></Link>
+          <Link className="mobile-bottom-link" to="/cadastrar-bebe"><Baby size={19} strokeWidth={1.8} /><span>Bebê</span></Link>
+          <Link className="mobile-bottom-link" to="/login"><CircleUserRound size={19} strokeWidth={1.8} /><span>Conta</span></Link>
+        </nav>
+      )}
+    </div>
+  );
+}
 
-        {/* Estado de Erro */}
-        {error && !loading && (
-          <div className="p-3 bg-red-50 text-red-600 rounded-2xl text-xs flex items-center gap-2 mb-6 w-full text-left">
-            <AlertCircle className="w-5 h-5 shrink-0 text-red-500" />
-            <span>{error}</span>
-          </div>
-        )}
+function HomeDashboard() {
+  return (
+    <section className="dashboard">
+      <header className="dashboard-header">
+        <div>
+          <p className="eyebrow">Seu espaço de cuidado</p>
+          <h1 className="display-title">Olá, vamos cuidar de você?</h1>
+          <p className="page-subtitle">Acompanhe sua jornada com leveza, informação e carinho.</p>
+        </div>
+        <div className="dashboard-avatar"><CircleUserRound size={24} strokeWidth={1.7} /></div>
+      </header>
 
-        {/* Exibição da resposta vinda do banco */}
-        {data && !loading && (
-          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl w-full mb-6">
-            <div className="flex items-center justify-center gap-1.5 text-emerald-600 text-xs font-semibold mb-1">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Sucesso! Resposta do Banco:</span>
-            </div>
-            <p className="text-sm font-medium text-slate-700">"{data.texto}"</p>
-          </div>
-        )}
-
-        {/* Botão para testar a requisição */}
-        <button
-          onClick={fetchHello}
-          disabled={loading}
-          className="w-full py-3 px-4 bg-pink-500 hover:bg-pink-600 active:scale-95 disabled:opacity-50 text-white font-medium rounded-xl text-sm transition-all shadow-md shadow-pink-200"
-        >
-          Testar Requisição Novamente
-        </button>
+      <div className="dashboard-hero">
+        <div>
+          <span className="dashboard-hero-icon"><Sparkles size={19} strokeWidth={1.8} /></span>
+          <p className="mt-5 text-sm font-bold text-[#3B7280]">Sua jornada começa aqui</p>
+          <h2 className="mt-2 text-2xl font-extrabold leading-tight text-slate-800 sm:text-3xl">Um cuidado de cada vez.</h2>
+          <p className="mt-3 max-w-md text-sm leading-6 text-slate-600">Registre sua gestação e tenha as informações mais importantes sempre por perto.</p>
+          <Link to="/cadastrar-gestacao" className="dashboard-hero-button">Começar acompanhamento <ChevronRight size={17} /></Link>
+        </div>
+        <div className="dashboard-hero-illustration" aria-hidden="true"><HeartHandshake size={112} strokeWidth={1.15} /></div>
       </div>
-    </main>
+
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Acesso rápido</p>
+          <h2 className="section-title">O que você deseja registrar?</h2>
+        </div>
+      </div>
+      <div className="quick-actions">
+        <Link to="/cadastrar-gestacao" className="quick-action quick-action-blue group">
+          <span className="quick-action-icon"><CalendarDays size={23} strokeWidth={1.7} /></span>
+          <span><strong>Acompanhar gestação</strong><small>Calcule a previsão de parto</small></span>
+          <ChevronRight size={18} />
+        </Link>
+        <Link to="/cadastrar-bebe" className="quick-action quick-action-pink group">
+          <span className="quick-action-icon"><Baby size={23} strokeWidth={1.7} /></span>
+          <span><strong>Cadastrar bebê</strong><small>Registre os primeiros momentos</small></span>
+          <ChevronRight size={18} />
+        </Link>
+      </div>
+
+      <div className="dashboard-tip">
+        <span className="dashboard-tip-icon"><Heart size={18} strokeWidth={1.7} fill="currentColor" /></span>
+        <div><strong>Um lembrete para você</strong><p>Pequenos registros ajudam a guardar grandes momentos.</p></div>
+      </div>
+    </section>
   );
 }

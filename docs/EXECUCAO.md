@@ -32,7 +32,7 @@ Instale as ferramentas abaixo antes de começar:
 | Banco de dados | [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Versão atual |
 | Back-end | [Java JDK](https://www.oracle.com/java/technologies/downloads/) | 17 ou superior |
 | Back-end | [Maven](https://maven.apache.org/download.cgi) | 3.9 ou superior |
-| Front-end | [Node.js](https://nodejs.org/) e npm | 18 ou superior |
+| Front-end | [Node.js](https://nodejs.org/) e npm | 24.x |
 
 > 💡 O Docker Desktop precisa estar aberto e em execução antes de criar o banco.
 
@@ -58,7 +58,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-O arquivo `.env` define o banco `maternidade_db`, o usuário e as portas usadas pelo Compose. O comando cria as imagens quando necessário, inicia o MySQL 8, aguarda o banco ficar saudável e sobe a API e o front-end.
+O projeto usa o `.env` quando ele existe. Se o `.env` ainda não existir, a API e o Vite usam os valores de `.env.example` como fallback; para o Docker Compose, crie o `.env` a partir do exemplo antes de iniciar a stack. O arquivo define o banco `maternidade_db`, o usuário e as portas usadas pelo Compose. O comando cria as imagens quando necessário, inicia o MySQL 8, aguarda o banco ficar saudável e sobe a API e o front-end.
 
 ### Endereços de acesso
 
@@ -86,7 +86,7 @@ Nesta opção, somente o banco de dados roda isolado no Docker. A API Spring Boo
 - **Spring Boot DevTools:** alterações no código Java provocam recompilação e reinicialização automática da API, normalmente em poucos segundos.
 - Menor consumo de memória e execução mais ágil para o desenvolvimento diário.
 
-Antes de começar, instale Docker, Java 17 ou superior, Maven 3.9 ou superior e Node.js 18 ou superior.
+Antes de começar, instale Docker, Java 17 ou superior, Maven 3.9 ou superior e Node.js 24.x.
 
 ## 🗄️ 3. Subir o banco de dados
 
@@ -193,7 +193,7 @@ cd frontend
 Instale as dependências do projeto:
 
 ```bash
-npm install
+npm ci
 ```
 
 Inicie o servidor de desenvolvimento do Vite:
@@ -261,7 +261,7 @@ Verifique se você está na pasta `frontend` e instale as dependências novament
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 

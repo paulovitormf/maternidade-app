@@ -1,0 +1,6 @@
+package br.com.maternidade.dto;
+import br.com.maternidade.model.Gestacao;
+import java.time.LocalDate;
+public record GestacaoPublicaDTO(Long id_gestacao, Long id_usuario, LocalDate ultima_mestruacao, Integer idade_gestacional, LocalDate data_parto, String tipo_gestacao, Boolean pre_natal) {
+    public static GestacaoPublicaDTO from(Gestacao g) { return new GestacaoPublicaDTO(g.getIdGestacao(), g.getUsuario().getIdUsuario(), g.getUltimaMestruacao(), g.getIdadeGestacional(), g.getDataParto(), g.getTipoGestacao(), g.getPreNatal()); }
+}
