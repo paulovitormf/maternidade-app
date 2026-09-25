@@ -10,6 +10,11 @@ export default function CadastroUsuario() {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setErro('');
+
+    if(form.senha.length < 8){
+      setErro('A senha deve ter no mínimo 8 caracteres.');
+      return;
+    }
     try {
       const payload: CadastroUsuarioPayload = { usuario: { ...form, qnt_gestacao: 0 } };
       await cadastrarUsuario(payload);
@@ -42,9 +47,15 @@ export default function CadastroUsuario() {
               className="field-control"
               type={type}
               required={required}
+              minLength={name === 'senha' ? 8 : undefined}
               value={form[name]}
               onChange={(e) => setForm({ ...form, [name]: e.target.value })}
             />
+            {name === 'senha' && (
+              <span className="text-sm text-slate-500">
+                A senha deve ter no mínimo 8 caracteres.
+              </span>
+            )}
           </label>
         ))}
         {erro && <p className="alert-error field-wide">{erro}</p>}

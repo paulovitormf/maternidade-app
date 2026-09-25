@@ -31,11 +31,11 @@ export interface UsuarioPublico {
 }
 
 export const cadastrarUsuario = async (dadosUsuario: CadastroUsuarioPayload) => {
-  const response = await api.post<UsuarioPublico>('/usuarios', dadosUsuario);
+  const response = await api.post<UsuarioPublico>('/api/usuarios', dadosUsuario);
   return response.data;
 };
 
 export const loginUsuario = async (dadosLogin: { email: string; senha: string }) => {
-  const response = await api.post<UsuarioPublico>('/usuarios/login', dadosLogin);
+  const response = await api.post<UsuarioPublico>('/api/usuarios/login', dadosLogin);
   return response.data;
 };

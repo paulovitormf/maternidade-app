@@ -66,7 +66,7 @@ export default function CadastroGestacao({ idUsuario }: { idUsuario?: number }) 
     }
 
     try {
-      await api.post('/gestacoes', {
+      await api.post('/api/gestacoes', {
         id_usuario: usuario,
         ultima_mestruacao: formData.ultima_mestruacao,
         idade_gestacional: formData.idade_gestacional ? Number(formData.idade_gestacional) : null,
