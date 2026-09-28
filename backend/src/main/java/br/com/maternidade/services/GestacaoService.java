@@ -24,9 +24,9 @@ public class GestacaoService {
     }
 
     @Transactional
-    public Gestacao cadastrarGestacao(GestacaoDTO dto) {
-        if (dto == null || dto.id_usuario() == null) {
-            throw new IllegalArgumentException("Usuário é obrigatório.");
+    public Gestacao cadastrarGestacao(GestacaoDTO dto, String emailAutenticado) {
+        if (dto == null || emailAutenticado == null || emailAutenticado.isBlank()) {
+            throw new IllegalArgumentException("Usuário autenticado é obrigatório.");
         }
         if (dto.ultima_mestruacao() == null) {
             throw new IllegalArgumentException("DUM é obrigatória.");
@@ -43,8 +43,8 @@ public class GestacaoService {
             throw new IllegalArgumentException("A idade gestacional deve estar entre 0 e 42 semanas.");
         }
 
-        Usuario usuario = usuarioRepository.findById(dto.id_usuario())
-                .orElseThrow(() -> new IllegalArgumentException("Usuário (Mãe) não encontrado com o ID: " + dto.id_usuario()));
+        Usuario usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
 
         Gestacao gestacao = new Gestacao();
         gestacao.setUsuario(usuario);
@@ -61,11 +61,11 @@ public class GestacaoService {
         return gestacaoRepository.save(gestacao);
     }
 
-    public List<Gestacao> listarPorUsuario(Long idUsuario) {
+    public List<Gestacao> listarPorUsuario(Integer idUsuario) {
         return gestacaoRepository.findByUsuarioIdUsuario(idUsuario);
     }
 
-    public Gestacao buscarMaisRecentePorUsuario(Long idUsuario) {
+    public Gestacao buscarMaisRecentePorUsuario(Integer idUsuario) {
         return gestacaoRepository.findFirstByUsuarioIdUsuarioOrderByIdGestacaoDesc(idUsuario)
                 .orElseThrow(() -> new IllegalArgumentException("Nenhuma gestação cadastrada para o usuário ID: " + idUsuario));
     }

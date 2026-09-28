@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import br.com.maternidade.dto.GestacaoDTO;
 import br.com.maternidade.services.GestacaoService;
 import br.com.maternidade.dto.GestacaoPublicaDTO;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/gestacoes")
@@ -19,9 +20,9 @@ public class GestacaoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> cadastrar(@RequestBody GestacaoDTO dto) {
+    public ResponseEntity<?> cadastrar(@RequestBody GestacaoDTO dto, Authentication authentication) {
         try {
-            var gestacaoSalva = gestacaoService.cadastrarGestacao(dto);
+            var gestacaoSalva = gestacaoService.cadastrarGestacao(dto, authentication.getName());
             return ResponseEntity.status(HttpStatus.CREATED).body(GestacaoPublicaDTO.from(gestacaoSalva));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

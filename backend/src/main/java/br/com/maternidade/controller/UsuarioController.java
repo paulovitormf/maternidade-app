@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import br.com.maternidade.dto.UsuarioCadastroDTO;
 import br.com.maternidade.dto.LoginDTO;
 import br.com.maternidade.dto.UsuarioPublicoDTO;
+import br.com.maternidade.dto.LoginRespostaDTO;
+import br.com.maternidade.config.JwtService;
 import br.com.maternidade.services.UsuarioService;
 
 @RestController
@@ -14,9 +16,11 @@ import br.com.maternidade.services.UsuarioService;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final JwtService jwtService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, JwtService jwtService) {
         this.usuarioService = usuarioService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping
@@ -32,7 +36,12 @@ public class UsuarioController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO dto) {
-        try { return ResponseEntity.ok(UsuarioPublicoDTO.from(usuarioService.autenticar(dto.email(), dto.senha()))); }
+        try {
+            var usuario = usuarioService.autenticar(dto.email(), dto.senha());
+            return ResponseEntity.ok(new LoginRespostaDTO(
+                    jwtService.generateToken(usuario.getEmail()),
+                    UsuarioPublicoDTO.from(usuario)));
+        }
         catch (IllegalArgumentException e) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage()); }
     }
 }

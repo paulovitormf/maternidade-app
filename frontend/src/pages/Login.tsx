@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Heart } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { loginUsuario } from '../services/usuarioService';
+import { AUTH_CHANGED_EVENT, loginUsuario, USUARIO_STORAGE_KEY } from '../services/usuarioService';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -17,7 +17,10 @@ export default function Login() {
     setCarregando(true);
     try {
       const usuario = await loginUsuario({ email, senha });
-      localStorage.setItem('id_usuario', String(usuario.id_usuario));
+      localStorage.setItem('access_token', usuario.token);
+      localStorage.setItem('id_usuario', String(usuario.usuario.id_usuario));
+      localStorage.setItem(USUARIO_STORAGE_KEY, JSON.stringify(usuario.usuario));
+      window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
       navigate('/');
     } catch (error) {
       setErro(axios.isAxiosError(error) && typeof error.response?.data === 'string'

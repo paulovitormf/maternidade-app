@@ -66,7 +66,7 @@ O projeto usa o `.env` quando ele existe. Se o `.env` ainda não existir, a API 
 | --- | --- |
 | Front-end | <http://localhost:5173> |
 | Back-end (API) | <http://localhost:8080> |
-| MySQL | `localhost:3306` |
+| MySQL | `localhost:3307` |
 
 O front-end também pode usar a porta `3000` caso o `vite.config.ts` e o mapeamento do Compose sejam configurados para ela. A configuração atual do projeto usa `5173`.
 
@@ -113,7 +113,7 @@ Se o container já existir e estiver parado, use:
 docker start mysql-maternidade
 ```
 
-O banco ficará disponível em `localhost:3306`, com os valores padrão do `.env.example`:
+O banco ficará disponível em `localhost:3307`, com os valores padrão do `.env.example`:
 
 | Configuração | Valor padrão |
 | --- | --- |
@@ -158,6 +158,17 @@ mysql -u maternidade_app -p maternidade < database/maternidade.sql
 ```
 
 O back-end usa os valores do `.env` quando executado fora do Docker. Se o MySQL estiver em outra porta ou com credenciais diferentes, ajuste `DB_HOST`, `MYSQL_PORT`, `MYSQL_DATABASE`, `MYSQL_USER` e `MYSQL_PASSWORD`.
+
+## 🧬 Schema e evolução do banco
+
+O schema completo é definido em `database/maternidade.sql` e criado quando o volume Docker
+é inicializado pela primeira vez. O backend não altera a estrutura do banco: ele usa
+`ddl-auto=validate` para detectar divergências sem modificar dados automaticamente.
+
+Como este ambiente ainda não possui dados, alterações estruturais devem ser feitas no
+arquivo principal `database/maternidade.sql`. Para aplicar uma versão atualizada em um
+ambiente Docker de desenvolvimento, remova o volume do banco e recrie-o conforme os
+passos desta documentação.
 
 ## ⚙️ 4. Executar o back-end no host
 
@@ -233,11 +244,11 @@ Antes de começar a usar a aplicação, confira:
 | --- | --- |
 | API Spring Boot | <http://localhost:8080> |
 | Aplicação web | <http://localhost:5173> |
-| MySQL | `localhost:3306` |
+| MySQL | `localhost:3307` |
 
 ## 🧯 Solução de problemas
 
-### ❌ `Connection to localhost:3306 refused`
+### ❌ `Connection to localhost:3307 refused`
 
 O MySQL não está em execução. Inicie o container:
 

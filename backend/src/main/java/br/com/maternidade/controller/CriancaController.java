@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 
 import br.com.maternidade.dto.CriancaCadastroDTO;
 import br.com.maternidade.services.CriancaService;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/criancas")
@@ -18,9 +19,9 @@ public class CriancaController {
     }
 
     @PostMapping
-    public ResponseEntity<?> cadastrar(@RequestBody CriancaCadastroDTO dto) {
+    public ResponseEntity<?> cadastrar(@RequestBody CriancaCadastroDTO dto, Authentication authentication) {
         try {
-            var criancaSalva = criancaService.cadastrarCrianca(dto);
+            var criancaSalva = criancaService.cadastrarCrianca(dto, authentication.getName());
             return ResponseEntity.status(HttpStatus.CREATED).body(criancaSalva);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

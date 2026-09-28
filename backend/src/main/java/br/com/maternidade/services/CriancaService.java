@@ -21,9 +21,9 @@ public class CriancaService {
     }
 
     @Transactional
-    public Crianca cadastrarCrianca(CriancaCadastroDTO dto) {
-        if (dto == null || dto.id_usuario() == null) {
-            throw new IllegalArgumentException("Usuário é obrigatório.");
+    public Crianca cadastrarCrianca(CriancaCadastroDTO dto, String emailAutenticado) {
+        if (dto == null || emailAutenticado == null || emailAutenticado.isBlank()) {
+            throw new IllegalArgumentException("Usuário autenticado é obrigatório.");
         }
         if (dto.nome() == null || dto.nome().isBlank()
                 || dto.data_nascimento() == null || dto.hora_nascimento() == null) {
@@ -39,9 +39,8 @@ public class CriancaService {
         if (dto.tipo_relacao() == null || !dto.tipo_relacao().matches("MAE|PAI|RESPONSAVEL")) {
             throw new IllegalArgumentException("Tipo de relação inválido.");
         }
-        if (!usuarioRepository.existsById(dto.id_usuario())) {
-            throw new IllegalArgumentException("Usuário não encontrado.");
-        }
+        var usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
 
         // 1. Instancia a entidade Crianca
         Crianca crianca = new Crianca();
@@ -57,7 +56,7 @@ public class CriancaService {
         Crianca criancaSalva = criancaRepository.save(crianca);
 
         vinculoRepository.save(new br.com.maternidade.model.UsuarioCrianca(
-                dto.id_usuario(), criancaSalva.getIdCrianca(), dto.tipo_relacao()));
+                usuario.getIdUsuario(), criancaSalva.getIdCrianca(), dto.tipo_relacao()));
 
         return criancaSalva;
     }

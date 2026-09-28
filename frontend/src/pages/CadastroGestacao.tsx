@@ -21,7 +21,7 @@ const initialForm: GestacaoForm = {
 const formatarData = (data: Date) =>
   new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(data);
 
-export default function CadastroGestacao({ idUsuario }: { idUsuario?: number }) {
+export default function CadastroGestacao() {
   const [formData, setFormData] = useState<GestacaoForm>(initialForm);
   const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [erroApi, setErroApi] = useState('');
@@ -51,8 +51,7 @@ export default function CadastroGestacao({ idUsuario }: { idUsuario?: number }) 
     setMensagemSucesso('');
     setErroApi('');
     setCarregando(true);
-    const usuario = idUsuario ?? Number(localStorage.getItem('id_usuario'));
-    if (!Number.isInteger(usuario) || usuario <= 0) {
+    if (!localStorage.getItem('access_token')) {
       setErroApi('Faça login antes de cadastrar uma gestação.');
       setCarregando(false);
       return;
@@ -66,8 +65,7 @@ export default function CadastroGestacao({ idUsuario }: { idUsuario?: number }) 
     }
 
     try {
-      await api.post('/api/gestacoes', {
-        id_usuario: usuario,
+      await api.post('/gestacoes', {
         ultima_mestruacao: formData.ultima_mestruacao,
         idade_gestacional: formData.idade_gestacional ? Number(formData.idade_gestacional) : null,
         tipo_gestacao: formData.tipo_gestacao,

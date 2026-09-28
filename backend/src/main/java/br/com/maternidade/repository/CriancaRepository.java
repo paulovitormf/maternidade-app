@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import br.com.maternidade.model.Crianca;
 
 @Repository
-public interface CriancaRepository extends JpaRepository<Crianca, Long> {
+public interface CriancaRepository extends JpaRepository<Crianca, Integer> {
 }

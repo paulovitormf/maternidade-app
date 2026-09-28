@@ -12,7 +12,7 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
-    private Long idUsuario;
+    private Integer idUsuario;
 
     @Column(name = "nome", nullable = false, length = 100)
     private String nome;
@@ -40,7 +40,7 @@ public class Usuario {
     public Usuario() {}
 
     // Construtor Completo
-    public Usuario(Long idUsuario, String nome, String email, String senha, LocalDate dataNascimento, String telefone, LocalDateTime dataCadastro, Integer qntGestacao) {
+    public Usuario(Integer idUsuario, String nome, String email, String senha, LocalDate dataNascimento, String telefone, LocalDateTime dataCadastro, Integer qntGestacao) {
         this.idUsuario = idUsuario;
         this.nome = nome;
         this.email = email;
@@ -52,11 +52,11 @@ public class Usuario {
     }
 
     // Getters e Setters
-    public Long getIdUsuario() {
+    public Integer getIdUsuario() {
         return idUsuario;
     }
 
-    public void setIdUsuario(Long idUsuario) {
+    public void setIdUsuario(Integer idUsuario) {
         this.idUsuario = idUsuario;
     }
 

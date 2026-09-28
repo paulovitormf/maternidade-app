@@ -27,7 +27,7 @@ public class Gestacao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_gestacao")
-    private Long idGestacao;
+    private Integer idGestacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
@@ -52,7 +52,7 @@ public class Gestacao {
     public Gestacao() {}
 
     // Construtor Completo
-    public Gestacao(Long idGestacao, Usuario usuario, LocalDate ultimaMestruacao, Integer idadeGestacional, LocalDate dataParto, String tipoGestacao, Boolean preNatal) {
+    public Gestacao(Integer idGestacao, Usuario usuario, LocalDate ultimaMestruacao, Integer idadeGestacional, LocalDate dataParto, String tipoGestacao, Boolean preNatal) {
         this.idGestacao = idGestacao;
         this.usuario = usuario;
         this.ultimaMestruacao = ultimaMestruacao;
@@ -63,11 +63,11 @@ public class Gestacao {
     }
 
     // Getters e Setters
-    public Long getIdGestacao() {
+    public Integer getIdGestacao() {
         return idGestacao;
     }
 
-    public void setIdGestacao(Long idGestacao) {
+    public void setIdGestacao(Integer idGestacao) {
         this.idGestacao = idGestacao;
     }
 

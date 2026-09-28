@@ -12,6 +12,5 @@ public record CriancaCadastroDTO(
     BigDecimal peso_nascimento,
     BigDecimal altura_nascimento,
     String observacoes,
-    String tipo_relacao,
-    Long id_usuario
+    String tipo_relacao
 ) {}

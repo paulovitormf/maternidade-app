@@ -30,12 +30,20 @@ export interface UsuarioPublico {
   qnt_gestacao?: number;
 }
 
+export const USUARIO_STORAGE_KEY = 'usuario_autenticado';
+export const AUTH_CHANGED_EVENT = 'maternidade-auth-changed';
+
+export interface LoginResposta {
+  token: string;
+  usuario: UsuarioPublico;
+}
+
 export const cadastrarUsuario = async (dadosUsuario: CadastroUsuarioPayload) => {
-  const response = await api.post<UsuarioPublico>('/api/usuarios', dadosUsuario);
+  const response = await api.post<UsuarioPublico>('/usuarios', dadosUsuario);
   return response.data;
 };
 
 export const loginUsuario = async (dadosLogin: { email: string; senha: string }) => {
-  const response = await api.post<UsuarioPublico>('/api/usuarios/login', dadosLogin);
+  const response = await api.post<LoginResposta>('/usuarios/login', dadosLogin);
   return response.data;
 };

@@ -33,15 +33,13 @@ export default function CadastroCrianca() {
     event.preventDefault();
     setErro('');
     setMensagem('');
-    const idUsuario = Number(localStorage.getItem('id_usuario'));
-    if (!Number.isInteger(idUsuario) || idUsuario <= 0) {
+    if (!localStorage.getItem('access_token')) {
       setErro('Faça login antes de cadastrar uma criança.');
       return;
     }
     try {
       await api.post('/criancas', {
         ...form,
-        id_usuario: idUsuario,
         hora_nascimento: `${form.hora_nascimento}:00`,
         peso_nascimento: form.peso_nascimento ? Number(form.peso_nascimento) : null,
         altura_nascimento: form.altura_nascimento ? Number(form.altura_nascimento) : null,

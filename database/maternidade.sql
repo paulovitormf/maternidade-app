@@ -18,13 +18,23 @@ CREATE TABLE usuario (
     CONSTRAINT ck_usuario_qnt_gestacao CHECK (qnt_gestacao >= 0)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS auditoria_acesso (
+    id_auditoria BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT,
+    evento VARCHAR(80) NOT NULL,
+    ip_origem VARCHAR(45),
+    data_evento DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    INDEX idx_auditoria_usuario_data (id_usuario, data_evento)
+) ENGINE=InnoDB;
+
 /* crianca */
 CREATE TABLE crianca (
     id_crianca INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(250) NOT NULL,
     data_nascimento DATE NOT NULL,
     hora_nascimento TIME NOT NULL,
-    sexo ENUM('F', 'M'),
+    sexo VARCHAR(1),
     peso_nascimento DECIMAL(5,2),
     altura_nascimento DECIMAL(5,2),
     observacoes TEXT
@@ -34,7 +44,7 @@ CREATE TABLE crianca (
 CREATE TABLE usuario_crianca (
     id_usuario INT NOT NULL,
     id_crianca INT NOT NULL,
-    tipo_relacao ENUM('MAE', 'PAI', 'RESPONSAVEL') NOT NULL,
+    tipo_relacao VARCHAR(20) NOT NULL,
 
     PRIMARY KEY (id_usuario, id_crianca),
 
@@ -67,19 +77,16 @@ CREATE TABLE alimentacao (
     id_crianca INT NOT NULL,
     data_registro DATE NOT NULL,
     horario TIME NOT NULL,
-    tipo ENUM(
-        'AMAMENTACAO',
-        'FORMULA',
-        'ALIMENTACAO_SOLIDA',
-        'OUTRO'
-    ) NOT NULL,
+    tipo VARCHAR(30) NOT NULL,
     quantidade DECIMAL(6,2),
-    unidade_medida ENUM('ML', 'G', 'MINUTOS', 'PORCAO', 'UNIDADE'), 
+    unidade_medida VARCHAR(15),
     observacao TEXT,
 
     FOREIGN KEY (id_crianca)
         REFERENCES crianca(id_crianca)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT ck_alimentacao_tipo CHECK (tipo IN ('AMAMENTACAO', 'FORMULA', 'ALIMENTACAO_SOLIDA', 'OUTRO')),
+    CONSTRAINT ck_alimentacao_unidade CHECK (unidade_medida IS NULL OR unidade_medida IN ('ML', 'G', 'MINUTOS', 'PORCAO', 'UNIDADE'))
 );
 
 /*sono*/
@@ -101,13 +108,15 @@ CREATE TABLE desenvolvimento (
     id_desenvolvimento INT AUTO_INCREMENT PRIMARY KEY,
     id_crianca INT NOT NULL,
     data_registro DATE NOT NULL,
-    categoria ENUM('MOTOR', 'LINGUAGEM', 'COGNITIVO', 'SOCIAL', 'OUTRO') NOT NULL,
+    categoria VARCHAR(20) NOT NULL,
     titulo VARCHAR(100) NOT NULL,
     descricao TEXT,
 
     FOREIGN KEY (id_crianca)
         REFERENCES crianca(id_crianca)
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT ck_desenvolvimento_categoria
+        CHECK (categoria IN ('MOTOR', 'LINGUAGEM', 'COGNITIVO', 'SOCIAL', 'OUTRO'))
 );
 
 /*loja parceira */ 
@@ -303,23 +312,14 @@ CREATE TABLE compromisso (
 
     titulo VARCHAR(150) NOT NULL,
 
-    tipo ENUM(
-        'CONSULTA',
-        'VACINA',
-        'EXAME',
-        'OUTRO'
-    ) NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
 
     data_compromisso DATE NOT NULL,
     horario TIME,
     local VARCHAR(255),
     descricao TEXT,
 
-    status ENUM(
-        'PENDENTE',
-        'CONCLUIDO',
-        'CANCELADO'
-    ) DEFAULT 'PENDENTE',
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
 
     FOREIGN KEY (id_usuario)
         REFERENCES usuario(id_usuario)
@@ -331,7 +331,9 @@ CREATE TABLE compromisso (
 
     FOREIGN KEY (id_especialista)
         REFERENCES especialista(id_especialista)
-        ON DELETE SET NULL
+        ON DELETE SET NULL,
+    CONSTRAINT ck_compromisso_tipo CHECK (tipo IN ('CONSULTA', 'VACINA', 'EXAME', 'OUTRO')),
+    CONSTRAINT ck_compromisso_status CHECK (status IN ('PENDENTE', 'CONCLUIDO', 'CANCELADO'))
 );
 
 /*vacinas*/
@@ -506,10 +508,11 @@ CREATE TABLE marco_desenvolvimento (
     descricao TEXT NOT NULL,
     idade_min_meses INT NOT NULL,
     idade_max_meses INT,
-    categoria ENUM('MOTOR', 'LINGUAGEM', 'COGNITIVO', 'SOCIAL', 'AUTONOMIA', 'OUTRO') NOT NULL,
+    categoria VARCHAR(20) NOT NULL,
     fonte VARCHAR(255),
     link_fonte VARCHAR(500),
-    INDEX idx_marco_faixa_etaria (idade_min_meses, idade_max_meses)
+    INDEX idx_marco_faixa_etaria (idade_min_meses, idade_max_meses),
+    CONSTRAINT ck_marco_categoria CHECK (categoria IN ('MOTOR', 'LINGUAGEM', 'COGNITIVO', 'SOCIAL', 'AUTONOMIA', 'OUTRO'))
 ) ENGINE=InnoDB;
 
 CREATE TABLE marco_crianca (
@@ -524,9 +527,10 @@ CREATE TABLE marco_crianca (
 
 /* revisão profissional de conteúdos */
 ALTER TABLE conteudo
-    ADD COLUMN status ENUM('RASCUNHO', 'PUBLICADO', 'ARQUIVADO') NOT NULL DEFAULT 'RASCUNHO',
+    ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'RASCUNHO',
     ADD COLUMN idade_min_meses INT,
-    ADD COLUMN idade_max_meses INT;
+    ADD COLUMN idade_max_meses INT,
+    ADD CONSTRAINT ck_conteudo_status CHECK (status IN ('RASCUNHO', 'PUBLICADO', 'ARQUIVADO'));
 
 CREATE TABLE conteudo_revisao (
     id_revisao INT AUTO_INCREMENT PRIMARY KEY,
@@ -548,13 +552,15 @@ CREATE TABLE notificacao (
     id_crianca INT,
     titulo VARCHAR(200) NOT NULL,
     mensagem TEXT NOT NULL,
-    tipo ENUM('VACINA', 'MEDICACAO', 'CONSULTA', 'DESENVOLVIMENTO', 'SISTEMA') NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
     data_agendada DATETIME NOT NULL,
     data_leitura DATETIME,
-    status ENUM('PENDENTE', 'ENVIADA', 'LIDA', 'CANCELADA') NOT NULL DEFAULT 'PENDENTE',
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
     FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
-    INDEX idx_notificacao_usuario_status (id_usuario, status, data_agendada)
+    INDEX idx_notificacao_usuario_status (id_usuario, status, data_agendada),
+    CONSTRAINT ck_notificacao_tipo CHECK (tipo IN ('VACINA', 'MEDICACAO', 'CONSULTA', 'DESENVOLVIMENTO', 'SISTEMA')),
+    CONSTRAINT ck_notificacao_status CHECK (status IN ('PENDENTE', 'ENVIADA', 'LIDA', 'CANCELADA'))
 ) ENGINE=InnoDB;
 
 /* crescimento com perímetro cefálico e referência OMS */
@@ -569,14 +575,16 @@ CREATE TABLE convite_responsavel (
     id_crianca INT NOT NULL,
     id_usuario_solicitante INT NOT NULL,
     email_convidado VARCHAR(150) NOT NULL,
-    tipo_relacao ENUM('MAE', 'PAI', 'RESPONSAVEL') NOT NULL,
+    tipo_relacao VARCHAR(20) NOT NULL,
     token_hash CHAR(64) NOT NULL UNIQUE,
-    status ENUM('PENDENTE', 'ACEITO', 'RECUSADO', 'EXPIRADO') NOT NULL DEFAULT 'PENDENTE',
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
     data_expiracao DATETIME NOT NULL,
     data_resposta DATETIME,
     FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
     FOREIGN KEY (id_usuario_solicitante) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
-    INDEX idx_convite_email_status (email_convidado, status)
+    INDEX idx_convite_email_status (email_convidado, status),
+    CONSTRAINT ck_convite_relacao CHECK (tipo_relacao IN ('MAE', 'PAI', 'RESPONSAVEL')),
+    CONSTRAINT ck_convite_status CHECK (status IN ('PENDENTE', 'ACEITO', 'RECUSADO', 'EXPIRADO'))
 ) ENGINE=InnoDB;
 
 /* diário de humor e grupos de apoio */
@@ -664,7 +672,8 @@ CREATE TABLE disponibilidade_especialista (
     dia_semana TINYINT NOT NULL,
     hora_inicio TIME NOT NULL,
     hora_fim TIME NOT NULL,
-    modalidade ENUM('PRESENCIAL', 'ONLINE') NOT NULL,
+    modalidade VARCHAR(15) NOT NULL,
     FOREIGN KEY (id_especialista) REFERENCES especialista(id_especialista) ON DELETE CASCADE,
-    CONSTRAINT ck_disponibilidade_dia CHECK (dia_semana BETWEEN 0 AND 6)
+    CONSTRAINT ck_disponibilidade_dia CHECK (dia_semana BETWEEN 0 AND 6),
+    CONSTRAINT ck_disponibilidade_modalidade CHECK (modalidade IN ('PRESENCIAL', 'ONLINE'))
 ) ENGINE=InnoDB;

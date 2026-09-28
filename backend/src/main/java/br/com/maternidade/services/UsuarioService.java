@@ -41,13 +41,14 @@ public class UsuarioService {
         if (dto.usuario().email() != null && !dto.usuario().email().matches("^[\\w.%+-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
             throw new IllegalArgumentException("E-mail inválido.");
         }
-        if (usuarioRepository.existsByEmail(dto.usuario().email())) {
+        String emailNormalizado = dto.usuario().email().trim().toLowerCase();
+        if (usuarioRepository.existsByEmail(emailNormalizado)) {
             throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
         }
 
         Usuario usuario = new Usuario();
         usuario.setNome(dto.usuario().nome());
-        usuario.setEmail(dto.usuario().email().trim().toLowerCase());
+        usuario.setEmail(emailNormalizado);
 
         String senhaCriptografada = passwordEncoder.encode(dto.usuario().senha());
         usuario.setSenha(senhaCriptografada);
@@ -86,7 +87,7 @@ public class UsuarioService {
 
     public Usuario autenticar(String email, String senha) {
         if (email == null || senha == null) throw new IllegalArgumentException("E-mail ou senha inválidos.");
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Usuario usuario = usuarioRepository.findByEmail(email.trim().toLowerCase())
                 .orElseThrow(() -> new IllegalArgumentException("E-mail ou senha inválidos."));
         if (!passwordEncoder.matches(senha, usuario.getSenha())) throw new IllegalArgumentException("E-mail ou senha inválidos.");
         return usuario;
