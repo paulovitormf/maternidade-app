@@ -2,10 +2,27 @@ package br.com.maternidade.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "gestacao")
 public class Gestacao {
+
+    public static LocalDate calcularDataParto(LocalDate ultimaMestruacao) {
+        if (ultimaMestruacao == null) {
+            return null;
+        }
+        return ultimaMestruacao.plusDays(280);
+    }
+
+    public static Integer calcularIdadeGestacional(LocalDate ultimaMestruacao) {
+        if (ultimaMestruacao == null) {
+            return null;
+        }
+
+        long diasDesdeDum = ChronoUnit.DAYS.between(ultimaMestruacao, LocalDate.now());
+        return Math.max(0, Math.min(42, (int) (diasDesdeDum / 7)));
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

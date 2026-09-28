@@ -20,7 +20,7 @@ public class Usuario {
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(name = "senha", nullable = false, length = 100)
+    @Column(name = "senha", nullable = false, length = 255)
     @JsonIgnore
     private String senha;
 

@@ -34,29 +34,30 @@ public class GestacaoService {
         if (dto.ultima_mestruacao().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("A DUM não pode estar no futuro.");
         }
-        if (dto.idade_gestacional() != null
-                && (dto.idade_gestacional() < 0 || dto.idade_gestacional() > 42)) {
+
+        Integer idadeGestacionalInformada = dto.idade_gestacional();
+        Integer idadeGestacionalCalculada = Gestacao.calcularIdadeGestacional(dto.ultima_mestruacao());
+
+        if (idadeGestacionalInformada != null
+                && (idadeGestacionalInformada < 0 || idadeGestacionalInformada > 42)) {
             throw new IllegalArgumentException("A idade gestacional deve estar entre 0 e 42 semanas.");
         }
-        // 1. Busca o usuário (mãe) pelo ID fornecido no DTO
+
         Usuario usuario = usuarioRepository.findById(dto.id_usuario())
                 .orElseThrow(() -> new IllegalArgumentException("Usuário (Mãe) não encontrado com o ID: " + dto.id_usuario()));
 
-        // 2. Cria e popula a entidade Gestacao
         Gestacao gestacao = new Gestacao();
         gestacao.setUsuario(usuario);
         gestacao.setUltimaMestruacao(dto.ultima_mestruacao());
-        gestacao.setIdadeGestacional(dto.idade_gestacional());
-        gestacao.setDataParto(dto.ultima_mestruacao().plusDays(280));
+        gestacao.setIdadeGestacional(idadeGestacionalInformada != null ? idadeGestacionalInformada : idadeGestacionalCalculada);
+        gestacao.setDataParto(Gestacao.calcularDataParto(dto.ultima_mestruacao()));
         gestacao.setTipoGestacao(dto.tipo_gestacao());
         gestacao.setPreNatal(dto.pre_natal());
 
-        // 3. Atualiza o contador de gestações na entidade do Usuário
         int gestacoesAtuais = usuario.getQntGestacao() != null ? usuario.getQntGestacao() : 0;
         usuario.setQntGestacao(gestacoesAtuais + 1);
         usuarioRepository.save(usuario);
 
-        // 4. Salva o registro na tabela 'gestacao' do MySQL
         return gestacaoRepository.save(gestacao);
     }
 

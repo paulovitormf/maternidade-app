@@ -1,19 +1,24 @@
-CREATE DATABASE maternidade;
+CREATE DATABASE IF NOT EXISTS maternidade
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
 USE maternidade;
 
-/*usuario pai,mae ou responsavel*/
+SET NAMES utf8mb4;
+
+/* usuario: pai, mae ou responsavel */
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(150) NOT NULL UNIQUE,
-    senha VARCHAR(100) NOT NULL,
+    senha VARCHAR(255) NOT NULL,
     data_nascimento DATE,
     telefone VARCHAR(20),
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
-    qnt_gestacao INT DEFAULT 0
-);
+    qnt_gestacao INT NOT NULL DEFAULT 0,
+    CONSTRAINT ck_usuario_qnt_gestacao CHECK (qnt_gestacao >= 0)
+) ENGINE=InnoDB;
 
-/*crianca*/
+/* crianca */
 CREATE TABLE crianca (
     id_crianca INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(250) NOT NULL,
@@ -23,7 +28,7 @@ CREATE TABLE crianca (
     peso_nascimento DECIMAL(5,2),
     altura_nascimento DECIMAL(5,2),
     observacoes TEXT
-); -- CORRIGIDO: Fechamento da tabela adicionado
+) ENGINE=InnoDB;
 
 /*criança e usuario --> relação*/
 CREATE TABLE usuario_crianca (
@@ -40,7 +45,7 @@ CREATE TABLE usuario_crianca (
     FOREIGN KEY (id_crianca)
         REFERENCES crianca(id_crianca)
         ON DELETE CASCADE
-);
+) ENGINE=InnoDB;
 
 /*crescimento*/ 
 CREATE TABLE crescimento (
@@ -54,7 +59,7 @@ CREATE TABLE crescimento (
     FOREIGN KEY (id_crianca)
         REFERENCES crianca(id_crianca)
         ON DELETE CASCADE
-);
+) ENGINE=InnoDB;
 
 /*alimentação*/
 CREATE TABLE alimentacao (
@@ -486,6 +491,180 @@ CREATE TABLE gestacao (
     idade_gestacional INT,
     data_parto DATE,
     tipo_gestacao TEXT,
-    pre_natal BOOLEAN,
+    pre_natal BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT ck_gestacao_idade CHECK (idade_gestacional IS NULL OR idade_gestacional BETWEEN 0 AND 42),
+    CONSTRAINT ck_gestacao_parto CHECK (data_parto IS NULL OR data_parto >= ultima_mestruacao),
+    INDEX idx_gestacao_usuario (id_usuario),
+    INDEX idx_gestacao_parto (data_parto)
+) ENGINE=InnoDB;
+
+/* trilha visual de marcos do desenvolvimento */
+CREATE TABLE marco_desenvolvimento (
+    id_marco INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(200) NOT NULL,
+    descricao TEXT NOT NULL,
+    idade_min_meses INT NOT NULL,
+    idade_max_meses INT,
+    categoria ENUM('MOTOR', 'LINGUAGEM', 'COGNITIVO', 'SOCIAL', 'AUTONOMIA', 'OUTRO') NOT NULL,
+    fonte VARCHAR(255),
+    link_fonte VARCHAR(500),
+    INDEX idx_marco_faixa_etaria (idade_min_meses, idade_max_meses)
+) ENGINE=InnoDB;
+
+CREATE TABLE marco_crianca (
+    id_crianca INT NOT NULL,
+    id_marco INT NOT NULL,
+    data_conquista DATE,
+    observacao TEXT,
+    PRIMARY KEY (id_crianca, id_marco),
+    FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
+    FOREIGN KEY (id_marco) REFERENCES marco_desenvolvimento(id_marco) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+/* revisão profissional de conteúdos */
+ALTER TABLE conteudo
+    ADD COLUMN status ENUM('RASCUNHO', 'PUBLICADO', 'ARQUIVADO') NOT NULL DEFAULT 'RASCUNHO',
+    ADD COLUMN idade_min_meses INT,
+    ADD COLUMN idade_max_meses INT;
+
+CREATE TABLE conteudo_revisao (
+    id_revisao INT AUTO_INCREMENT PRIMARY KEY,
+    id_conteudo INT NOT NULL,
+    nome_revisor VARCHAR(150) NOT NULL,
+    especialidade VARCHAR(150) NOT NULL,
+    registro_profissional VARCHAR(80),
+    data_revisao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    parecer TEXT,
+    aprovado BOOLEAN NOT NULL DEFAULT FALSE,
+    FOREIGN KEY (id_conteudo) REFERENCES conteudo(id_conteudo) ON DELETE CASCADE,
+    INDEX idx_conteudo_revisao_status (id_conteudo, aprovado)
+) ENGINE=InnoDB;
+
+/* notificações e alertas sincronizados */
+CREATE TABLE notificacao (
+    id_notificacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_crianca INT,
+    titulo VARCHAR(200) NOT NULL,
+    mensagem TEXT NOT NULL,
+    tipo ENUM('VACINA', 'MEDICACAO', 'CONSULTA', 'DESENVOLVIMENTO', 'SISTEMA') NOT NULL,
+    data_agendada DATETIME NOT NULL,
+    data_leitura DATETIME,
+    status ENUM('PENDENTE', 'ENVIADA', 'LIDA', 'CANCELADA') NOT NULL DEFAULT 'PENDENTE',
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
+    INDEX idx_notificacao_usuario_status (id_usuario, status, data_agendada)
+) ENGINE=InnoDB;
+
+/* crescimento com perímetro cefálico e referência OMS */
+ALTER TABLE crescimento
+    ADD COLUMN perimetro_cefalico DECIMAL(5,2),
+    ADD COLUMN fonte_curva VARCHAR(50) DEFAULT 'OMS',
+    ADD INDEX idx_crescimento_crianca_data (id_crianca, data_registro);
+
+/* compartilhamento seguro entre responsáveis */
+CREATE TABLE convite_responsavel (
+    id_convite BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_crianca INT NOT NULL,
+    id_usuario_solicitante INT NOT NULL,
+    email_convidado VARCHAR(150) NOT NULL,
+    tipo_relacao ENUM('MAE', 'PAI', 'RESPONSAVEL') NOT NULL,
+    token_hash CHAR(64) NOT NULL UNIQUE,
+    status ENUM('PENDENTE', 'ACEITO', 'RECUSADO', 'EXPIRADO') NOT NULL DEFAULT 'PENDENTE',
+    data_expiracao DATETIME NOT NULL,
+    data_resposta DATETIME,
+    FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario_solicitante) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    INDEX idx_convite_email_status (email_convidado, status)
+) ENGINE=InnoDB;
+
+/* diário de humor e grupos de apoio */
+CREATE TABLE registro_humor (
+    id_humor BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    nivel TINYINT NOT NULL,
+    anotacao TEXT,
+    data_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT ck_humor_nivel CHECK (nivel BETWEEN 1 AND 5),
+    INDEX idx_humor_usuario_data (id_usuario, data_registro)
+) ENGINE=InnoDB;
+
+CREATE TABLE grupo_apoio (
+    id_grupo INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    descricao TEXT,
+    faixa_etaria VARCHAR(80),
+    diagnostico VARCHAR(150),
+    mediado_por_profissional BOOLEAN NOT NULL DEFAULT FALSE,
+    id_moderador INT,
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_moderador) REFERENCES usuario(id_usuario) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE grupo_apoio_usuario (
+    id_grupo INT NOT NULL,
+    id_usuario INT NOT NULL,
+    data_entrada DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_grupo, id_usuario),
+    FOREIGN KEY (id_grupo) REFERENCES grupo_apoio(id_grupo) ON DELETE CASCADE,
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
-);
+) ENGINE=InnoDB;
+
+/* produtos: alergênicos, avaliações e código de barras */
+ALTER TABLE produto
+    ADD COLUMN codigo_barras VARCHAR(50) UNIQUE,
+    ADD COLUMN alerta_alergenicos TEXT,
+    ADD COLUMN ingredientes TEXT;
+
+CREATE TABLE produto_avaliacao (
+    id_avaliacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_produto INT NOT NULL,
+    id_usuario INT NOT NULL,
+    nota TINYINT NOT NULL,
+    comentario TEXT,
+    data_avaliacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id_produto) REFERENCES produto(id_produto) ON DELETE CASCADE,
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    UNIQUE KEY uk_produto_usuario_avaliacao (id_produto, id_usuario),
+    CONSTRAINT ck_produto_nota CHECK (nota BETWEEN 1 AND 5)
+) ENGINE=InnoDB;
+
+/* protocolos do verificador de sintomas */
+CREATE TABLE protocolo_sintoma (
+    id_protocolo INT AUTO_INCREMENT PRIMARY KEY,
+    sintoma VARCHAR(150) NOT NULL,
+    pergunta TEXT NOT NULL,
+    orientacao TEXT NOT NULL,
+    sinal_alerta BOOLEAN NOT NULL DEFAULT FALSE,
+    fonte VARCHAR(255) NOT NULL,
+    link_fonte VARCHAR(500),
+    versao VARCHAR(30) NOT NULL,
+    data_revisao DATE NOT NULL
+) ENGINE=InnoDB;
+
+/* terapia online e disponibilidade */
+CREATE TABLE plano_saude (
+    id_plano INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL UNIQUE
+) ENGINE=InnoDB;
+
+CREATE TABLE especialista_plano (
+    id_especialista INT NOT NULL,
+    id_plano INT NOT NULL,
+    PRIMARY KEY (id_especialista, id_plano),
+    FOREIGN KEY (id_especialista) REFERENCES especialista(id_especialista) ON DELETE CASCADE,
+    FOREIGN KEY (id_plano) REFERENCES plano_saude(id_plano) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE disponibilidade_especialista (
+    id_disponibilidade BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_especialista INT NOT NULL,
+    dia_semana TINYINT NOT NULL,
+    hora_inicio TIME NOT NULL,
+    hora_fim TIME NOT NULL,
+    modalidade ENUM('PRESENCIAL', 'ONLINE') NOT NULL,
+    FOREIGN KEY (id_especialista) REFERENCES especialista(id_especialista) ON DELETE CASCADE,
+    CONSTRAINT ck_disponibilidade_dia CHECK (dia_semana BETWEEN 0 AND 6)
+) ENGINE=InnoDB;

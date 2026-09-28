@@ -58,7 +58,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-O projeto usa o `.env` quando ele existe. Se o `.env` ainda não existir, a API e o Vite usam os valores de `.env.example` como fallback; para o Docker Compose, crie o `.env` a partir do exemplo antes de iniciar a stack. O arquivo define o banco `maternidade_db`, o usuário e as portas usadas pelo Compose. O comando cria as imagens quando necessário, inicia o MySQL 8, aguarda o banco ficar saudável e sobe a API e o front-end.
+O projeto usa o `.env` quando ele existe. Se o `.env` ainda não existir, a API e o Vite usam os valores de `.env.example` como fallback; para o Docker Compose, crie o `.env` a partir do exemplo antes de iniciar a stack. O Compose monta `database/maternidade.sql` no diretório de inicialização do MySQL, portanto o schema é criado automaticamente na primeira inicialização do volume.
 
 ### Endereços de acesso
 
@@ -117,9 +117,16 @@ O banco ficará disponível em `localhost:3306`, com os valores padrão do `.env
 
 | Configuração | Valor padrão |
 | --- | --- |
-| Banco | `maternidade_db` |
-| Usuário | `root` |
-| Senha | `1234` |
+| Banco | `maternidade` |
+| Usuário | `maternidade_app` |
+| Senha | definida em `MYSQL_PASSWORD` |
+
+O script SQL de inicialização do MySQL só é executado quando o volume ainda não possui um banco. Depois de alterar o schema em `database/maternidade.sql`, recrie o volume de desenvolvimento:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
 
 ### Opção B: MySQL instalado na máquina
 
@@ -137,14 +144,20 @@ mysql -u root -p
 ```
 
 ```sql
-CREATE DATABASE IF NOT EXISTS maternidade_db;
-CREATE USER IF NOT EXISTS 'maternidade_user'@'localhost' IDENTIFIED BY 'maternidade_password';
-GRANT ALL PRIVILEGES ON maternidade_db.* TO 'maternidade_user'@'localhost';
+CREATE DATABASE IF NOT EXISTS maternidade;
+CREATE USER IF NOT EXISTS 'maternidade_app'@'localhost' IDENTIFIED BY 'change_me_app_password';
+GRANT ALL PRIVILEGES ON maternidade.* TO 'maternidade_app'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
 
-O back-end já usa esses valores como padrão quando executado fora do Docker. Se o MySQL estiver em outra porta ou com credenciais diferentes, exporte `DB_HOST`, `MYSQL_PORT`, `MYSQL_DATABASE`, `MYSQL_USER` e `MYSQL_PASSWORD` antes de iniciar a API.
+Importe o schema do projeto no banco criado:
+
+```bash
+mysql -u maternidade_app -p maternidade < database/maternidade.sql
+```
+
+O back-end usa os valores do `.env` quando executado fora do Docker. Se o MySQL estiver em outra porta ou com credenciais diferentes, ajuste `DB_HOST`, `MYSQL_PORT`, `MYSQL_DATABASE`, `MYSQL_USER` e `MYSQL_PASSWORD`.
 
 ## ⚙️ 4. Executar o back-end no host
 
