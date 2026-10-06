@@ -11,6 +11,7 @@ import br.com.maternidade.repository.UsuarioRepository;
 
 import java.util.List;
 import java.time.LocalDate;
+import java.util.Locale;
 
 @Service
 public class GestacaoService {
@@ -46,14 +47,16 @@ public class GestacaoService {
         Usuario usuario = usuarioRepository.findByEmail(emailAutenticado)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
 
-        validarTipo(dto.tipo_gestacao(), dto.tipo_gestacao_detalhe());
+        String tipoGestacao = normalizarTipo(dto.tipo_gestacao());
+        String tipoGestacaoDetalhe = normalizarTipo(dto.tipo_gestacao_detalhe());
+        validarTipo(tipoGestacao, tipoGestacaoDetalhe);
         Gestacao gestacao = new Gestacao();
         gestacao.setUsuario(usuario);
         gestacao.setUltimaMestruacao(dto.ultima_mestruacao());
         gestacao.setIdadeGestacional(idadeGestacionalInformada != null ? idadeGestacionalInformada : idadeGestacionalCalculada);
         gestacao.setDataParto(Gestacao.calcularDataParto(dto.ultima_mestruacao()));
-        gestacao.setTipoGestacao(dto.tipo_gestacao());
-        gestacao.setTipoGestacaoDetalhe(dto.tipo_gestacao_detalhe());
+        gestacao.setTipoGestacao(tipoGestacao);
+        gestacao.setTipoGestacaoDetalhe(tipoGestacaoDetalhe);
         gestacao.setPreNatal(dto.pre_natal());
 
         int gestacoesAtuais = usuario.getQntGestacao() != null ? usuario.getQntGestacao() : 0;
@@ -92,12 +95,14 @@ public class GestacaoService {
         if (dto.idade_gestacional() != null && (dto.idade_gestacional() < 0 || dto.idade_gestacional() > 42)) {
             throw new IllegalArgumentException("A idade gestacional deve estar entre 0 e 42 semanas.");
         }
-        validarTipo(dto.tipo_gestacao(), dto.tipo_gestacao_detalhe());
+        String tipoGestacao = normalizarTipo(dto.tipo_gestacao());
+        String tipoGestacaoDetalhe = normalizarTipo(dto.tipo_gestacao_detalhe());
+        validarTipo(tipoGestacao, tipoGestacaoDetalhe);
         gestacao.setUltimaMestruacao(dto.ultima_mestruacao());
         gestacao.setIdadeGestacional(dto.idade_gestacional() != null ? dto.idade_gestacional() : Gestacao.calcularIdadeGestacional(dto.ultima_mestruacao()));
         gestacao.setDataParto(Gestacao.calcularDataParto(dto.ultima_mestruacao()));
-        gestacao.setTipoGestacao(dto.tipo_gestacao());
-        gestacao.setTipoGestacaoDetalhe(dto.tipo_gestacao_detalhe());
+        gestacao.setTipoGestacao(tipoGestacao);
+        gestacao.setTipoGestacaoDetalhe(tipoGestacaoDetalhe);
         gestacao.setPreNatal(dto.pre_natal());
         return gestacaoRepository.save(gestacao);
     }
@@ -113,5 +118,11 @@ public class GestacaoService {
         if (!multipla && detalhe != null && !detalhe.isBlank()) {
             throw new IllegalArgumentException("O detalhe só se aplica a gestações múltiplas.");
         }
+    }
+
+    private String normalizarTipo(String valor) {
+        return valor == null || valor.isBlank()
+                ? null
+                : valor.trim().toUpperCase(Locale.ROOT);
     }
 }

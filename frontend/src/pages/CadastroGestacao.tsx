@@ -25,7 +25,7 @@ type GestacaoForm = {
 const initialForm: GestacaoForm = {
   ultima_mestruacao: '',
   idade_gestacional: '',
-  tipo_gestacao: 'Unica',
+  tipo_gestacao: 'UNICA',
   tipo_gestacao_detalhe: '',
   pre_natal: false,
 };
@@ -118,9 +118,12 @@ export default function CadastroGestacao() {
       await carregarGestacoes();
       setMostrarFormulario(false);
     } catch (error) {
-      const mensagem = axios.isAxiosError(error) && typeof error.response?.data === 'string'
-        ? error.response.data
-        : 'Não foi possível salvar os dados. Confira as informações e tente novamente.';
+      const resposta = axios.isAxiosError(error) ? error.response?.data : null;
+      const mensagem = typeof resposta === 'string'
+        ? resposta
+        : resposta && typeof resposta.message === 'string'
+          ? resposta.message
+          : 'Não foi possível salvar os dados. Confira as informações e tente novamente.';
       setErroApi(mensagem);
     } finally {
       setCarregando(false);

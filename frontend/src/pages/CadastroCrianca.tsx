@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Baby, CalendarDays, Plus, RotateCcw } from 'lucide-react';
+import axios from 'axios';
 import api from '../services/api';
 
 type Form = {
@@ -78,8 +79,14 @@ export default function CadastroCrianca() {
       setForm(initial);
       await carregarCriancas();
       setMostrarFormulario(false);
-    } catch {
-      setErro('Não foi possível registrar os dados. Confira as informações e tente novamente.');
+    } catch (error) {
+      const resposta = axios.isAxiosError(error) ? error.response?.data : null;
+      const mensagem = typeof resposta === 'string'
+        ? resposta
+        : resposta && typeof resposta.message === 'string'
+          ? resposta.message
+          : 'Não foi possível registrar os dados. Confira as informações e tente novamente.';
+      setErro(mensagem);
     }
   };
 
