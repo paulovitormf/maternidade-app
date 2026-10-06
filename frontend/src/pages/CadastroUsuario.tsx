@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { cadastrarUsuario, CadastroUsuarioPayload } from '../services/usuarioService';
 
@@ -19,8 +20,18 @@ export default function CadastroUsuario() {
       const payload: CadastroUsuarioPayload = { usuario: { ...form, qnt_gestacao: 0 } };
       await cadastrarUsuario(payload);
       navigate('/login');
-    } catch {
-      setErro('Não foi possível realizar o cadastro. Confira os dados e tente novamente.');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const resposta = error.response?.data;
+        const mensagem = typeof resposta === 'string'
+          ? resposta
+          : resposta && typeof resposta.message === 'string'
+            ? resposta.message
+            : null;
+        setErro(mensagem || 'Não foi possível conectar ao servidor. Tente novamente.');
+      } else {
+        setErro('Não foi possível conectar ao servidor. Tente novamente.');
+      }
     }
   };
 

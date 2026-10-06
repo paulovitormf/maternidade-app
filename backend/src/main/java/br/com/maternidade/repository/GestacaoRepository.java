@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface GestacaoRepository extends JpaRepository<Gestacao, Integer> {
 
     // Busca todas as gestações associadas a um determinado usuário (mãe)
-    List<Gestacao> findByUsuarioIdUsuario(Integer idUsuario);
+    List<Gestacao> findByUsuarioIdUsuarioOrderByUltimaMestruacaoDesc(Integer idUsuario);
 
     // Busca a gestação mais recente de um determinado usuário
     Optional<Gestacao> findFirstByUsuarioIdUsuarioOrderByIdGestacaoDesc(Integer idUsuario);

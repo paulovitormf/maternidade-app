@@ -1,13 +1,24 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import type React from 'react';
 import axios from 'axios';
-import { HeartPulse } from 'lucide-react';
+import { CalendarDays, CheckCircle2, Clock3, Edit3, HeartPulse, Plus, RotateCcw } from 'lucide-react';
 import api from '../services/api';
+
+type Gestacao = {
+  id_gestacao: number;
+  ultima_mestruacao: string;
+  idade_gestacional: number;
+  data_parto: string;
+  tipo_gestacao?: string;
+  tipo_gestacao_detalhe?: string;
+  pre_natal?: boolean;
+};
 
 type GestacaoForm = {
   ultima_mestruacao: string;
   idade_gestacional: string;
   tipo_gestacao: string;
+  tipo_gestacao_detalhe: string;
   pre_natal: boolean;
 };
 
@@ -15,6 +26,7 @@ const initialForm: GestacaoForm = {
   ultima_mestruacao: '',
   idade_gestacional: '',
   tipo_gestacao: 'Unica',
+  tipo_gestacao_detalhe: '',
   pre_natal: false,
 };
 
@@ -22,10 +34,33 @@ const formatarData = (data: Date) =>
   new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(data);
 
 export default function CadastroGestacao() {
+  const [gestacoes, setGestacoes] = useState<Gestacao[]>([]);
+  const [carregandoLista, setCarregandoLista] = useState(true);
+  const [erroLista, setErroLista] = useState('');
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [formData, setFormData] = useState<GestacaoForm>(initialForm);
   const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [erroApi, setErroApi] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const [gestacaoEditando, setGestacaoEditando] = useState<number | null>(null);
+  const tipoMultiplo = formData.tipo_gestacao === 'GEMEOS' || formData.tipo_gestacao === 'TRIGEMEOS_OU_MAIS';
+
+  const carregarGestacoes = async () => {
+    setCarregandoLista(true);
+    setErroLista('');
+    try {
+      const response = await api.get<Gestacao[]>('/gestacoes');
+      setGestacoes(response.data);
+    } catch {
+      setErroLista('Não foi possível carregar suas gestações.');
+    } finally {
+      setCarregandoLista(false);
+    }
+  };
+
+  useEffect(() => {
+    void carregarGestacoes();
+  }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = event.target;
@@ -65,14 +100,23 @@ export default function CadastroGestacao() {
     }
 
     try {
-      await api.post('/gestacoes', {
+      const payload = {
         ultima_mestruacao: formData.ultima_mestruacao,
         idade_gestacional: formData.idade_gestacional ? Number(formData.idade_gestacional) : null,
         tipo_gestacao: formData.tipo_gestacao,
+        tipo_gestacao_detalhe: tipoMultiplo ? formData.tipo_gestacao_detalhe : null,
         pre_natal: formData.pre_natal,
-      });
-      setMensagemSucesso('Gestação salva! A previsão de parto foi calculada automaticamente.');
+      };
+      if (gestacaoEditando) {
+        await api.put(`/gestacoes/${gestacaoEditando}`, payload);
+      } else {
+        await api.post('/gestacoes', payload);
+      }
+      setMensagemSucesso(gestacaoEditando ? 'Gestação atualizada com sucesso.' : 'Gestação salva! A previsão de parto foi calculada automaticamente.');
       setFormData(initialForm);
+      setGestacaoEditando(null);
+      await carregarGestacoes();
+      setMostrarFormulario(false);
     } catch (error) {
       const mensagem = axios.isAxiosError(error) && typeof error.response?.data === 'string'
         ? error.response.data
@@ -83,12 +127,70 @@ export default function CadastroGestacao() {
     }
   };
 
+  const editar = (gestacao: Gestacao) => {
+    setGestacaoEditando(gestacao.id_gestacao);
+    setFormData({
+      ultima_mestruacao: gestacao.ultima_mestruacao,
+      idade_gestacional: String(gestacao.idade_gestacional ?? ''),
+      tipo_gestacao: gestacao.tipo_gestacao || 'AINDA_NAO_SEI',
+      tipo_gestacao_detalhe: gestacao.tipo_gestacao_detalhe || '',
+      pre_natal: Boolean(gestacao.pre_natal),
+    });
+    setMensagemSucesso('');
+    setErroApi('');
+    setMostrarFormulario(true);
+  };
+
+  if (!mostrarFormulario) {
+    const hoje = new Date().toISOString().split('T')[0];
+    const atuais = gestacoes.filter((gestacao) => gestacao.data_parto >= hoje);
+    const anteriores = gestacoes.filter((gestacao) => gestacao.data_parto < hoje);
+
+    return (
+      <section className="mx-auto w-full max-w-5xl space-y-8 pb-12">
+        <header className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div>
+            <span className="form-icon form-icon-blue mb-4"><HeartPulse size={28} strokeWidth={1.65} /></span>
+            <p className="eyebrow">Acompanhamento</p>
+            <h1 className="display-title">Minhas gestações</h1>
+            <p className="page-subtitle">Acompanhe sua jornada e mantenha cada registro importante por perto.</p>
+          </div>
+          <button className="primary-button sm:!w-auto" type="button" onClick={() => setMostrarFormulario(true)}>
+            <Plus size={18} className="mr-2" /> Cadastrar gestação
+          </button>
+        </header>
+
+        {erroLista && <div className="alert-error">{erroLista}</div>}
+        {carregandoLista ? (
+          <div className="card text-center text-sm text-slate-500">Carregando suas gestações...</div>
+        ) : gestacoes.length === 0 ? (
+          <div className="empty-state card">
+            <CalendarDays size={34} />
+            <h2>Nenhuma gestação cadastrada</h2>
+            <p>Comece seu acompanhamento registrando uma nova gestação.</p>
+            <button className="primary-button sm:!w-auto" type="button" onClick={() => setMostrarFormulario(true)}>
+              Cadastrar primeira gestação
+            </button>
+          </div>
+        ) : (
+          <>
+            <GestacaoSection titulo="Gestação atual" icone={<Clock3 size={19} />} gestacoes={atuais} vazio="Nenhuma gestação no momento atual." onCadastrar={() => setMostrarFormulario(true)} onEditar={(gestacao) => editar(gestacao)} />
+            <GestacaoSection titulo="Gestações anteriores" icone={<CheckCircle2 size={19} />} gestacoes={anteriores} vazio="Você ainda não possui gestações anteriores." onEditar={(gestacao) => editar(gestacao)} />
+          </>
+        )}
+      </section>
+    );
+  }
+
   return (
     <section className="form-card card">
       <div className="mb-8">
+        <button className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-[#B0435B] hover:underline" type="button" onClick={() => setMostrarFormulario(false)}>
+          <RotateCcw size={16} /> Voltar para minhas gestações
+        </button>
         <span className="form-icon form-icon-blue mb-4"><HeartPulse size={28} strokeWidth={1.65} /></span>
         <p className="eyebrow">Acompanhamento</p>
-        <h1 className="display-title !text-3xl">Registro da gestação</h1>
+        <h1 className="display-title !text-3xl">{gestacaoEditando ? 'Editar gestação' : 'Registro da gestação'}</h1>
         <p className="page-subtitle">Informe a DUM e calcularemos a previsão de parto para você.</p>
       </div>
       {mensagemSucesso && <div className="alert-success mb-5">{mensagemSucesso}</div>}
@@ -113,11 +215,23 @@ export default function CadastroGestacao() {
         <label className="field">
           <span className="field-label">Tipo de gestação</span>
           <select className="field-control" name="tipo_gestacao" value={formData.tipo_gestacao} onChange={handleChange}>
-            <option value="Unica">Única</option>
-            <option value="Gemeos">Gêmeos</option>
-            <option value="Trigemeos_ou_mais">Trigêmeos ou mais</option>
+            <option value="UNICA">Única</option>
+            <option value="GEMEOS">Gêmeos</option>
+            <option value="TRIGEMEOS_OU_MAIS">Trigêmeos ou mais</option>
+            <option value="AINDA_NAO_SEI">Ainda não sei</option>
           </select>
         </label>
+        {tipoMultiplo && (
+          <label className="field field-wide">
+            <span className="field-label">Tipo dos gêmeos</span>
+            <select className="field-control" name="tipo_gestacao_detalhe" value={formData.tipo_gestacao_detalhe} onChange={handleChange} required>
+              <option value="">Selecione uma opção</option>
+              <option value="BIVITELINO">Bivitelino</option>
+              <option value="UNIVITELINO">Univitelino</option>
+              <option value="AINDA_NAO_SEI">Ainda não sei</option>
+            </select>
+          </label>
+        )}
         <label className="field-wide flex cursor-pointer items-center gap-3 rounded-2xl bg-[#EBF3F5] p-4">
           <input className="h-5 w-5 accent-[#C8526B]" type="checkbox" name="pre_natal" checked={formData.pre_natal} onChange={handleChange} />
           <span className="text-sm font-semibold text-[#3B7280]">Já realiza acompanhamento pré-natal?</span>
@@ -132,9 +246,67 @@ export default function CadastroGestacao() {
           </div>
         )}
         <button className="primary-button field-wide mt-2" type="submit" disabled={carregando}>
-          {carregando ? 'Salvando gestação...' : 'Salvar dados da gestação'}
+          {carregando ? 'Salvando gestação...' : gestacaoEditando ? 'Salvar alterações' : 'Salvar dados da gestação'}
         </button>
       </form>
     </section>
   );
+}
+
+function GestacaoSection({
+  titulo,
+  icone,
+  gestacoes,
+  vazio,
+  onCadastrar,
+  onEditar,
+}: {
+  titulo: string;
+  icone: React.ReactNode;
+  gestacoes: Gestacao[];
+  vazio: string;
+  onCadastrar?: () => void;
+  onEditar: (gestacao: Gestacao) => void;
+}) {
+  return (
+    <section>
+      <div className="section-heading">
+        <h2 className="section-title flex items-center gap-2">{icone}{titulo}</h2>
+      </div>
+      {gestacoes.length === 0 ? (
+        <div className="card flex flex-col items-start gap-3 text-sm text-slate-500">
+          <span>{vazio}</span>
+          {onCadastrar && <button className="secondary-button sm:!w-auto" type="button" onClick={onCadastrar}><Plus size={17} className="mr-2" /> Cadastrar gestação</button>}
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2">
+          {gestacoes.map((gestacao) => (
+            <article className="card" key={gestacao.id_gestacao}>
+              <p className="eyebrow">{gestacao.tipo_gestacao || 'Gestação'}</p>
+              <h3 className="text-xl font-extrabold text-slate-800">
+                Previsão do parto: {formatarDataString(gestacao.data_parto)}
+              </h3>
+              <div className="mt-4 grid gap-2 text-sm text-slate-600">
+                <p><strong>DUM:</strong> {formatarDataString(gestacao.ultima_mestruacao)}</p>
+                <p><strong>Idade gestacional:</strong> {gestacao.idade_gestacional} semanas</p>
+                <p><strong>Pré-natal:</strong> {gestacao.pre_natal ? 'Em acompanhamento' : 'Ainda não informado'}</p>
+              </div>
+              {gestacao.tipo_gestacao_detalhe && <p className="mt-2 text-sm text-slate-600"><strong>Classificação:</strong> {formatarDetalhe(gestacao.tipo_gestacao_detalhe)}</p>}
+              <button className="secondary-button mt-4 sm:!w-auto" type="button" onClick={() => onEditar(gestacao)}>
+                <Edit3 size={16} className="mr-2" /> Editar
+              </button>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function formatarDetalhe(value: string) {
+  return value === 'BIVITELINO' ? 'Bivitelino' : value === 'UNIVITELINO' ? 'Univitelino' : 'Ainda não sei';
+}
+
+function formatarDataString(value: string) {
+  return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date(`${value}T00:00:00`));
 }

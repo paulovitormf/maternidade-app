@@ -42,8 +42,11 @@ public class Gestacao {
     @Column(name = "data_parto")
     private LocalDate dataParto;
 
-    @Column(name = "tipo_gestacao", columnDefinition = "TEXT")
+    @Column(name = "tipo_gestacao", length = 30)
     private String tipoGestacao;
+
+    @Column(name = "tipo_gestacao_detalhe", length = 30)
+    private String tipoGestacaoDetalhe;
 
     @Column(name = "pre_natal")
     private Boolean preNatal;
@@ -52,13 +55,14 @@ public class Gestacao {
     public Gestacao() {}
 
     // Construtor Completo
-    public Gestacao(Integer idGestacao, Usuario usuario, LocalDate ultimaMestruacao, Integer idadeGestacional, LocalDate dataParto, String tipoGestacao, Boolean preNatal) {
+    public Gestacao(Integer idGestacao, Usuario usuario, LocalDate ultimaMestruacao, Integer idadeGestacional, LocalDate dataParto, String tipoGestacao, String tipoGestacaoDetalhe, Boolean preNatal) {
         this.idGestacao = idGestacao;
         this.usuario = usuario;
         this.ultimaMestruacao = ultimaMestruacao;
         this.idadeGestacional = idadeGestacional;
         this.dataParto = dataParto;
         this.tipoGestacao = tipoGestacao;
+        this.tipoGestacaoDetalhe = tipoGestacaoDetalhe;
         this.preNatal = preNatal;
     }
 
@@ -110,6 +114,10 @@ public class Gestacao {
     public void setTipoGestacao(String tipoGestacao) {
         this.tipoGestacao = tipoGestacao;
     }
+
+    public String getTipoGestacaoDetalhe() { return tipoGestacaoDetalhe; }
+
+    public void setTipoGestacaoDetalhe(String tipoGestacaoDetalhe) { this.tipoGestacaoDetalhe = tipoGestacaoDetalhe; }
 
     public Boolean getPreNatal() {
         return preNatal;

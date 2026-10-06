@@ -37,6 +37,9 @@ public class UsuarioController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO dto) {
         try {
+            if (dto == null) {
+                throw new IllegalArgumentException("E-mail ou senha inválidos.");
+            }
             var usuario = usuarioService.autenticar(dto.email(), dto.senha());
             return ResponseEntity.ok(new LoginRespostaDTO(
                     jwtService.generateToken(usuario.getEmail()),

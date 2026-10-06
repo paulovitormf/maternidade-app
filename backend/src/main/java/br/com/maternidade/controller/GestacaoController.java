@@ -8,6 +8,7 @@ import br.com.maternidade.dto.GestacaoDTO;
 import br.com.maternidade.services.GestacaoService;
 import br.com.maternidade.dto.GestacaoPublicaDTO;
 import org.springframework.security.core.Authentication;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/gestacoes")
@@ -26,6 +27,26 @@ public class GestacaoController {
             return ResponseEntity.status(HttpStatus.CREATED).body(GestacaoPublicaDTO.from(gestacaoSalva));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<GestacaoPublicaDTO>> listar(Authentication authentication) {
+        var usuario = gestacaoService.buscarUsuarioAutenticado(authentication.getName());
+        var gestacoes = gestacaoService.listarPorUsuario(usuario.getIdUsuario())
+                .stream()
+                .map(GestacaoPublicaDTO::from)
+                .toList();
+        return ResponseEntity.ok(gestacoes);
+    }
+
+    @PutMapping("/{idGestacao}")
+    public ResponseEntity<?> atualizar(@PathVariable Integer idGestacao, @RequestBody GestacaoDTO dto, Authentication authentication) {
+        try {
+            return ResponseEntity.ok(GestacaoPublicaDTO.from(
+                    gestacaoService.atualizarGestacao(idGestacao, dto, authentication.getName())));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

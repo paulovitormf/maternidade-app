@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import br.com.maternidade.dto.CriancaCadastroDTO;
 import br.com.maternidade.services.CriancaService;
 import org.springframework.security.core.Authentication;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/criancas")
@@ -26,5 +27,10 @@ public class CriancaController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<br.com.maternidade.model.Crianca>> listar(Authentication authentication) {
+        return ResponseEntity.ok(criancaService.listarPorUsuario(authentication.getName()));
     }
 }

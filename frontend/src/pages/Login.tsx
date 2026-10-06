@@ -23,9 +23,17 @@ export default function Login() {
       window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
       navigate('/');
     } catch (error) {
-      setErro(axios.isAxiosError(error) && typeof error.response?.data === 'string'
-        ? error.response.data
-        : 'E-mail ou senha inválidos.');
+      if (axios.isAxiosError(error)) {
+        const resposta = error.response?.data;
+        const mensagem = typeof resposta === 'string'
+          ? resposta
+          : resposta && typeof resposta.message === 'string'
+            ? resposta.message
+            : null;
+        setErro(mensagem || 'Não foi possível conectar ao servidor. Tente novamente.');
+      } else {
+        setErro('Não foi possível conectar ao servidor. Tente novamente.');
+      }
     } finally {
       setCarregando(false);
     }

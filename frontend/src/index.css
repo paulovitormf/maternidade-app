@@ -240,6 +240,22 @@
     @apply rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700;
   }
 
+  .empty-state {
+    @apply flex flex-col items-center gap-3 py-14 text-center;
+  }
+
+  .empty-state > svg {
+    @apply text-[#C8526B];
+  }
+
+  .empty-state h2 {
+    @apply text-xl font-extrabold text-slate-800;
+  }
+
+  .empty-state p {
+    @apply mb-2 text-sm text-slate-500;
+  }
+
   .auth-layout {
     @apply grid min-h-[calc(100vh-8rem)] items-center gap-8 lg:grid-cols-[1fr_0.85fr];
   }

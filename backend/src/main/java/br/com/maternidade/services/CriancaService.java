@@ -60,4 +60,10 @@ public class CriancaService {
 
         return criancaSalva;
     }
+
+    public java.util.List<Crianca> listarPorUsuario(String emailAutenticado) {
+        var usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+        return criancaRepository.findByUsuarioId(usuario.getIdUsuario());
+    }
 }
