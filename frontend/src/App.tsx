@@ -6,6 +6,7 @@ import { Baby, CalendarDays, ChevronRight, CircleUserRound, Heart, HeartHandshak
 import CadastroBebe from './pages/CadastroCrianca';
 import CadastroGestacao from './pages/CadastroGestacao';
 import CadastroUsuario from './pages/CadastroUsuario';
+import ContinuarCadastro from './pages/ContinuarCadastro';
 import Login from './pages/Login';
 import MarcosDesenvolvimento from './pages/MarcosDesenvolvimento';
 import Perfil from './pages/Perfil';
@@ -61,6 +62,7 @@ function AppLayout() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/cadastrar-usuario" element={<CadastroUsuario />} />
+          <Route path="/continuar-cadastro" element={<ProtectedRoute><ContinuarCadastro /></ProtectedRoute>} />
           <Route path="/cadastrar-bebe" element={<ProtectedRoute><CadastroBebe /></ProtectedRoute>} />
           <Route path="/cadastrar-gestacao" element={<ProtectedRoute><CadastroGestacao /></ProtectedRoute>} />
           <Route path="/marcos-desenvolvimento" element={<ProtectedRoute><MarcosDesenvolvimento /></ProtectedRoute>} />
