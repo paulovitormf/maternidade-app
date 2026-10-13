@@ -42,20 +42,95 @@ CREATE TABLE crianca (
 
 /*criança e usuario --> relação*/
 CREATE TABLE usuario_crianca (
+    id_vinculo BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT NOT NULL,
     id_crianca INT NOT NULL,
     tipo_relacao VARCHAR(20) NOT NULL,
+    tipo_acesso VARCHAR(20) NOT NULL DEFAULT 'PRINCIPAL',
+    concedido_por INT NULL,
+    pode_editar BOOLEAN NOT NULL DEFAULT TRUE,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_revogacao DATETIME NULL,
 
-    PRIMARY KEY (id_usuario, id_crianca),
+    CONSTRAINT uq_usuario_crianca UNIQUE (id_usuario, id_crianca),
+    CONSTRAINT uq_uc_crianca_vinculo_acesso_ativo
+        UNIQUE (id_crianca, id_vinculo, tipo_acesso, ativo),
+    CONSTRAINT fk_uc_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT fk_uc_crianca FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
+    CONSTRAINT fk_uc_concedido_por FOREIGN KEY (concedido_por) REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    CONSTRAINT ck_uc_tipo_acesso CHECK (tipo_acesso IN ('PRINCIPAL', 'RESPONSAVEL')),
+    CONSTRAINT ck_uc_principal_edita
+        CHECK (tipo_acesso <> 'PRINCIPAL' OR pode_editar = TRUE),
+    CONSTRAINT ck_uc_tipo_relacao
+        CHECK (tipo_relacao IN ('MAE', 'PAI', 'RESPONSAVEL')),
 
-    FOREIGN KEY (id_usuario)
-        REFERENCES usuario(id_usuario)
-        ON DELETE CASCADE,
+    INDEX idx_uc_crianca_ativo (id_crianca, ativo)
+) ENGINE=InnoDB;
 
-    FOREIGN KEY (id_crianca)
-        REFERENCES crianca(id_crianca)
+CREATE TABLE crianca_principal (
+    id_crianca INT NOT NULL,
+    id_vinculo BIGINT NOT NULL,
+    tipo_acesso VARCHAR(20) NOT NULL DEFAULT 'PRINCIPAL',
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+
+    PRIMARY KEY (id_crianca),
+    UNIQUE KEY uq_crianca_principal_vinculo (id_vinculo),
+
+    CONSTRAINT ck_cp_tipo_acesso CHECK (tipo_acesso = 'PRINCIPAL'),
+    CONSTRAINT ck_cp_ativo CHECK (ativo = TRUE),
+    CONSTRAINT fk_cp_vinculo
+        FOREIGN KEY (id_crianca, id_vinculo, tipo_acesso, ativo)
+        REFERENCES usuario_crianca (id_crianca, id_vinculo, tipo_acesso, ativo)
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+DELIMITER //
+CREATE TRIGGER trg_uc_principal_ai
+AFTER INSERT ON usuario_crianca
+FOR EACH ROW
+BEGIN
+    IF NEW.tipo_acesso = 'PRINCIPAL' AND NEW.ativo = TRUE THEN
+        INSERT INTO crianca_principal (id_crianca, id_vinculo)
+        VALUES (NEW.id_crianca, NEW.id_vinculo);
+    END IF;
+END//
+
+CREATE TRIGGER trg_uc_principal_bu
+BEFORE UPDATE ON usuario_crianca
+FOR EACH ROW
+BEGIN
+    IF OLD.tipo_acesso = 'PRINCIPAL'
+        AND OLD.ativo = TRUE
+        AND (
+            OLD.id_crianca <> NEW.id_crianca
+            OR OLD.id_vinculo <> NEW.id_vinculo
+            OR OLD.tipo_acesso <> NEW.tipo_acesso
+            OR OLD.ativo <> NEW.ativo
+        ) THEN
+        DELETE FROM crianca_principal
+        WHERE id_crianca = OLD.id_crianca
+          AND id_vinculo = OLD.id_vinculo;
+    END IF;
+END//
+
+CREATE TRIGGER trg_uc_principal_au
+AFTER UPDATE ON usuario_crianca
+FOR EACH ROW
+BEGIN
+    IF NEW.tipo_acesso = 'PRINCIPAL'
+        AND NEW.ativo = TRUE
+        AND (
+            OLD.id_crianca <> NEW.id_crianca
+            OR OLD.id_vinculo <> NEW.id_vinculo
+            OR OLD.tipo_acesso <> NEW.tipo_acesso
+            OR OLD.ativo <> NEW.ativo
+        ) THEN
+        INSERT INTO crianca_principal (id_crianca, id_vinculo)
+        VALUES (NEW.id_crianca, NEW.id_vinculo);
+    END IF;
+END//
+DELIMITER ;
 
 /*crescimento*/ 
 CREATE TABLE crescimento (
@@ -546,23 +621,6 @@ CREATE TABLE conteudo_revisao (
     INDEX idx_conteudo_revisao_status (id_conteudo, aprovado)
 ) ENGINE=InnoDB;
 
-/* notificações e alertas sincronizados */
-CREATE TABLE notificacao (
-    id_notificacao BIGINT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    id_crianca INT,
-    titulo VARCHAR(200) NOT NULL,
-    mensagem TEXT NOT NULL,
-    tipo VARCHAR(20) NOT NULL,
-    data_agendada DATETIME NOT NULL,
-    data_leitura DATETIME,
-    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
-    FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
-    FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
-    INDEX idx_notificacao_usuario_status (id_usuario, status, data_agendada),
-    CONSTRAINT ck_notificacao_tipo CHECK (tipo IN ('VACINA', 'MEDICACAO', 'CONSULTA', 'DESENVOLVIMENTO', 'SISTEMA')),
-    CONSTRAINT ck_notificacao_status CHECK (status IN ('PENDENTE', 'ENVIADA', 'LIDA', 'CANCELADA'))
-) ENGINE=InnoDB;
 
 /* crescimento com perímetro cefálico e referência OMS */
 ALTER TABLE crescimento
@@ -575,18 +633,120 @@ CREATE TABLE convite_responsavel (
     id_convite BIGINT AUTO_INCREMENT PRIMARY KEY,
     id_crianca INT NOT NULL,
     id_usuario_solicitante INT NOT NULL,
+    id_usuario_convidado INT NOT NULL,
     email_convidado VARCHAR(150) NOT NULL,
     tipo_relacao VARCHAR(20) NOT NULL,
     token_hash CHAR(64) NOT NULL UNIQUE,
     status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     data_expiracao DATETIME NOT NULL,
-    data_resposta DATETIME,
-    FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
-    FOREIGN KEY (id_usuario_solicitante) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    data_resposta DATETIME NULL,
+
+    CONSTRAINT fk_convite_crianca
+        FOREIGN KEY (id_crianca)
+        REFERENCES crianca(id_crianca)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_convite_solicitante
+        FOREIGN KEY (id_usuario_solicitante)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_convite_convidado
+        FOREIGN KEY (id_usuario_convidado)
+        REFERENCES usuario(id_usuario)
+        ON DELETE CASCADE,
+
+    CONSTRAINT ck_convite_relacao
+        CHECK (tipo_relacao IN ('MAE', 'PAI', 'RESPONSAVEL')),
+
+    CONSTRAINT ck_convite_status
+        CHECK (
+            status IN ('PENDENTE','ACEITO','RECUSADO','EXPIRADO','CANCELADO')
+        ),
+
     INDEX idx_convite_email_status (email_convidado, status),
-    CONSTRAINT ck_convite_relacao CHECK (tipo_relacao IN ('MAE', 'PAI', 'RESPONSAVEL')),
-    CONSTRAINT ck_convite_status CHECK (status IN ('PENDENTE', 'ACEITO', 'RECUSADO', 'EXPIRADO'))
+    INDEX idx_convite_convidado_status (id_usuario_convidado, status),
+    INDEX idx_convite_crianca_status (id_crianca, status)
 ) ENGINE=InnoDB;
+
+/*tabelas para a notificação e configuração do compartilhamento de criancas*/
+CREATE TABLE historico_permissao (
+    id_historico BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_crianca INT NULL,
+    id_vinculo BIGINT NULL,
+    id_usuario_afetado INT NULL,
+    id_usuario_ator INT NULL,
+    tipo_evento VARCHAR(40) NOT NULL,
+    tipo_relacao_anterior VARCHAR(20) NULL,
+    tipo_relacao_novo VARCHAR(20) NULL,
+    tipo_acesso_anterior VARCHAR(20) NULL,
+    tipo_acesso_novo VARCHAR(20) NULL,
+    pode_editar_anterior BOOLEAN NULL,
+    pode_editar_novo BOOLEAN NULL,
+    ativo_anterior BOOLEAN NULL,
+    ativo_novo BOOLEAN NULL,
+    detalhes VARCHAR(255) NULL,
+    data_evento DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_hp_crianca FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE SET NULL,
+    CONSTRAINT fk_hp_vinculo FOREIGN KEY (id_vinculo) REFERENCES usuario_crianca(id_vinculo) ON DELETE SET NULL,
+    CONSTRAINT fk_hp_afetado FOREIGN KEY (id_usuario_afetado) REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    CONSTRAINT fk_hp_ator FOREIGN KEY (id_usuario_ator) REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    CONSTRAINT ck_hp_evento
+        CHECK (tipo_evento IN ('ACESSO_CONCEDIDO', 'EDICAO_LIBERADA', 'EDICAO_BLOQUEADA', 'ACESSO_REVOGADO', 'ACESSO_REATIVADO')),
+
+    INDEX idx_hp_crianca_data (id_crianca, data_evento),
+    INDEX idx_hp_ator_data (id_usuario_ator, data_evento),
+    INDEX idx_hp_afetado_data (id_usuario_afetado, data_evento)
+) ENGINE=InnoDB;
+
+
+CREATE TABLE historico_alteracao (
+    id_historico BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_crianca INT NULL,
+    id_usuario_ator INT NULL,
+    entidade VARCHAR(50) NOT NULL,
+    id_registro BIGINT NULL,
+    tipo_evento VARCHAR(40) NOT NULL,
+    dados_anteriores JSON NULL,
+    dados_novos JSON NULL,
+    data_evento DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_ha_crianca FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE SET NULL,
+    CONSTRAINT fk_ha_usuario FOREIGN KEY (id_usuario_ator) REFERENCES usuario(id_usuario) ON DELETE SET NULL,
+    CONSTRAINT ck_ha_evento
+        CHECK (tipo_evento IN ('CRIADO', 'ALTERADO', 'EXCLUIDO')),
+
+    INDEX idx_ha_crianca_data (id_crianca, data_evento),
+    INDEX idx_ha_usuario_data (id_usuario_ator, data_evento),
+    INDEX idx_ha_entidade_registro (entidade, id_registro)
+) ENGINE=InnoDB;
+
+
+CREATE TABLE notificacao (
+    id_notificacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_crianca INT NULL,
+    titulo VARCHAR(200) NOT NULL,
+    mensagem TEXT NOT NULL,
+    tipo VARCHAR(30) NOT NULL,
+    data_agendada DATETIME NOT NULL,
+    data_leitura DATETIME NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDENTE',
+
+    CONSTRAINT fk_notificacao_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT fk_notificacao_crianca FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
+    CONSTRAINT ck_notificacao_tipo
+        CHECK (tipo IN ('VACINA', 'MEDICACAO', 'CONSULTA', 'DESENVOLVIMENTO', 'SISTEMA', 'COMPARTILHAMENTO', 'ATIVIDADE_CRIANCA')),
+
+    CONSTRAINT ck_notificacao_status
+        CHECK (status IN ('PENDENTE', 'ENVIADA', 'LIDA', 'CANCELADA')),
+
+    INDEX idx_notificacao_usuario_status (id_usuario, status, data_agendada),
+    INDEX idx_notificacao_crianca_data (id_crianca, data_agendada)
+) ENGINE=InnoDB;
+
 
 /* diário de humor e grupos de apoio */
 CREATE TABLE registro_humor (
