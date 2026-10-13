@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Baby, CalendarDays, Plus, RotateCcw } from 'lucide-react';
 import axios from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 type Form = {
@@ -34,10 +35,13 @@ const initial: Form = {
 };
 
 export default function CadastroCrianca() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const estadoCadastro = location.state as { abrirFormulario?: boolean } | null;
   const [criancas, setCriancas] = useState<Crianca[]>([]);
   const [carregandoLista, setCarregandoLista] = useState(true);
   const [erroLista, setErroLista] = useState('');
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [mostrarFormulario, setMostrarFormulario] = useState(Boolean(estadoCadastro?.abrirFormulario));
   const [form, setForm] = useState(initial);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
@@ -63,13 +67,15 @@ export default function CadastroCrianca() {
     event.preventDefault();
     setErro('');
     setMensagem('');
-    if (!localStorage.getItem('access_token')) {
+    const idUsuario = Number(localStorage.getItem('id_usuario'));
+    if (!Number.isInteger(idUsuario) || idUsuario <= 0) {
       setErro('Faça login antes de cadastrar uma criança.');
       return;
     }
     try {
       await api.post('/criancas', {
         ...form,
+        id_usuario: idUsuario,
         hora_nascimento: `${form.hora_nascimento}:00`,
         peso_nascimento: form.peso_nascimento ? Number(form.peso_nascimento) : null,
         altura_nascimento: form.altura_nascimento ? Number(form.altura_nascimento) : null,
@@ -79,6 +85,7 @@ export default function CadastroCrianca() {
       setForm(initial);
       await carregarCriancas();
       setMostrarFormulario(false);
+      navigate('/continuar-cadastro', { state: { etapa: 'mais' }, replace: true });
     } catch (error) {
       const resposta = axios.isAxiosError(error) ? error.response?.data : null;
       const mensagem = typeof resposta === 'string'

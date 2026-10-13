@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import type React from 'react';
 import axios from 'axios';
 import { CalendarDays, CheckCircle2, Clock3, Edit3, HeartPulse, Plus, RotateCcw } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 type Gestacao = {
@@ -34,10 +35,13 @@ const formatarData = (data: Date) =>
   new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(data);
 
 export default function CadastroGestacao() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const estadoCadastro = location.state as { abrirFormulario?: boolean; origemCadastro?: 'inicio' | 'mais' } | null;
   const [gestacoes, setGestacoes] = useState<Gestacao[]>([]);
   const [carregandoLista, setCarregandoLista] = useState(true);
   const [erroLista, setErroLista] = useState('');
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [mostrarFormulario, setMostrarFormulario] = useState(Boolean(estadoCadastro?.abrirFormulario));
   const [formData, setFormData] = useState<GestacaoForm>(initialForm);
   const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [erroApi, setErroApi] = useState('');
@@ -86,7 +90,8 @@ export default function CadastroGestacao() {
     setMensagemSucesso('');
     setErroApi('');
     setCarregando(true);
-    if (!localStorage.getItem('access_token')) {
+    const idUsuario = Number(localStorage.getItem('id_usuario'));
+    if (!Number.isInteger(idUsuario) || idUsuario <= 0) {
       setErroApi('Faça login antes de cadastrar uma gestação.');
       setCarregando(false);
       return;
@@ -101,6 +106,7 @@ export default function CadastroGestacao() {
 
     try {
       const payload = {
+        id_usuario: idUsuario,
         ultima_mestruacao: formData.ultima_mestruacao,
         idade_gestacional: formData.idade_gestacional ? Number(formData.idade_gestacional) : null,
         tipo_gestacao: formData.tipo_gestacao,
@@ -112,11 +118,18 @@ export default function CadastroGestacao() {
       } else {
         await api.post('/gestacoes', payload);
       }
+      const novaGestacao = gestacaoEditando === null;
       setMensagemSucesso(gestacaoEditando ? 'Gestação atualizada com sucesso.' : 'Gestação salva! A previsão de parto foi calculada automaticamente.');
       setFormData(initialForm);
       setGestacaoEditando(null);
       await carregarGestacoes();
       setMostrarFormulario(false);
+      if (novaGestacao) {
+        navigate('/continuar-cadastro', {
+          state: { etapa: estadoCadastro?.origemCadastro === 'inicio' ? 'crianca' : 'mais' },
+          replace: true,
+        });
+      }
     } catch (error) {
       const resposta = axios.isAxiosError(error) ? error.response?.data : null;
       const mensagem = typeof resposta === 'string'

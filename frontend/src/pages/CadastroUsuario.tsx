@@ -1,7 +1,13 @@
 import { FormEvent, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { cadastrarUsuario, CadastroUsuarioPayload } from '../services/usuarioService';
+import {
+  AUTH_CHANGED_EVENT,
+  cadastrarUsuario,
+  CadastroUsuarioPayload,
+  loginUsuario,
+  USUARIO_STORAGE_KEY,
+} from '../services/usuarioService';
 
 export default function CadastroUsuario() {
   const navigate = useNavigate();
@@ -19,19 +25,22 @@ export default function CadastroUsuario() {
     try {
       const payload: CadastroUsuarioPayload = { usuario: { ...form, qnt_gestacao: 0 } };
       await cadastrarUsuario(payload);
-      navigate('/login');
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const resposta = error.response?.data;
-        const mensagem = typeof resposta === 'string'
-          ? resposta
-          : resposta && typeof resposta.message === 'string'
-            ? resposta.message
-            : null;
-        setErro(mensagem || 'Não foi possível conectar ao servidor. Tente novamente.');
-      } else {
-        setErro('Não foi possível conectar ao servidor. Tente novamente.');
-      }
+      setErro(obterMensagemErro(error));
+      return;
+    }
+
+    try {
+      const respostaLogin = await loginUsuario({ email: form.email, senha: form.senha });
+      localStorage.setItem('access_token', respostaLogin.token);
+      localStorage.setItem('id_usuario', String(respostaLogin.usuario.id_usuario));
+      localStorage.setItem(USUARIO_STORAGE_KEY, JSON.stringify(respostaLogin.usuario));
+      window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
+      navigate('/continuar-cadastro', { state: { etapa: 'gestacao' }, replace: true });
+    } catch (error) {
+      setErro(
+        `Sua conta foi criada, mas não foi possível entrar automaticamente. ${obterMensagemErro(error)} Entre usando seu e-mail e senha.`,
+      );
     }
   };
 
@@ -79,4 +88,18 @@ export default function CadastroUsuario() {
       </form>
     </section>
   );
+}
+
+function obterMensagemErro(error: unknown) {
+  if (axios.isAxiosError(error)) {
+    const resposta = error.response?.data;
+    const mensagem = typeof resposta === 'string'
+      ? resposta
+      : resposta && typeof resposta.message === 'string'
+        ? resposta.message
+        : null;
+    return mensagem || 'Não foi possível conectar ao servidor. Tente novamente.';
+  }
+
+  return 'Não foi possível conectar ao servidor. Tente novamente.';
 }
