@@ -2,84 +2,143 @@
 
 # 🍼 Maternidade
 
-### Informação, acompanhamento e cuidado nos primeiros momentos da vida do bebê
+### Informação, acompanhamento e cuidado para a jornada da maternidade
 
-Projeto acadêmico desenvolvido em grupo na disciplina de **Engenharia de Software II**.
+Aplicação web acadêmica desenvolvida em grupo na disciplina de **Engenharia de Software II**.
 
-[![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](#-tecnologias) [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-API-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](#-tecnologias) [![React](https://img.shields.io/badge/React-Front--end-61DAFB?style=for-the-badge&logo=react&logoColor=black)](#-tecnologias) [![MySQL](https://img.shields.io/badge/MySQL-Banco-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](#-tecnologias) [![Docker](https://img.shields.io/badge/Docker-Ambiente-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-tecnologias)
-<br />
-<div align="center">
-
-### 📖 Central de Documentação
-
-<a href="./docs/EXECUCAO.md"><img src="https://img.shields.io/badge/🚀_Guia_de_Execução-4c1d95?style=for-the-badge&logo=docker&logoColor=white" alt="Guia de Execução" /></a>
-&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="./docs/CONTRIBUICAO.md"><img src="https://img.shields.io/badge/🌸_Guia_de_Contribuição-be185d?style=for-the-badge&logo=github&logoColor=white" alt="Guia de Contribuição" /></a>
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](#-tecnologias)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.3-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](#-tecnologias)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](#-tecnologias)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](#-tecnologias)
+[![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-como-executar)
 
 <br />
-</div>
-</p>
+
+[🚀 Guia de execução](docs/EXECUTION.md) ·
+[🏗️ Arquitetura](docs/ARCHITECTURE.md) ·
+[🔌 API](docs/API.md) ·
+[🤝 Contribuição](docs/CONTRIBUTING.md)
 
 </div>
 
-## ✨ Sobre
+## ✨ Sobre o projeto
 
-O **Maternidade** é uma aplicação web pensada para apoiar mães e responsáveis durante os primeiros momentos da vida do bebê. A proposta reúne conteúdos e recursos para organizar informações importantes da rotina, tornando o acompanhamento mais simples e acessível.
+O **Maternidade** é uma aplicação web responsiva para apoiar mães, pais e responsáveis no acompanhamento da gestação e dos primeiros momentos da vida do bebê. A experiência combina uma interface acolhedora com recursos para centralizar informações pessoais, registros de gestação, dados da criança e marcos do desenvolvimento.
 
-O projeto está sendo desenvolvido como trabalho acadêmico e aplica conceitos de desenvolvimento full-stack, integração entre serviços e organização de software.
+O projeto nasceu como uma iniciativa acadêmica e aplica conceitos de desenvolvimento full-stack, arquitetura em camadas, autenticação e integração entre uma aplicação React, uma API REST e um banco de dados relacional.
 
-## 🎯 Objetivos do projeto
+> O sistema está em desenvolvimento. A documentação descreve o comportamento e as integrações disponíveis no código atual; entidades previstas no banco, mas ainda sem tela ou endpoint, não são apresentadas como funcionalidades concluídas.
 
-- Reunir orientações úteis para os primeiros cuidados com o bebê.
-- Facilitar o acompanhamento de informações da rotina e da evolução do bebê.
-- Oferecer uma experiência simples, acessível e adaptável a diferentes telas.
-- Praticar a construção e a integração de uma aplicação web completa.
+## 🎯 Funcionalidades disponíveis
+
+- Cadastro e autenticação de usuários com token JWT.
+- Dashboard inicial após o login.
+- Cadastro, listagem e edição de gestações.
+- Cadastro e listagem de crianças vinculadas ao usuário.
+- Consulta de marcos do desenvolvimento infantil.
+- Perfil do usuário e encerramento de sessão.
+- Interface responsiva para desktop e dispositivos móveis.
+
+## 🎨 Identidade visual
+
+A interface preserva uma estética leve, acolhedora e editorial, baseada em rosa quartzo, pêssego pastel e azul petróleo. A tipografia de destaque utiliza **Playfair Display**, enquanto os textos de interface usam **DM Sans**.
+
+| Uso | Cor |
+| --- | --- |
+| Ação principal e marca | `#C8526B` |
+| Hover da ação principal | `#B0435B` |
+| Superfícies suaves | `#FADCE1` |
+| Destaques informativos | `#3B7280` |
+| Fundo da aplicação | `#FDF7F8` |
+
+As cores estão centralizadas no [tailwind.config.js](frontend/tailwind.config.js), evitando que a documentação e as telas mantenham paletas divergentes.
 
 ## 🧰 Tecnologias
 
 | Camada | Tecnologias |
 | --- | --- |
-| 🎨 Front-end | React, TypeScript, Vite, Tailwind CSS e Node.js 24 |
-| ⚙️ Back-end | Java 17, Spring Boot e Spring Data JPA |
-| 🗄️ Banco de dados | MySQL 8 |
-| 📦 Ambiente | Docker e Docker Compose |
+| Front-end | React 18, TypeScript, Vite 5, Tailwind CSS, React Router e Axios |
+| Back-end | Java 21, Spring Boot 3.2.3, Spring Web, Spring Data JPA e Spring Security |
+| Autenticação | JWT com JJWT 0.12.6 |
+| Banco de dados | MySQL 8.0 |
+| Ambiente | Docker, Docker Compose, Maven e npm |
 
-## 🏗️ Arquitetura
-
-O front-end consome a API do back-end, que centraliza as regras da aplicação e acessa o banco de dados para persistir as informações.
+## 🏗️ Organização do repositório
 
 ```text
-Usuário → Front-end → API REST → Banco de dados
+maternidade-app/
+├── backend/                 # API REST Spring Boot
+│   └── src/main/java/       # Controllers, services, repositories, DTOs e models
+├── frontend/                # SPA React + Vite
+│   └── src/                 # Páginas, componentes e serviços HTTP
+├── database/                # Schema SQL e modelo visual do banco
+├── docs/                    # Guias técnicos e diretrizes do projeto
+├── docker-compose.yml       # Orquestração do MySQL, API e front-end
+└── .env.example             # Variáveis de ambiente sem segredos reais
 ```
+
+Para entender o fluxo entre as camadas, consulte [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Para os endpoints atualmente expostos, consulte [docs/API.md](docs/API.md).
 
 ## 🚀 Como executar
 
-O repositório oferece duas formas de execução, detalhadas no [guia de execução](docs/EXECUCAO.md):
+### Pré-requisitos
 
-| Abordagem | Indicada para | Resumo |
-| --- | --- | --- |
-| 🐳 **Docker Compose** | Apresentações, entregas e testes de integração | Toda a stack roda em containers isolados. |
-| ⚡ **DevTools + HMR** | Desenvolvimento do dia a dia | MySQL no Docker; API e front-end no host, com atualizações rápidas. |
+- Docker Desktop ou Docker Engine com Compose.
+- Java 21 ou superior e Maven 3.9 ou superior para execução local da API.
+- Node.js 24.x e npm 10 ou superior para execução local do front-end.
 
-O passo a passo completo, incluindo pré-requisitos, comandos, endereços de acesso e solução de problemas, está no [guia de execução](docs/EXECUCAO.md).
+### Execução completa com Docker
 
-Para uma visão rápida, o Docker Compose inicia MySQL 8, API e front-end juntos. No desenvolvimento diário, apenas o banco roda em Docker e os demais serviços são iniciados localmente.
+Na raiz do projeto:
 
-## 📁 Estrutura do projeto
-
-```text
-├── backend/       # API Spring Boot
-├── database/      # Modelo e scripts do banco de dados
-├── docs/          # Documentação do projeto
-├── docker-compose.yml
-└── frontend/      # Aplicação React com Vite
+```bash
+cp .env.example .env
+docker compose up --build
 ```
+
+Depois, acesse:
+
+- Aplicação: <http://localhost:5173>
+- API: <http://localhost:8080>
+- MySQL: `localhost:3306`
+
+No Windows PowerShell, o equivalente à cópia do ambiente é:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Para rodar em segundo plano, use `docker compose up --build -d`. O guia de execução explica também como rodar somente o banco em Docker e a API e o front-end no host, com recarregamento rápido.
+
+> Na primeira inicialização, o Compose monta [database/maternidade.sql](database/maternidade.sql) no MySQL. O script é executado apenas quando o volume ainda não possui um banco.
+
+O passo a passo completo, as variáveis de ambiente e a solução de problemas estão em [docs/EXECUTION.md](docs/EXECUTION.md).
+
+## 🧪 Validação local
+
+```bash
+# Front-end
+cd frontend
+npm ci
+npm run build
+
+# Back-end
+cd ../backend
+mvn test
+```
+
+O build do front-end executa a checagem TypeScript antes da compilação do Vite. O comando do back-end executa a suíte configurada pelo Maven, caso existam testes no checkout.
 
 ## 📚 Documentação
 
-- [📖 Guia de execução](docs/EXECUCAO.md)
-- [🗃️ Script do banco de dados](database/maternidade.sql)
-- [🐳 Configuração dos serviços](docker-compose.yml)
+| Documento | Conteúdo |
+| --- | --- |
+| [Guia de execução](docs/EXECUTION.md) | Instalação, Docker, execução local, variáveis e troubleshooting |
+| [Arquitetura](docs/ARCHITECTURE.md) | Limites das camadas, fluxo de dados e organização do código |
+| [API](docs/API.md) | Endpoints, autenticação, respostas e exemplos de requisição |
+| [Contribuição](docs/CONTRIBUTING.md) | Branches, Conventional Commits, revisão e checklist de alterações |
+| [Requisitos](docs/REQUIREMENTS.md) | Requisitos funcionais e contexto acadêmico |
+| [Script do banco](database/maternidade.sql) | Schema relacional inicial |
 
 ## 👥 Equipe
 
@@ -90,9 +149,9 @@ Para uma visão rápida, o Docker Compose inicia MySQL 8, API e front-end juntos
 - Paulo Vitor
 - Samira
 
-## 📝 Status do projeto
+## 📌 Status
 
-🚧 Projeto acadêmico em desenvolvimento. Funcionalidades e documentação podem ser ampliadas ao longo da disciplina.
+🚧 Projeto acadêmico em desenvolvimento. O escopo pode evoluir durante a disciplina, sempre mantendo a documentação próxima do comportamento implementado.
 
 <div align="center">
 
