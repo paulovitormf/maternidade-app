@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Baby, CalendarDays, Plus, RotateCcw } from 'lucide-react';
+import { Baby, CalendarDays, Plus, RotateCcw, MoreVertical, Pencil } from 'lucide-react';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -45,6 +45,7 @@ export default function CadastroCrianca() {
   const [form, setForm] = useState(initial);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
+  const [menuAberto, setMenuAberto] = useState<number | null>(null);
 
   const carregarCriancas = async () => {
     setCarregandoLista(true);
@@ -132,14 +133,62 @@ export default function CadastroCrianca() {
             </div>
             <div className="grid gap-4 md:grid-cols-2">
               {criancas.map((crianca) => (
+
+
+
+
                 <article className="card" key={crianca.idCrianca}>
-                  <p className="eyebrow">Perfil do bebê</p>
-                  <h2 className="text-xl font-extrabold text-slate-800">{crianca.nome}</h2>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="eyebrow">Perfil do bebê</p>
+                      <h2 className="text-xl font-extrabold text-slate-800">
+                        {crianca.nome}
+                      </h2>
+                    </div>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setMenuAberto(menuAberto === crianca.idCrianca ? null : crianca.idCrianca)}
+                        className="text-slate-600 hover:text-[#B0435B]"
+                      >
+                        <MoreVertical size={22} />
+                      </button>
+                      {menuAberto === crianca.idCrianca && (
+                        <div className="absolute right-0 top-full z-10 mt-1 w-40 rounded-lg border bg-white py-1 shadow-lg">
+                          <button
+                            type="button"
+                            onClick={() => setMenuAberto(null)}
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100"
+                          >
+                            Editar Perfil
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setMenuAberto(null)}
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100"
+                          >
+                            Adicionar Responsável
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setMenuAberto(null)}
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100"
+                          >
+                            Compartilhar Perfil
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <p className="mt-3 flex items-center gap-2 text-sm text-slate-600">
                     <CalendarDays size={16} className="text-[#C8526B]" />
                     Nascimento: {formatarData(crianca.dataNascimento)}
                   </p>
                 </article>
+
+
+
+
               ))}
             </div>
           </section>
