@@ -838,3 +838,4 @@ CREATE TABLE disponibilidade_especialista (
     CONSTRAINT ck_disponibilidade_dia CHECK (dia_semana BETWEEN 0 AND 6),
     CONSTRAINT ck_disponibilidade_modalidade CHECK (modalidade IN ('PRESENCIAL', 'ONLINE'))
 ) ENGINE=InnoDB;
+
