@@ -38,10 +38,10 @@ public class UsuarioService {
         if (dto.usuario().senha().length() < 8) {
             throw new IllegalArgumentException("A senha deve ter pelo menos 8 caracteres.");
         }
-        if (dto.usuario().email() != null && !dto.usuario().email().matches("^[\\w.%+-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
+        String emailNormalizado = dto.usuario().email().trim().toLowerCase();
+        if (!emailNormalizado.matches("^[\\w.%+-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
             throw new IllegalArgumentException("E-mail inválido.");
         }
-        String emailNormalizado = dto.usuario().email().trim().toLowerCase();
         if (usuarioRepository.existsByEmail(emailNormalizado)) {
             throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
         }
