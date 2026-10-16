@@ -9,7 +9,7 @@ const etapas = [
   {
     numero: '01',
     titulo: 'Início do pré-natal',
-    periodo: 'Na primeira consulta',
+    periodo: 'Na consulta',
     descricao:
       'Revisar o cartão de vacinação e planejar as doses necessárias.',
     vacinas: [
