@@ -9,6 +9,7 @@ import CadastroUsuario from './pages/CadastroUsuario';
 import ContinuarCadastro from './pages/ContinuarCadastro';
 import Login from './pages/Login';
 import MarcosDesenvolvimento from './pages/MarcosDesenvolvimento';
+import VacinaBebe from './pages/VacinaBebe';
 import VacinaGestante from './pages/VacinaGestante';
 import Perfil from './pages/Perfil';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
@@ -51,7 +52,8 @@ function AppLayout() {
             {isAuthenticated && <Link className="nav-link" to="/cadastrar-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Gestação</Link>}
             {isAuthenticated && <Link className="nav-link" to="/cadastrar-bebe"><Baby size={16} strokeWidth={1.8} />Bebê</Link>}
             {isAuthenticated && <Link className="nav-link" to="/marcos-desenvolvimento"><Sparkles size={16} strokeWidth={1.8} />Marcos</Link>}
-            {isAuthenticated && (<Link className="nav-link" to="/vacinas-gestante"><Heart size={16} strokeWidth={1.8} />Vacinação</Link>)}
+            {isAuthenticated && (<Link className="nav-link" to="/vacinas-bebe"><Baby size={16} strokeWidth={1.8} />Vacinas do bebê</Link>)}
+            {isAuthenticated && (<Link className="nav-link" to="/vacinas-gestante"><Heart size={16} strokeWidth={1.8} />Vacinas da gestante</Link>)}
           </div>
           {isAuthenticated && usuario ? <ProfileMenu usuario={usuario} /> : (
             <Link className="nav-login-button" to="/login"><CircleUserRound size={18} />Entrar</Link>
@@ -68,6 +70,7 @@ function AppLayout() {
           <Route path="/cadastrar-bebe" element={<ProtectedRoute><CadastroBebe /></ProtectedRoute>} />
           <Route path="/cadastrar-gestacao" element={<ProtectedRoute><CadastroGestacao /></ProtectedRoute>} />
           <Route path="/marcos-desenvolvimento" element={<ProtectedRoute><MarcosDesenvolvimento /></ProtectedRoute>} />
+          <Route path="/vacinas-bebe" element={<ProtectedRoute><VacinaBebe /></ProtectedRoute>} />
           <Route path="/vacinas-gestante" element={<ProtectedRoute><VacinaGestante /></ProtectedRoute>}/>
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
