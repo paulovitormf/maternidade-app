@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import br.com.maternidade.dto.CriancaCadastroDTO;
+import br.com.maternidade.dto.CriancaAcessoDTO;
 import br.com.maternidade.model.Crianca;
 import br.com.maternidade.model.Usuario;
 import br.com.maternidade.model.UsuarioCrianca;
@@ -118,6 +120,73 @@ class CriancaServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Tipo de relação inválido.");
         verify(usuarioRepository, never()).findByEmail(any(String.class));
+    }
+
+    @Test
+    void deveAdicionarResponsavelAoPerfilDaCriancaCriadaPeloUsuario() {
+        Usuario usuario = usuario(10);
+        Usuario responsavel = usuario(11);
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(vinculoRepository.existsByIdUsuarioAndIdCriancaAndTipoAcessoAndAtivo(10, 20, "PRINCIPAL", true))
+                .thenReturn(true);
+        when(usuarioRepository.findByIdUsuario(11)).thenReturn(Optional.of(responsavel));
+        when(vinculoRepository.existsByIdUsuarioAndIdCrianca(11, 20)).thenReturn(false);
+
+        criancaService.adicionarResponsavel(20, 11, "maria@example.com");
+
+        ArgumentCaptor<UsuarioCrianca> vinculoCaptor = ArgumentCaptor.forClass(UsuarioCrianca.class);
+        verify(vinculoRepository).save(vinculoCaptor.capture());
+        UsuarioCrianca vinculo = vinculoCaptor.getValue();
+        assertThat(ReflectionTestUtils.getField(vinculo, "idUsuario")).isEqualTo(11);
+        assertThat(ReflectionTestUtils.getField(vinculo, "idCrianca")).isEqualTo(20);
+        assertThat(ReflectionTestUtils.getField(vinculo, "tipoRelacao")).isEqualTo("RESPONSAVEL");
+        assertThat(ReflectionTestUtils.getField(vinculo, "tipoAcesso")).isEqualTo("RESPONSAVEL");
+        assertThat(ReflectionTestUtils.getField(vinculo, "concedidoPor")).isEqualTo(10);
+        assertThat(ReflectionTestUtils.getField(vinculo, "podeEditar")).isEqualTo(false);
+    }
+
+    @Test
+    void deveImpedirUsuarioSemVinculoPrincipalDeAdicionarResponsavel() {
+        Usuario usuario = usuario(10);
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(vinculoRepository.existsByIdUsuarioAndIdCriancaAndTipoAcessoAndAtivo(10, 20, "PRINCIPAL", true))
+                .thenReturn(false);
+
+        assertThatThrownBy(() -> criancaService.adicionarResponsavel(20, 11, "maria@example.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Somente o responsável principal pode adicionar outro responsável.");
+        verify(vinculoRepository, never()).save(any(UsuarioCrianca.class));
+    }
+
+    @Test
+    void deveRetornarPermissaoDeAcessoDaCriancaNaListagem() {
+        Usuario usuario = usuario(11);
+        CriancaAcessoDTO crianca = new CriancaAcessoDTO(
+                20, "Ana", LocalDate.now().minusDays(1), LocalTime.NOON, "F", "RESPONSAVEL", false);
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(criancaRepository.findByUsuarioId(11)).thenReturn(List.of(crianca));
+
+        var resultado = criancaService.listarPorUsuario("maria@example.com");
+
+        assertThat(resultado).containsExactly(crianca);
+        assertThat(resultado.get(0).tipoAcesso()).isEqualTo("RESPONSAVEL");
+        assertThat(resultado.get(0).podeEditar()).isFalse();
+    }
+
+    @Test
+    void deveImpedirAdicionarUsuarioQueJaEstaVinculado() {
+        Usuario usuario = usuario(10);
+        Usuario responsavel = usuario(11);
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(vinculoRepository.existsByIdUsuarioAndIdCriancaAndTipoAcessoAndAtivo(10, 20, "PRINCIPAL", true))
+                .thenReturn(true);
+        when(usuarioRepository.findByIdUsuario(11)).thenReturn(Optional.of(responsavel));
+        when(vinculoRepository.existsByIdUsuarioAndIdCrianca(11, 20)).thenReturn(true);
+
+        assertThatThrownBy(() -> criancaService.adicionarResponsavel(20, 11, "maria@example.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Este usuário já está vinculado a esta criança.");
+        verify(vinculoRepository, never()).save(any(UsuarioCrianca.class));
     }
 
     private CriancaCadastroDTO criancaDto(String nome, String tipoRelacao) {

@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import br.com.maternidade.dto.CriancaCadastroDTO;
+import br.com.maternidade.dto.ResponsavelCriancaDTO;
+import br.com.maternidade.dto.CriancaAcessoDTO;
 import br.com.maternidade.services.CriancaService;
 import org.springframework.security.core.Authentication;
 import java.util.List;
@@ -30,7 +32,21 @@ public class CriancaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<br.com.maternidade.model.Crianca>> listar(Authentication authentication) {
+    public ResponseEntity<List<CriancaAcessoDTO>> listar(Authentication authentication) {
         return ResponseEntity.ok(criancaService.listarPorUsuario(authentication.getName()));
+    }
+
+    @PostMapping("/{idCrianca}/responsaveis")
+    public ResponseEntity<?> adicionarResponsavel(
+            @PathVariable Integer idCrianca,
+            @RequestBody ResponsavelCriancaDTO dto,
+            Authentication authentication) {
+        try {
+            criancaService.adicionarResponsavel(
+                    idCrianca, dto == null ? null : dto.id_usuario(), authentication.getName());
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

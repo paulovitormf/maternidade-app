@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.maternidade.dto.CriancaCadastroDTO;
+import br.com.maternidade.dto.CriancaAcessoDTO;
 import br.com.maternidade.model.Crianca;
 import br.com.maternidade.repository.CriancaRepository;
 import br.com.maternidade.repository.UsuarioCriancaRepository;
@@ -61,7 +62,35 @@ public class CriancaService {
         return criancaSalva;
     }
 
-    public java.util.List<Crianca> listarPorUsuario(String emailAutenticado) {
+    @Transactional
+    public void adicionarResponsavel(Integer idCrianca, Integer idResponsavel, String emailAutenticado) {
+        if (idCrianca == null || idResponsavel == null || emailAutenticado == null || emailAutenticado.isBlank()) {
+            throw new IllegalArgumentException("Criança, responsável e usuário autenticado são obrigatórios.");
+        }
+
+        var usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+        boolean eResponsavelPrincipal = vinculoRepository.existsByIdUsuarioAndIdCriancaAndTipoAcessoAndAtivo(
+                usuario.getIdUsuario(), idCrianca, "PRINCIPAL", true);
+        if (!eResponsavelPrincipal) {
+            throw new IllegalArgumentException("Somente o responsável principal pode adicionar outro responsável.");
+        }
+        if (usuario.getIdUsuario().equals(idResponsavel)) {
+            throw new IllegalArgumentException("Você já está vinculado a esta criança.");
+        }
+
+        var responsavel = usuarioRepository.findByIdUsuario(idResponsavel)
+                .orElseThrow(() -> new IllegalArgumentException("Responsável selecionado não encontrado."));
+        if (vinculoRepository.existsByIdUsuarioAndIdCrianca(idResponsavel, idCrianca)) {
+            throw new IllegalArgumentException("Este usuário já está vinculado a esta criança.");
+        }
+
+        vinculoRepository.save(new br.com.maternidade.model.UsuarioCrianca(
+                responsavel.getIdUsuario(), idCrianca, "RESPONSAVEL",
+                "RESPONSAVEL", usuario.getIdUsuario(), false));
+    }
+
+    public java.util.List<CriancaAcessoDTO> listarPorUsuario(String emailAutenticado) {
         var usuario = usuarioRepository.findByEmail(emailAutenticado)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
         return criancaRepository.findByUsuarioId(usuario.getIdUsuario());

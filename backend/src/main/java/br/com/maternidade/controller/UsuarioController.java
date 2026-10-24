@@ -10,6 +10,9 @@ import br.com.maternidade.dto.UsuarioPublicoDTO;
 import br.com.maternidade.dto.LoginRespostaDTO;
 import br.com.maternidade.config.JwtService;
 import br.com.maternidade.services.UsuarioService;
+import br.com.maternidade.dto.UsuarioBuscaDTO;
+import org.springframework.security.core.Authentication;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -46,5 +49,15 @@ public class UsuarioController {
                     UsuarioPublicoDTO.from(usuario)));
         }
         catch (IllegalArgumentException e) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage()); }
+    }
+
+    @GetMapping("/busca")
+    public ResponseEntity<?> buscarResponsaveis(@RequestParam String q, Authentication authentication) {
+        try {
+            List<UsuarioBuscaDTO> usuarios = usuarioService.buscarResponsaveis(q, authentication.getName());
+            return ResponseEntity.ok(usuarios);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

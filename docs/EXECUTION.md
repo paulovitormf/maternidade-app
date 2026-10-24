@@ -95,6 +95,8 @@ docker compose up --build
 
 > `docker compose down -v` remove os dados persistidos do volume. Use somente quando isso for intencional.
 
+Ao iniciar a API, o Flyway aplica as migrações versionadas antes da validação do Hibernate. Em bancos existentes sem histórico do Flyway, a versão inicial é registrada como baseline e as migrações adicionam somente as alterações ausentes, preservando os registros.
+
 ## ⚡ 4. Opção B — banco no Docker e aplicações no host
 
 Esta opção é indicada para desenvolvimento diário, pois preserva o HMR do Vite e o reinício automático do Spring Boot DevTools.

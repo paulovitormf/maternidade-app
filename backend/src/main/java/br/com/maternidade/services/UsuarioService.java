@@ -4,8 +4,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
+import java.util.List;
 
 import br.com.maternidade.dto.UsuarioCadastroDTO;
+import br.com.maternidade.dto.UsuarioBuscaDTO;
 import br.com.maternidade.model.Gestacao;
 import br.com.maternidade.model.Usuario;
 import br.com.maternidade.repository.GestacaoRepository;
@@ -91,5 +93,28 @@ public class UsuarioService {
                 .orElseThrow(() -> new IllegalArgumentException("E-mail ou senha inválidos."));
         if (!passwordEncoder.matches(senha, usuario.getSenha())) throw new IllegalArgumentException("E-mail ou senha inválidos.");
         return usuario;
+    }
+
+    public List<UsuarioBuscaDTO> buscarResponsaveis(String nome, String emailAutenticado) {
+        if (nome == null || nome.trim().length() < 2) {
+            throw new IllegalArgumentException("Digite pelo menos 2 caracteres para buscar.");
+        }
+        Usuario usuarioAutenticado = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+
+        return usuarioRepository.findTop8ByNomeContainingIgnoreCaseAndIdUsuarioNotOrderByNomeAsc(
+                        nome.trim(), usuarioAutenticado.getIdUsuario())
+                .stream()
+                .map(usuario -> new UsuarioBuscaDTO(
+                        usuario.getIdUsuario(), usuario.getNome(), mascararEmail(usuario.getEmail())))
+                .toList();
+    }
+
+    private String mascararEmail(String email) {
+        int separador = email.indexOf('@');
+        if (separador <= 0) {
+            return "***";
+        }
+        return email.charAt(0) + "***" + email.substring(separador);
     }
 }

@@ -39,6 +39,7 @@ Content-Type: application/json
 | --- | --- | --- | --- |
 | `POST` | `/api/usuarios` | pública | cadastra um usuário |
 | `POST` | `/api/usuarios/login` | pública | autentica e retorna JWT |
+| `GET` | `/api/usuarios/busca?q={nome}` | JWT | busca até 8 usuários pelo nome, sem incluir o usuário autenticado |
 
 Exemplo de login:
 
@@ -63,7 +64,10 @@ Uma autenticação bem-sucedida retorna um objeto com o token e os dados públic
 | Método | Endpoint | Proteção | Uso |
 | --- | --- | --- | --- |
 | `POST` | `/api/criancas` | JWT | cadastra uma criança vinculada ao usuário autenticado |
-| `GET` | `/api/criancas` | JWT | lista as crianças do usuário autenticado |
+| `GET` | `/api/criancas` | JWT | lista as crianças do usuário autenticado com seu nível de acesso |
+| `POST` | `/api/criancas/{idCrianca}/responsaveis` | JWT | adiciona um usuário cadastrado como responsável de uma criança do usuário principal |
+
+O corpo de `POST /api/criancas/{idCrianca}/responsaveis` recebe `{"id_usuario": 123}`. Somente o responsável principal da criança pode conceder o vínculo; usuários já vinculados não podem ser adicionados novamente. O responsável recebe acesso secundário, somente para leitura, sem ações de gerenciamento no perfil. A listagem informa `tipoAcesso` (`PRINCIPAL` ou `RESPONSAVEL`) e `podeEditar`, para que a interface apresente apenas as ações permitidas ao usuário. Não há endpoint de exclusão de crianças.
 
 ## ✨ Marcos do desenvolvimento
 
