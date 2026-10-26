@@ -1,4 +1,11 @@
-import { Baby, CalendarDays, Info, Syringe } from 'lucide-react';
+
+import {
+  Baby,
+  CalendarDays,
+  Info,
+  Syringe,
+  ClipboardList,
+} from 'lucide-react';
 
 type Vacina = {
   nome: string;
@@ -92,98 +99,175 @@ const etapas: Etapa[] = [
   },
 ];
 
-const totalVacinas = etapas.reduce((total, etapa) => total + etapa.vacinas.length, 0);
+const totalVacinas = etapas.reduce(
+  (total, etapa) => total + etapa.vacinas.length,
+  0,
+);
 
 export default function VacinaBebe() {
   return (
-    <section className="space-y-6">
-      <header className="page-heading">
-        <span className="form-icon form-icon-blue mb-4">
-          <Baby size={28} />
-        </span>
-        <p className="eyebrow">Acompanhamento infantil</p>
-        <h1 className="display-title">Vacinação do bebê</h1>
-        <p className="page-subtitle">
-          Acompanhe as vacinas de rotina do nascimento até os 5 anos de idade.
+    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Cabeçalho */}
+      <header className="mb-8">
+        <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#3B7280]">
+          Acompanhamento infantil
+        </p>
+
+        <h1 className="text-3xl font-bold tracking-tight text-slate-800">
+          Vacinação do bebê
+        </h1>
+
+        <p className="mt-2 max-w-2xl text-slate-600">
+          Acompanhe as etapas da vacinação infantil e consulte
+          as doses previstas para cada idade.
         </p>
       </header>
 
-      <div className="grid items-start gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+        {/* Resumo lateral */}
         <aside className="space-y-4">
-          <section className="card">
-            <div className="form-icon form-icon-pink mb-4">
-              <CalendarDays size={24} />
+          <section className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#EBF3F5] text-[#3B7280]">
+              <ClipboardList size={23} />
             </div>
-            <h2 className="font-extrabold text-slate-800">Resumo do calendário</h2>
-            <div className="mt-4 divide-y divide-rose-100">
+
+            <h2 className="font-semibold text-slate-800">
+              Resumo do calendário
+            </h2>
+
+            <div className="mt-4 divide-y divide-slate-100">
               <div className="flex items-center justify-between gap-3 py-3">
-                <span className="text-sm text-slate-600">Etapas</span>
-                <strong className="text-slate-800">{etapas.length}</strong>
+                <span className="text-sm text-slate-600">
+                  Etapas
+                </span>
+
+                <span className="font-semibold text-slate-800">
+                  {etapas.length}
+                </span>
               </div>
+
               <div className="flex items-center justify-between gap-3 py-3">
-                <span className="text-sm text-slate-600">Registros de doses</span>
-                <strong className="text-slate-800">{totalVacinas}</strong>
+                <span className="text-sm text-slate-600">
+                  Doses previstas
+                </span>
+
+                <span className="font-semibold text-slate-800">
+                  {totalVacinas}
+                </span>
               </div>
+
               <div className="flex items-center justify-between gap-3 py-3">
-                <span className="text-sm text-slate-600">Período</span>
-                <strong className="text-slate-800">0 a 5 anos</strong>
+                <span className="text-sm text-slate-600">
+                  Última etapa
+                </span>
+
+                <span className="font-semibold text-slate-800">
+                  4 anos
+                </span>
               </div>
             </div>
           </section>
 
-          <div className="flex gap-3 rounded-2xl border border-[#D5E7EB] bg-[#EBF3F5] p-4">
-            <Info className="mt-0.5 shrink-0 text-[#3B7280]" size={19} />
+          <div className="flex gap-3 rounded-xl border border-[#D5E7EB] bg-[#EBF3F5] p-4">
+            <Info
+              className="mt-0.5 shrink-0 text-[#3B7280]"
+              size={19}
+            />
+
             <p className="text-sm leading-6 text-slate-700">
-              Confira as datas no cartão de vacinação e procure a unidade de saúde em caso de atraso.
+              Confira o cartão de vacinação da criança e procure
+              uma unidade de saúde para confirmar as doses e os
+              intervalos recomendados.
             </p>
           </div>
         </aside>
 
-        <section className="card">
+        {/* Linha do tempo */}
+        <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
           <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-extrabold text-slate-800">Calendário por idade</h2>
-              <p className="mt-1 text-sm text-slate-500">Doses de rotina até os 5 anos</p>
+              <h2 className="text-xl font-bold text-slate-800">
+                Calendário por idade
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-500">
+                Etapas da vacinação infantil
+              </p>
             </div>
-            <span className="rounded-full bg-[#FADCE1] px-3 py-1.5 text-xs font-extrabold text-[#B0435B]">
+
+            <span className="rounded-full bg-[#EBF3F5] px-3 py-1.5 text-xs font-semibold text-[#315C66]">
               Calendário de referência
             </span>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             {etapas.map((etapa, indice) => (
-              <article className="relative pl-12" key={etapa.idade}>
+              <article
+                key={etapa.idade}
+                className="relative pl-12"
+              >
+                {/* Linha vertical */}
                 {indice < etapas.length - 1 && (
-                  <div className="absolute bottom-[-28px] left-[15px] top-10 w-px bg-rose-200" />
+                  <div className="absolute bottom-[-34px] left-[15px] top-10 w-px bg-rose-200" />
                 )}
+
+                {/* Marcador da etapa */}
                 <div className="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#C8526B] bg-white text-[#B0435B]">
-                  <Syringe size={15} />
+                  <Baby size={16} />
                 </div>
-                <h3 className="font-extrabold text-slate-800">{etapa.idade}</h3>
-                <div className="mt-3 divide-y divide-slate-100 rounded-2xl border border-slate-200">
-                  {etapa.vacinas.map((vacina) => (
-                    <div className="flex items-center justify-between gap-4 p-4" key={vacina.nome}>
-                      <span className="text-sm font-semibold text-slate-700">{vacina.nome}</span>
-                      <span className="shrink-0 text-right text-xs font-bold text-[#3B7280]">{vacina.doses}</span>
-                    </div>
-                  ))}
+
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-bold text-slate-800">
+                      {etapa.idade}
+                    </h3>
+
+                    <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+                      <CalendarDays size={13} />
+                      Etapa de vacinação
+                    </span>
+                  </div>
+
+                  <div className="mt-3 divide-y divide-slate-100 rounded-xl border border-slate-200">
+                    {etapa.vacinas.map((vacina) => (
+                      <div
+                        key={vacina.nome}
+                        className="flex items-start gap-3 p-4"
+                      >
+                        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#FDF7F8] text-[#C8526B]">
+                          <Syringe size={19} />
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-sm font-semibold text-slate-800">
+                            {vacina.nome}
+                          </h4>
+
+                          <p className="mt-1 text-sm text-slate-500">
+                            {vacina.doses}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </article>
             ))}
           </div>
 
+          {/* Fonte oficial */}
           <footer className="mt-8 border-t border-slate-100 pt-5">
             <a
               href="https://www.gov.br/saude/pt-br/vacinacao/arquivos/calendario-nacional-de-vacinacao-crianca/view"
               target="_blank"
               rel="noreferrer"
-              className="text-sm font-semibold text-[#B0435B] underline underline-offset-4 hover:text-[#8F344A]"
+              className="text-sm font-medium text-[#B0435B] underline underline-offset-4 hover:text-[#8F344A]"
             >
               Consultar calendário oficial do Ministério da Saúde
             </a>
           </footer>
         </section>
       </div>
-    </section>
+    </main>
   );
 }
