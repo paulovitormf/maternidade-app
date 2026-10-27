@@ -13,6 +13,7 @@ import MarcosDesenvolvimento from './pages/MarcosDesenvolvimento';
 import VacinaBebe from './pages/VacinaBebe';
 import VacinaGestante from './pages/VacinaGestante';
 import Perfil from './pages/Perfil';
+import MarcosCrianca from './pages/MarcosCrianca';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
 
 export default function App() {
@@ -77,6 +78,7 @@ function AppLayout() {
           <Route path="/vacinas-gestante" element={<ProtectedRoute><VacinaGestante /></ProtectedRoute>}/>
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
+          <Route path="/marcos-crianca" element={<ProtectedRoute><MarcosCrianca /></ProtectedRoute>} />
         </Routes>
       </main>
 
@@ -233,7 +235,7 @@ function HomeDashboard() {
         </Link>
       </div>
 
-      <div className="dashboard-tip">
+  <div className="dashboard-tip">
         <span className="dashboard-tip-icon"><Heart size={18} strokeWidth={1.7} fill="currentColor" /></span>
         <div><strong>Um lembrete para você</strong><p>Pequenos registros ajudam a guardar grandes momentos.</p></div>
       </div>

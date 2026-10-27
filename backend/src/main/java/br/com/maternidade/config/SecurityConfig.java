@@ -43,6 +43,9 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/usuarios", "/api/usuarios/login").permitAll()
+                // Autenticação completa (JWT) ainda pode evoluir; não há leitura pública.
+                .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/criancas", "/api/gestacoes").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/gestacoes/usuario/*/mais-recente", "/api/criancas/usuario/*").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

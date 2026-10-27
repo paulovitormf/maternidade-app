@@ -95,4 +95,7 @@ public class CriancaService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
         return criancaRepository.findByUsuarioId(usuario.getIdUsuario());
     }
+    public java.util.List<Crianca> listarEntidadesPorUsuario(Long idUsuario) {
+        return criancaRepository.findEntidadesByUsuarioId(Math.toIntExact(idUsuario));
+    }
 }

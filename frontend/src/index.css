@@ -550,3 +550,25 @@
     }
   }
 }
+
+.milestones-disclaimer a { @apply font-bold text-[#3B7280] underline; }
+.child-milestones-section { @apply mb-8 rounded-[2rem] border border-[#FADCE1] bg-white p-5 shadow-[0_18px_45px_-30px_rgba(200,82,107,0.35)] sm:p-6; }
+.child-milestones-section > .milestones-heading > svg { @apply bg-[#FADCE1] text-[#C8526B]; }
+.child-selector { @apply mb-4 block max-w-sm; }
+.child-selector span { @apply mb-2 block text-xs font-extrabold uppercase tracking-[0.12em] text-[#3B7280]; }
+.child-summary-grid { @apply mb-4 grid gap-3 rounded-2xl bg-[#FFF7F8] p-4 sm:grid-cols-2; }
+.child-summary-grid div { @apply flex flex-col gap-1; }
+.child-summary-grid span { @apply text-xs font-semibold text-[#B0435B]; }
+.child-summary-grid strong { @apply text-sm text-slate-800; }
+.child-topic-legend { @apply mb-4 flex flex-wrap gap-2; }
+.child-topic-legend span { @apply inline-flex items-center gap-1 rounded-full bg-[#EBF3F5] px-3 py-1.5 text-xs font-bold text-[#3B7280]; }
+.child-milestones-scroll { @apply max-h-[42rem] space-y-3 overflow-y-auto overscroll-contain pr-2; scrollbar-color: #c8526b #fdf1f3; scrollbar-width: thin; }
+.child-milestones-scroll:focus-visible { @apply rounded-2xl outline-none ring-4 ring-[#fadce1]; }
+.child-milestone-card { @apply rounded-3xl border border-[#E2E8F0] bg-[#fffdfc] p-4 transition sm:p-5; }
+.child-milestone-done { @apply border-[#FADCE1] bg-[#FFF9FA]; }
+.child-milestone-heading { @apply mb-4 flex items-center justify-between gap-3; }
+.child-done-label { @apply inline-flex items-center gap-1 text-xs font-bold text-emerald-600; }
+.child-info-grid { @apply grid gap-3 md:grid-cols-2; }
+.child-info-grid > div { @apply rounded-2xl bg-white p-3; }
+.child-info-grid strong { @apply text-xs font-extrabold text-slate-700; }
+.child-info-grid p { @apply mt-1 text-xs leading-5 text-slate-500; }

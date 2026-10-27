@@ -22,4 +22,6 @@ public interface CriancaRepository extends JpaRepository<Crianca, Integer> {
             order by c.dataNascimento desc, c.nome asc
             """)
     List<CriancaAcessoDTO> findByUsuarioId(@Param("idUsuario") Integer idUsuario);
+    @Query(value = "SELECT c.* FROM crianca c INNER JOIN usuario_crianca uc ON uc.id_crianca = c.id_crianca WHERE uc.id_usuario = :idUsuario AND uc.ativo = true ORDER BY c.data_nascimento DESC", nativeQuery = true)
+    List<Crianca> findEntidadesByUsuarioId(@Param("idUsuario") Integer idUsuario);
 }

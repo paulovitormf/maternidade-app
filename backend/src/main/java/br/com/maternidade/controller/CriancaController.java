@@ -21,6 +21,13 @@ public class CriancaController {
         this.criancaService = criancaService;
     }
 
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<?> listarPorUsuario(@PathVariable Long idUsuario) {
+        return ResponseEntity.ok(criancaService.listarEntidadesPorUsuario(idUsuario).stream()
+            .map(br.com.maternidade.dto.CriancaPublicaDTO::from)
+            .toList());
+    }
+
     @PostMapping
     public ResponseEntity<?> cadastrar(@RequestBody CriancaCadastroDTO dto, Authentication authentication) {
         try {
@@ -30,7 +37,6 @@ public class CriancaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
     @GetMapping
     public ResponseEntity<List<CriancaAcessoDTO>> listar(Authentication authentication) {
         return ResponseEntity.ok(criancaService.listarPorUsuario(authentication.getName()));
