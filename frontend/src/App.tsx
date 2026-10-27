@@ -8,6 +8,7 @@ import CadastroGestacao from './pages/CadastroGestacao';
 import CadastroUsuario from './pages/CadastroUsuario';
 import ContinuarCadastro from './pages/ContinuarCadastro';
 import Login from './pages/Login';
+import MarcosGestacao from './pages/MarcosGestacao';
 import MarcosDesenvolvimento from './pages/MarcosDesenvolvimento';
 import VacinaBebe from './pages/VacinaBebe';
 import VacinaGestante from './pages/VacinaGestante';
@@ -52,6 +53,7 @@ function AppLayout() {
             {isAuthenticated && <Link className="nav-link" to="/cadastrar-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Gestação</Link>}
             {isAuthenticated && <Link className="nav-link" to="/cadastrar-bebe"><Baby size={16} strokeWidth={1.8} />Bebê</Link>}
             {isAuthenticated && <Link className="nav-link" to="/marcos-desenvolvimento"><Sparkles size={16} strokeWidth={1.8} />Marcos</Link>}
+            {isAuthenticated && <Link className="nav-link" to="/marcos-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Marcos da gestação</Link>}
             {isAuthenticated && (<Link className="nav-link" to="/vacinas-bebe"><Baby size={16} strokeWidth={1.8} />Vacinas do bebê</Link>)}
             {isAuthenticated && (<Link className="nav-link" to="/vacinas-gestante"><Heart size={16} strokeWidth={1.8} />Vacinas da gestante</Link>)}
           </div>
@@ -70,6 +72,7 @@ function AppLayout() {
           <Route path="/cadastrar-bebe" element={<ProtectedRoute><CadastroBebe /></ProtectedRoute>} />
           <Route path="/cadastrar-gestacao" element={<ProtectedRoute><CadastroGestacao /></ProtectedRoute>} />
           <Route path="/marcos-desenvolvimento" element={<ProtectedRoute><MarcosDesenvolvimento /></ProtectedRoute>} />
+          <Route path="/marcos-gestacao" element={<ProtectedRoute><MarcosGestacao /></ProtectedRoute>} />
           <Route path="/vacinas-bebe" element={<ProtectedRoute><VacinaBebe /></ProtectedRoute>} />
           <Route path="/vacinas-gestante" element={<ProtectedRoute><VacinaGestante /></ProtectedRoute>}/>
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
@@ -221,6 +224,11 @@ function HomeDashboard() {
         <Link to="/marcos-desenvolvimento" className="quick-action quick-action-blue group">
           <span className="quick-action-icon"><Sparkles size={23} strokeWidth={1.7} /></span>
           <span><strong>Acompanhar desenvolvimento</strong><small>Veja os marcos por idade</small></span>
+          <ChevronRight size={18} />
+        </Link>
+        <Link to="/marcos-gestacao" className="quick-action quick-action-pink group">
+          <span className="quick-action-icon"><CalendarDays size={23} strokeWidth={1.7} /></span>
+          <span><strong>Marcos da gestação</strong><small>Acompanhe as semanas e a previsão de parto</small></span>
           <ChevronRight size={18} />
         </Link>
       </div>
