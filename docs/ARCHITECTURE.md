@@ -59,7 +59,7 @@ O código da aplicação está em `frontend/src`:
 | `services/` | comunicação com a API e dados de sessão |
 | `index.css` | estilos globais e tokens visuais |
 
-As rotas de cadastro de bebê, gestação, marcos e perfil exigem sessão válida. Usuários não autenticados são encaminhados para `/login`.
+As rotas de cadastro de bebê, gestação, jornada e perfil exigem sessão válida. Usuários não autenticados são encaminhados para `/login`.
 
 ## 🗄️ Banco de dados
 

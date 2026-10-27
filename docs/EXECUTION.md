@@ -139,7 +139,7 @@ Abra <http://localhost:5173>.
 1. Confirme que o container `mysql-maternidade` está saudável com `docker compose ps`.
 2. Confirme que a API iniciou sem erro de conexão com o banco.
 3. Abra o front-end e faça um cadastro de usuário.
-4. Faça login e valide as áreas protegidas de gestação, bebê, marcos e perfil.
+4. Faça login e valide as áreas protegidas de gestação, bebê, jornada e perfil.
 
 ## 🧯 6. Solução de problemas
 

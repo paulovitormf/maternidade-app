@@ -577,9 +577,9 @@ CREATE TABLE gestacao (
     INDEX idx_gestacao_parto (data_parto)
 ) ENGINE=InnoDB;
 
-/* trilha visual de marcos do desenvolvimento */
-CREATE TABLE marco_desenvolvimento (
-    id_marco INT AUTO_INCREMENT PRIMARY KEY,
+/* trilha visual de jornada do desenvolvimento */
+CREATE TABLE jornada_desenvolvimento (
+    id_jornada INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(200) NOT NULL,
     descricao TEXT NOT NULL,
     idade_min_meses INT NOT NULL,
@@ -587,18 +587,18 @@ CREATE TABLE marco_desenvolvimento (
     categoria VARCHAR(20) NOT NULL,
     fonte VARCHAR(255),
     link_fonte VARCHAR(500),
-    INDEX idx_marco_faixa_etaria (idade_min_meses, idade_max_meses),
-    CONSTRAINT ck_marco_categoria CHECK (categoria IN ('MOTOR', 'LINGUAGEM', 'COGNITIVO', 'SOCIAL', 'AUTONOMIA', 'OUTRO'))
+    INDEX idx_jornada_faixa_etaria (idade_min_meses, idade_max_meses),
+    CONSTRAINT ck_jornada_categoria CHECK (categoria IN ('MOTOR', 'LINGUAGEM', 'COGNITIVO', 'SOCIAL', 'AUTONOMIA', 'OUTRO'))
 ) ENGINE=InnoDB;
 
-CREATE TABLE marco_crianca (
+CREATE TABLE jornada_crianca (
     id_crianca INT NOT NULL,
-    id_marco INT NOT NULL,
+    id_jornada INT NOT NULL,
     data_conquista DATE,
     observacao TEXT,
-    PRIMARY KEY (id_crianca, id_marco),
+    PRIMARY KEY (id_crianca, id_jornada),
     FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
-    FOREIGN KEY (id_marco) REFERENCES marco_desenvolvimento(id_marco) ON DELETE CASCADE
+    FOREIGN KEY (id_jornada) REFERENCES jornada_desenvolvimento(id_jornada) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 /* revisão profissional de conteúdos */

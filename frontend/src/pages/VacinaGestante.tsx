@@ -42,7 +42,7 @@ const etapas = [
   {
     numero: '02',
     titulo: 'A partir da 20ª semana',
-    periodo: 'Marco gestacional',
+    periodo: 'Jornada gestacional',
     descricao:
       'Período de referência para a vacinação com dTpa.',
     vacinas: [
@@ -57,7 +57,7 @@ const etapas = [
   {
     numero: '03',
     titulo: 'A partir da 28ª semana',
-    periodo: 'Marco gestacional',
+    periodo: 'Jornada gestacional',
     descricao:
       'Período de referência para a vacinação contra o VSR.',
     vacinas: [
@@ -130,7 +130,7 @@ export default function VacinaGestante() {
 
               <div className="flex items-center justify-between gap-3 py-3">
                 <span className="text-sm text-slate-600">
-                  Marcos gestacionais
+                  Jornadas gestacionais
                 </span>
 
                 <span className="font-semibold text-slate-800">

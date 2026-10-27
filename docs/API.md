@@ -15,7 +15,7 @@
 - [👤 Autenticação e usuários](#-autenticação-e-usuários)
 - [🤰 Gestações](#-gestações)
 - [👶 Crianças](#-crianças)
-- [✨ Marcos do desenvolvimento](#-marcos-do-desenvolvimento)
+- [✨ Jornada do desenvolvimento](#-jornada-do-desenvolvimento)
 - [🧯 Respostas e erros](#-respostas-e-erros)
 - [🔄 Atualização deste documento](#-atualização-deste-documento)
 
@@ -69,11 +69,11 @@ Uma autenticação bem-sucedida retorna um objeto com o token e os dados públic
 
 O corpo de `POST /api/criancas/{idCrianca}/responsaveis` recebe `{"id_usuario": 123}`. Somente o responsável principal da criança pode conceder o vínculo; usuários já vinculados não podem ser adicionados novamente. O responsável recebe acesso secundário, somente para leitura, sem ações de gerenciamento no perfil. A listagem informa `tipoAcesso` (`PRINCIPAL` ou `RESPONSAVEL`) e `podeEditar`, para que a interface apresente apenas as ações permitidas ao usuário. Não há endpoint de exclusão de crianças.
 
-## ✨ Marcos do desenvolvimento
+## ✨ Jornada do desenvolvimento
 
 | Método | Endpoint | Proteção | Uso |
 | --- | --- | --- | --- |
-| `GET` | `/api/marcos-desenvolvimento` | JWT | lista os marcos disponíveis |
+| `GET` | `/api/jornada-desenvolvimento` | JWT | lista a jornada disponível |
 
 ## 🧯 Respostas e erros
 

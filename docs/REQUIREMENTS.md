@@ -33,7 +33,7 @@ O sistema atualmente oferece:
 - dashboard inicial;
 - cadastro, listagem e edição de gestações;
 - cadastro e listagem de crianças vinculadas ao usuário;
-- consulta de marcos do desenvolvimento infantil;
+- consulta de jornada do desenvolvimento infantil;
 - consulta e edição do perfil;
 - navegação responsiva para desktop e dispositivos móveis.
 
@@ -47,7 +47,7 @@ O sistema atualmente oferece:
 | RF-04 | Cadastrar e consultar gestações do usuário. | ✅ Implementado |
 | RF-05 | Atualizar dados de uma gestação existente. | ✅ Implementado |
 | RF-06 | Cadastrar e consultar crianças vinculadas ao usuário. | ✅ Implementado |
-| RF-07 | Exibir marcos do desenvolvimento infantil. | ✅ Implementado |
+| RF-07 | Exibir jornada do desenvolvimento infantil. | ✅ Implementado |
 | RF-08 | Permitir consultar dados básicos do perfil. | ✅ Implementado |
 | RF-09 | Exibir o calendário de vacinação de rotina do bebê até os 5 anos. | ✅ Implementado |
 

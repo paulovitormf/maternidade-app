@@ -1,15 +1,20 @@
 package br.com.maternidade.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "marco_desenvolvimento")
-public class MarcoDesenvolvimento {
+@Table(name = "jornada_desenvolvimento")
+public class JornadaDesenvolvimento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_marco")
-    private Integer idMarco;
+    @Column(name = "id_jornada")
+    private Integer idJornada;
 
     @Column(nullable = false, length = 200)
     private String titulo;
@@ -31,7 +36,7 @@ public class MarcoDesenvolvimento {
     @Column(name = "link_fonte", length = 500)
     private String linkFonte;
 
-    public Integer getIdMarco() { return idMarco; }
+    public Integer getIdJornada() { return idJornada; }
     public String getTitulo() { return titulo; }
     public String getDescricao() { return descricao; }
     public Integer getIdadeMinMeses() { return idadeMinMeses; }
