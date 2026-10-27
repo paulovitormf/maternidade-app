@@ -15,18 +15,26 @@ const etapas = [
     vacinas: [
       {
         nome: 'Hepatite B',
+        descricao:
+          'Ajuda a prevenir a infecção pelo vírus da hepatite B, que pode ser transmitida ao bebê durante o parto.',
         detalhe: '3 doses, conforme histórico vacinal',
       },
       {
         nome: 'dT — difteria e tétano',
+        descricao:
+          'Protege contra difteria e tétano, doenças que podem causar complicações importantes para a gestante e o bebê.',
         detalhe: 'Esquema definido conforme histórico vacinal',
       },
       {
         nome: 'Influenza',
+        descricao:
+          'Protege contra a gripe e suas complicações, que podem ser mais graves durante a gestação.',
         detalhe: '1 dose por temporada',
       },
       {
         nome: 'Covid-19',
+        descricao:
+          'Reduz o risco de formas graves da Covid-19 e contribui para a proteção da gestante durante a gravidez.',
         detalhe: '1 dose a cada gestação',
       },
     ],
@@ -40,6 +48,8 @@ const etapas = [
     vacinas: [
       {
         nome: 'dTpa',
+        descricao:
+          'Protege contra difteria, tétano e coqueluche. A vacinação ajuda a transferir anticorpos para o bebê antes do nascimento.',
         detalhe: '1 dose a cada gestação, conforme orientação vacinal',
       },
     ],
@@ -53,6 +63,8 @@ const etapas = [
     vacinas: [
       {
         nome: 'Vírus sincicial respiratório (VSR)',
+        descricao:
+          'Ajuda a proteger o bebê contra formas graves de infecção pelo VSR nos primeiros meses de vida.',
         detalhe: '1 dose a cada gestação',
       },
     ],
@@ -66,6 +78,8 @@ const etapas = [
     vacinas: [
       {
         nome: 'Febre amarela',
+        descricao:
+          'Protege contra a febre amarela, mas durante a gestação só deve ser considerada após avaliação individual do risco e benefício.',
         detalhe: 'Avaliação profissional em situações excepcionais',
       },
     ],
@@ -204,6 +218,10 @@ export default function VacinaGestante() {
                           <h4 className="text-sm font-semibold text-slate-800">
                             {vacina.nome}
                           </h4>
+
+                          <p className="mt-1 text-sm leading-5 text-slate-600">
+                            {vacina.descricao}
+                          </p>
 
                           <p className="mt-1 text-sm leading-5 text-slate-500">
                             {vacina.detalhe}

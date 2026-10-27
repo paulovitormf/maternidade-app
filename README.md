@@ -36,6 +36,7 @@ O projeto nasceu como uma iniciativa acadêmica e aplica conceitos de desenvolvi
 - Cadastro, listagem e edição de gestações.
 - Cadastro e listagem de crianças vinculadas ao usuário.
 - Consulta de marcos do desenvolvimento infantil.
+- Consulta do calendário de vacinação do bebê até os 5 anos.
 - Perfil do usuário e encerramento de sessão.
 - Interface responsiva para desktop e dispositivos móveis.
 

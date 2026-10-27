@@ -49,6 +49,7 @@ O sistema atualmente oferece:
 | RF-06 | Cadastrar e consultar crianças vinculadas ao usuário. | ✅ Implementado |
 | RF-07 | Exibir marcos do desenvolvimento infantil. | ✅ Implementado |
 | RF-08 | Permitir consultar dados básicos do perfil. | ✅ Implementado |
+| RF-09 | Exibir o calendário de vacinação de rotina do bebê até os 5 anos. | ✅ Implementado |
 
 ## 🎨 Requisitos de experiência
 
