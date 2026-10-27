@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Heart } from 'lucide-react';
+import { Eye, EyeOff, Heart } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AUTH_CHANGED_EVENT, loginUsuario, USUARIO_STORAGE_KEY } from '../services/usuarioService';
@@ -8,6 +8,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
 
@@ -60,7 +61,25 @@ export default function Login() {
           </label>
           <label className="field">
             <span className="field-label">Senha</span>
-            <input className="field-control" type="password" required placeholder="Digite sua senha" value={senha} onChange={(e) => setSenha(e.target.value)} />
+            <div className="relative">
+              <input
+                className="field-control pr-12"
+                type={mostrarSenha ? 'text' : 'password'}
+                required
+                placeholder="Digite sua senha"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+              />
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-500 transition hover:text-[#B0435B] focus:outline-none focus:ring-4 focus:ring-[#FADCE1]"
+                onClick={() => setMostrarSenha((visivel) => !visivel)}
+                aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+              >
+                {mostrarSenha ? <EyeOff size={19} /> : <Eye size={19} />}
+              </button>
+            </div>
           </label>
           {erro && <p className="alert-error">{erro}</p>}
           <button className="primary-button" disabled={carregando}>{carregando ? 'Entrando...' : 'Entrar'}</button>
