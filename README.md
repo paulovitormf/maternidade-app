@@ -23,7 +23,7 @@ Aplicação web acadêmica desenvolvida em grupo na disciplina de **Engenharia d
 
 ## ✨ Sobre o projeto
 
-O **Maternidade** é uma aplicação web responsiva para apoiar mães, pais e responsáveis no acompanhamento da gestação e dos primeiros momentos da vida do bebê. A experiência combina uma interface acolhedora com recursos para centralizar informações pessoais, registros de gestação, dados da criança e marcos do desenvolvimento.
+O **Maternidade** é uma aplicação web responsiva para apoiar mães, pais e responsáveis no acompanhamento da gestação e dos primeiros momentos da vida do bebê. A experiência combina uma interface acolhedora com recursos para centralizar informações pessoais, registros de gestação, dados da criança e a jornada do desenvolvimento.
 
 O projeto nasceu como uma iniciativa acadêmica e aplica conceitos de desenvolvimento full-stack, arquitetura em camadas, autenticação e integração entre uma aplicação React, uma API REST e um banco de dados relacional.
 
@@ -35,7 +35,7 @@ O projeto nasceu como uma iniciativa acadêmica e aplica conceitos de desenvolvi
 - Dashboard inicial após o login.
 - Cadastro, listagem e edição de gestações.
 - Cadastro e listagem de crianças vinculadas ao usuário.
-- Consulta de marcos do desenvolvimento infantil.
+- Consulta da jornada do desenvolvimento infantil.
 - Consulta do calendário de vacinação do bebê até os 5 anos.
 - Perfil do usuário e encerramento de sessão.
 - Interface responsiva para desktop e dispositivos móveis.

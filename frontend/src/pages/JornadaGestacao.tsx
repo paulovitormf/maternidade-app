@@ -9,7 +9,7 @@ type GestacaoResumo = {
   data_parto: string;
 };
 
-const marcosGestacao = [
+const jornadasGestacao = [
   { semana: 4, titulo: 'Início da gestação', texto: 'O embrião começa a se desenvolver. Confirme o acompanhamento com um profissional de saúde.' },
   { semana: 8, titulo: 'Primeiras mudanças', texto: 'Podem surgir náuseas, cansaço e maior sensibilidade. Cuide do descanso e da hidratação.' },
   { semana: 12, titulo: 'Fim do primeiro trimestre', texto: 'É um bom momento para manter os exames do pré-natal em dia e conversar sobre vitaminas.' },
@@ -34,7 +34,7 @@ function formatarDataGestacao(data: string) {
   return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'long' }).format(new Date(`${data}T00:00:00`));
 }
 
-export default function MarcosGestacao() {
+export default function JornadaGestacao() {
   const [gestacao, setGestacao] = useState<GestacaoResumo | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
@@ -63,8 +63,8 @@ export default function MarcosGestacao() {
     () => gestacao ? calcularSemanaAtual(gestacao.ultima_mestruacao) : 0,
     [gestacao],
   );
-  const marcosConcluidos = marcosGestacao.filter((marco) => marco.semana <= semanaAtual);
-  const marcoAtual = marcosConcluidos[marcosConcluidos.length - 1];
+  const jornadasConcluidas = jornadasGestacao.filter((jornada) => jornada.semana <= semanaAtual);
+  const jornadaAtual = jornadasConcluidas[jornadasConcluidas.length - 1];
   const progresso = Math.min(100, Math.round((semanaAtual / 40) * 100));
 
   return (
@@ -72,7 +72,7 @@ export default function MarcosGestacao() {
       <header>
         <span className="form-icon form-icon-pink mb-4"><HeartPulse size={28} /></span>
         <p className="eyebrow">Acompanhamento gestacional</p>
-        <h1 className="display-title">Marcos da gestação</h1>
+        <h1 className="display-title">Jornada da gestação</h1>
         <p className="page-subtitle">Consulte as etapas estimadas da gestação com base na data informada no pré-natal.</p>
       </header>
 
@@ -121,22 +121,22 @@ export default function MarcosGestacao() {
             <span style={{ width: `${progresso}%` }} />
           </div>
 
-          {marcoAtual && (
-            <p className="current-milestone"><strong>Nesta fase:</strong> {marcoAtual.titulo}. {marcoAtual.texto}</p>
+          {jornadaAtual && (
+            <p className="current-milestone"><strong>Nesta fase:</strong> {jornadaAtual.titulo}. {jornadaAtual.texto}</p>
           )}
 
-          <div className="milestones-scroll" tabIndex={0} aria-label="Marcos da gestação por semana">
-            {marcosGestacao.map((marco) => {
-              const concluido = marco.semana <= semanaAtual;
+          <div className="milestones-scroll" tabIndex={0} aria-label="Jornada da gestação por semana">
+            {jornadasGestacao.map((jornada) => {
+              const concluido = jornada.semana <= semanaAtual;
               return (
-                <article className="milestone-item" key={marco.semana}>
+                <article className="milestone-item" key={jornada.semana}>
                   <div className={`milestone-marker ${concluido ? 'milestone-marker-done' : ''}`} aria-hidden="true">
                     {concluido ? <Check size={15} strokeWidth={2.5} /> : <Clock3 size={15} strokeWidth={2} />}
                   </div>
                   <div className="milestone-card">
-                    <span className="milestone-age">{marco.semana}ª semana</span>
-                    <h2>{marco.titulo}</h2>
-                    <p>{marco.texto}</p>
+                    <span className="milestone-age">{jornada.semana}ª semana</span>
+                    <h2>{jornada.titulo}</h2>
+                    <p>{jornada.texto}</p>
                   </div>
                 </article>
               );

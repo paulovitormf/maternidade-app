@@ -73,7 +73,7 @@ O corpo de `POST /api/criancas/{idCrianca}/responsaveis` recebe `{"id_usuario": 
 
 | Método | Endpoint | Proteção | Uso |
 | --- | --- | --- | --- |
-| `GET` | `/api/jornada-desenvolvimento` | JWT | lista a jornada disponível |
+| `GET` | `/api/jornadas-desenvolvimento` | JWT | lista as jornadas disponíveis |
 
 ## 🧯 Respostas e erros
 

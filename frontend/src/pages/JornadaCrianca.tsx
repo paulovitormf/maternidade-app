@@ -11,7 +11,7 @@ type CriancaResumo = {
   altura_nascimento?: number | null;
 };
 
-type MarcoCrianca = {
+type JornadaCriancaResumo = {
   meses: number;
   desenvolvimento: string;
   alimentacao: string;
@@ -20,7 +20,7 @@ type MarcoCrianca = {
   cuidados: string;
 };
 
-const MARCOS: MarcoCrianca[] = [
+const JORNADAS: JornadaCriancaResumo[] = [
   { meses: 0, desenvolvimento: 'Acolhimento, contato pele a pele e respostas a sons e vozes.', alimentacao: 'Leite materno exclusivo, quando possível, ou orientação individualizada da equipe de saúde.', crescimento: 'Registre peso, comprimento e perímetro da cabeça na primeira consulta.', vacinas: 'Confira BCG e hepatite B ao nascer no Calendário Nacional de Vacinação.', cuidados: 'Teste do pezinho, orelhinha, olhinho e coraçãozinho conforme orientação da maternidade.' },
   { meses: 1, desenvolvimento: 'Pode fixar o olhar por instantes e acalmar-se com voz e colo.', alimentacao: 'Observe sinais de fome e saciedade e mantenha a orientação do aleitamento.', crescimento: 'Acompanhe a curva de peso e comprimento; a tendência entre consultas importa mais que um número isolado.', vacinas: 'Verifique se as vacinas do nascimento foram registradas na caderneta.', cuidados: 'Sono seguro: de barriga para cima, em superfície firme e sem objetos soltos.' },
   { meses: 2, desenvolvimento: 'Pode sorrir socialmente, emitir sons e acompanhar pessoas com o olhar.', alimentacao: 'Leite materno em livre demanda; não ofereça água, chás ou outros alimentos sem orientação.', crescimento: 'Faça a consulta de puericultura e leve a caderneta para registrar medidas.', vacinas: 'Confira penta, VIP, pneumocócica e rotavírus, conforme o PNI vigente.', cuidados: 'Converse, cante e faça momentos curtos de brincadeira de barriga para baixo acordado.' },
@@ -57,7 +57,7 @@ function idadeEmMeses(dataNascimento: string) {
   return Math.max(0, meses);
 }
 
-export default function MarcosCrianca() {
+export default function JornadaCrianca() {
   const [criancas, setCriancas] = useState<CriancaResumo[]>([]);
   const [idSelecionado, setIdSelecionado] = useState<number>();
   const [carregando, setCarregando] = useState(true);
@@ -71,30 +71,30 @@ export default function MarcosCrianca() {
 
   const crianca = criancas.find((item) => item.id_crianca === idSelecionado) ?? criancas[0];
   const meses = crianca ? idadeEmMeses(crianca.data_nascimento) : 0;
-  const marcoAtual = useMemo(() => {
-    const marcosAcompanhados = MARCOS.filter((marco) => marco.meses <= meses);
-    return marcosAcompanhados[marcosAcompanhados.length - 1];
+  const jornadaAtual = useMemo(() => {
+    const jornadasAcompanhadas = JORNADAS.filter((jornada) => jornada.meses <= meses);
+    return jornadasAcompanhadas[jornadasAcompanhadas.length - 1];
   }, [meses]);
 
   if (carregando) return <section className="child-milestones-section"><p className="text-sm text-slate-500">Carregando acompanhamento da criança...</p></section>;
   if (!crianca) {
-    return <section className="child-milestones-section"><p className="eyebrow">Acompanhamento infantil</p><h2 className="section-title">Marcos do bebê e da criança</h2><p className="milestones-subtitle">Cadastre uma criança para liberar o acompanhamento personalizado até os 5 anos.</p><Link to="/cadastrar-bebe" className="dashboard-hero-button">Cadastrar criança <ChevronRight size={17} /></Link></section>;
+    return <section className="child-milestones-section"><p className="eyebrow">Acompanhamento infantil</p><h2 className="section-title">Jornada do bebê e da criança</h2><p className="milestones-subtitle">Cadastre uma criança para liberar o acompanhamento personalizado até os 5 anos.</p><Link to="/cadastrar-bebe" className="dashboard-hero-button">Cadastrar criança <ChevronRight size={17} /></Link></section>;
   }
 
   return (
     <section className="child-milestones-section" aria-labelledby="child-milestones-title">
       <div className="section-heading milestones-heading">
-        <div><p className="eyebrow">Acompanhamento infantil</p><h2 id="child-milestones-title" className="section-title">Marcos de {crianca.nome}</h2><p className="milestones-subtitle">Informações organizadas até 5 anos de idade.</p></div>
+        <div><p className="eyebrow">Acompanhamento infantil</p><h2 id="child-milestones-title" className="section-title">Jornada de {crianca.nome}</h2><p className="milestones-subtitle">Informações organizadas até 5 anos de idade.</p></div>
         <Baby size={30} strokeWidth={1.7} aria-hidden="true" />
       </div>
       {criancas.length > 1 && <label className="child-selector"><span>Criança acompanhada</span><select className="field-control" value={crianca.id_crianca} onChange={(e) => setIdSelecionado(Number(e.target.value))}>{criancas.map((item) => <option key={item.id_crianca} value={item.id_crianca}>{item.nome}</option>)}</select></label>}
       <div className="child-summary-grid">
         <div><span>Idade aproximada</span><strong>{meses < 24 ? `${meses} meses` : `${Math.floor(meses / 12)} anos`}</strong></div>
-        <div><span>Próximo foco</span><strong>{marcoAtual ? `Até ${marcoAtual.meses} meses` : 'Nascimento'}</strong></div>
+        <div><span>Próximo foco</span><strong>{jornadaAtual ? `Até ${jornadaAtual.meses} meses` : 'Nascimento'}</strong></div>
       </div>
       <div className="child-topic-legend"><span><Ruler size={15} />Crescimento</span><span><Syringe size={15} />Vacinas</span><span><Utensils size={15} />Alimentação</span><span><ShieldCheck size={15} />Cuidados</span></div>
-      <div className="child-milestones-scroll" tabIndex={0} aria-label={`Marcos de ${crianca.nome} até 5 anos`}>
-        {MARCOS.map((marco) => { const concluido = marco.meses <= meses; const idade = marco.meses === 0 ? 'Nascimento' : marco.meses < 24 ? `${marco.meses} meses` : `${marco.meses / 12} anos`; return <article className={`child-milestone-card ${concluido ? 'child-milestone-done' : ''}`} key={marco.meses}><div className="child-milestone-heading"><span className="milestone-age">{idade}</span>{concluido && <span className="child-done-label"><CheckCircle2 size={15} />Acompanhado</span>}</div><div className="child-info-grid"><div><strong>Desenvolvimento</strong><p>{marco.desenvolvimento}</p></div><div><strong>Alimentação</strong><p>{marco.alimentacao}</p></div><div><strong>Crescimento e peso</strong><p>{marco.crescimento}</p></div><div><strong>Vacinas</strong><p>{marco.vacinas}</p></div><div><strong>Cuidados</strong><p>{marco.cuidados}</p></div><div><strong>Registro</strong><p><CalendarCheck2 size={15} className="inline mr-1" />Leve a caderneta nas consultas.</p></div></div></article>; })}
+      <div className="child-milestones-scroll" tabIndex={0} aria-label={`Jornada de ${crianca.nome} até 5 anos`}>
+        {JORNADAS.map((jornada) => { const concluido = jornada.meses <= meses; const idade = jornada.meses === 0 ? 'Nascimento' : jornada.meses < 24 ? `${jornada.meses} meses` : `${jornada.meses / 12} anos`; return <article className={`child-milestone-card ${concluido ? 'child-milestone-done' : ''}`} key={jornada.meses}><div className="child-milestone-heading"><span className="milestone-age">{idade}</span>{concluido && <span className="child-done-label"><CheckCircle2 size={15} />Acompanhado</span>}</div><div className="child-info-grid"><div><strong>Desenvolvimento</strong><p>{jornada.desenvolvimento}</p></div><div><strong>Alimentação</strong><p>{jornada.alimentacao}</p></div><div><strong>Crescimento e peso</strong><p>{jornada.crescimento}</p></div><div><strong>Vacinas</strong><p>{jornada.vacinas}</p></div><div><strong>Cuidados</strong><p>{jornada.cuidados}</p></div><div><strong>Registro</strong><p><CalendarCheck2 size={15} className="inline mr-1" />Leve a caderneta nas consultas.</p></div></div></article>; })}
       </div>
       <p className="milestones-disclaimer">Conteúdo educativo baseado em orientações do Ministério da Saúde. Vacinas, peso, alimentação e desenvolvimento devem ser confirmados com a equipe que acompanha a criança. <a href="https://www.gov.br/saude/pt-br/vacinacao/calendario" target="_blank" rel="noreferrer">Consultar calendário oficial</a>.</p>
     </section>

@@ -8,12 +8,12 @@ import CadastroGestacao from './pages/CadastroGestacao';
 import CadastroUsuario from './pages/CadastroUsuario';
 import ContinuarCadastro from './pages/ContinuarCadastro';
 import Login from './pages/Login';
-import MarcosGestacao from './pages/MarcosGestacao';
+import JornadaGestacao from './pages/JornadaGestacao';
 import JornadaDesenvolvimento from './pages/JornadaDesenvolvimento';
 import VacinaBebe from './pages/VacinaBebe';
 import VacinaGestante from './pages/VacinaGestante';
 import Perfil from './pages/Perfil';
-import MarcosCrianca from './pages/MarcosCrianca';
+import JornadaCrianca from './pages/JornadaCrianca';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
 
 export default function App() {
@@ -54,7 +54,7 @@ function AppLayout() {
             {isAuthenticated && <Link className="nav-link" to="/cadastrar-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Gestação</Link>}
             {isAuthenticated && <Link className="nav-link" to="/cadastrar-bebe"><Baby size={16} strokeWidth={1.8} />Bebê</Link>}
             {isAuthenticated && <Link className="nav-link" to="/jornadas-desenvolvimento"><Sparkles size={16} strokeWidth={1.8} />Jornadas</Link>}
-            {isAuthenticated && <Link className="nav-link" to="/marcos-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Marcos da gestação</Link>}
+            {isAuthenticated && <Link className="nav-link" to="/jornada-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Jornada da gestação</Link>}
             {isAuthenticated && (<Link className="nav-link" to="/vacinas-bebe"><Baby size={16} strokeWidth={1.8} />Vacinas do bebê</Link>)}
             {isAuthenticated && (<Link className="nav-link" to="/vacinas-gestante"><Heart size={16} strokeWidth={1.8} />Vacinação</Link>)}
           </div>
@@ -73,12 +73,12 @@ function AppLayout() {
           <Route path="/cadastrar-bebe" element={<ProtectedRoute><CadastroBebe /></ProtectedRoute>} />
           <Route path="/cadastrar-gestacao" element={<ProtectedRoute><CadastroGestacao /></ProtectedRoute>} />
           <Route path="/jornadas-desenvolvimento" element={<ProtectedRoute><JornadaDesenvolvimento /></ProtectedRoute>} />
-          <Route path="/marcos-gestacao" element={<ProtectedRoute><MarcosGestacao /></ProtectedRoute>} />
+          <Route path="/jornada-gestacao" element={<ProtectedRoute><JornadaGestacao /></ProtectedRoute>} />
           <Route path="/vacinas-bebe" element={<ProtectedRoute><VacinaBebe /></ProtectedRoute>} />
           <Route path="/vacinas-gestante" element={<ProtectedRoute><VacinaGestante /></ProtectedRoute>}/>
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
-          <Route path="/marcos-crianca" element={<ProtectedRoute><MarcosCrianca /></ProtectedRoute>} />
+          <Route path="/jornada-crianca" element={<ProtectedRoute><JornadaCrianca /></ProtectedRoute>} />
         </Routes>
       </main>
 
@@ -228,9 +228,9 @@ function HomeDashboard() {
           <span><strong>Acompanhar desenvolvimento</strong><small>Veja as jornadas por idade</small></span>
           <ChevronRight size={18} />
         </Link>
-        <Link to="/marcos-gestacao" className="quick-action quick-action-pink group">
+        <Link to="/jornada-gestacao" className="quick-action quick-action-pink group">
           <span className="quick-action-icon"><CalendarDays size={23} strokeWidth={1.7} /></span>
-          <span><strong>Marcos da gestação</strong><small>Acompanhe as semanas e a previsão de parto</small></span>
+          <span><strong>Jornada da gestação</strong><small>Acompanhe as semanas e a previsão de parto</small></span>
           <ChevronRight size={18} />
         </Link>
       </div>
