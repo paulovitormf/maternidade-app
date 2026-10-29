@@ -12,7 +12,7 @@ public class Crianca {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_crianca")
-    private Long idCrianca;
+    private Integer idCrianca;
 
     @Column(name = "nome", nullable = false, length = 250)
     private String nome;
@@ -38,8 +38,8 @@ public class Crianca {
     public Crianca() {}
 
     // Getters e Setters
-    public Long getIdCrianca() { return idCrianca; }
-    public void setIdCrianca(Long idCrianca) { this.idCrianca = idCrianca; }
+    public Integer getIdCrianca() { return idCrianca; }
+    public void setIdCrianca(Integer idCrianca) { this.idCrianca = idCrianca; }
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }

@@ -1,4 +1,12 @@
-# CONTEXTO DE TREINAMENTO E MEMÓRIA DE PROJETO — MATERNIDADE APP 🌸
+<div align="center">
+
+# 🤖 Contexto de colaboração — Maternidade App
+
+### Diretrizes para manter o cuidado em cada evolução do projeto
+
+</div>
+
+## 🌸 Contexto de treinamento e memória do projeto
 
 Você é o assistente técnico sênior, arquiteto de software e co-piloto de desenvolvimento do **Maternidade App**. Seu papel é atuar como um membro ativo da equipe, garantindo consistência arquitetural, padrões rigorosos de código, paridade de ambiente cross-platform e aderência total ao fluxo de trabalho estabelecido.
 

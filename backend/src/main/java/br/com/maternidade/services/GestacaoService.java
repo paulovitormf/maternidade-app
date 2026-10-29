@@ -11,6 +11,7 @@ import br.com.maternidade.repository.UsuarioRepository;
 
 import java.util.List;
 import java.time.LocalDate;
+import java.util.Locale;
 
 @Service
 public class GestacaoService {
@@ -24,9 +25,9 @@ public class GestacaoService {
     }
 
     @Transactional
-    public Gestacao cadastrarGestacao(GestacaoDTO dto) {
-        if (dto == null || dto.id_usuario() == null) {
-            throw new IllegalArgumentException("Usuário é obrigatório.");
+    public Gestacao cadastrarGestacao(GestacaoDTO dto, String emailAutenticado) {
+        if (dto == null || emailAutenticado == null || emailAutenticado.isBlank()) {
+            throw new IllegalArgumentException("Usuário autenticado é obrigatório.");
         }
         if (dto.ultima_mestruacao() == null) {
             throw new IllegalArgumentException("DUM é obrigatória.");
@@ -34,38 +35,94 @@ public class GestacaoService {
         if (dto.ultima_mestruacao().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("A DUM não pode estar no futuro.");
         }
-        if (dto.idade_gestacional() != null
-                && (dto.idade_gestacional() < 0 || dto.idade_gestacional() > 42)) {
+
+        Integer idadeGestacionalInformada = dto.idade_gestacional();
+        Integer idadeGestacionalCalculada = Gestacao.calcularIdadeGestacional(dto.ultima_mestruacao());
+
+        if (idadeGestacionalInformada != null
+                && (idadeGestacionalInformada < 0 || idadeGestacionalInformada > 42)) {
             throw new IllegalArgumentException("A idade gestacional deve estar entre 0 e 42 semanas.");
         }
-        // 1. Busca o usuário (mãe) pelo ID fornecido no DTO
-        Usuario usuario = usuarioRepository.findById(dto.id_usuario())
-                .orElseThrow(() -> new IllegalArgumentException("Usuário (Mãe) não encontrado com o ID: " + dto.id_usuario()));
 
-        // 2. Cria e popula a entidade Gestacao
+        Usuario usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+
+        String tipoGestacao = normalizarTipo(dto.tipo_gestacao());
+        String tipoGestacaoDetalhe = normalizarTipo(dto.tipo_gestacao_detalhe());
+        validarTipo(tipoGestacao, tipoGestacaoDetalhe);
         Gestacao gestacao = new Gestacao();
         gestacao.setUsuario(usuario);
         gestacao.setUltimaMestruacao(dto.ultima_mestruacao());
-        gestacao.setIdadeGestacional(dto.idade_gestacional());
-        gestacao.setDataParto(dto.ultima_mestruacao().plusDays(280));
-        gestacao.setTipoGestacao(dto.tipo_gestacao());
+        gestacao.setIdadeGestacional(idadeGestacionalInformada != null ? idadeGestacionalInformada : idadeGestacionalCalculada);
+        gestacao.setDataParto(Gestacao.calcularDataParto(dto.ultima_mestruacao()));
+        gestacao.setTipoGestacao(tipoGestacao);
+        gestacao.setTipoGestacaoDetalhe(tipoGestacaoDetalhe);
         gestacao.setPreNatal(dto.pre_natal());
 
-        // 3. Atualiza o contador de gestações na entidade do Usuário
         int gestacoesAtuais = usuario.getQntGestacao() != null ? usuario.getQntGestacao() : 0;
         usuario.setQntGestacao(gestacoesAtuais + 1);
         usuarioRepository.save(usuario);
 
-        // 4. Salva o registro na tabela 'gestacao' do MySQL
         return gestacaoRepository.save(gestacao);
     }
 
-    public List<Gestacao> listarPorUsuario(Long idUsuario) {
-        return gestacaoRepository.findByUsuarioIdUsuario(idUsuario);
+    public List<Gestacao> listarPorUsuario(Integer idUsuario) {
+        return gestacaoRepository.findByUsuarioIdUsuarioOrderByUltimaMestruacaoDesc(idUsuario);
     }
 
-    public Gestacao buscarMaisRecentePorUsuario(Long idUsuario) {
+    public Usuario buscarUsuarioAutenticado(String emailAutenticado) {
+        if (emailAutenticado == null || emailAutenticado.isBlank()) {
+            throw new IllegalArgumentException("Usuário autenticado é obrigatório.");
+        }
+        return usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+    }
+
+    public Gestacao buscarMaisRecentePorUsuario(Integer idUsuario) {
         return gestacaoRepository.findFirstByUsuarioIdUsuarioOrderByIdGestacaoDesc(idUsuario)
                 .orElseThrow(() -> new IllegalArgumentException("Nenhuma gestação cadastrada para o usuário ID: " + idUsuario));
+    }
+
+    @Transactional
+    public Gestacao atualizarGestacao(Integer idGestacao, GestacaoDTO dto, String emailAutenticado) {
+        Usuario usuario = buscarUsuarioAutenticado(emailAutenticado);
+        Gestacao gestacao = gestacaoRepository.findById(idGestacao)
+                .filter(item -> item.getUsuario().getIdUsuario().equals(usuario.getIdUsuario()))
+                .orElseThrow(() -> new IllegalArgumentException("Gestação não encontrada."));
+        if (dto.ultima_mestruacao() == null || dto.ultima_mestruacao().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Informe uma DUM válida.");
+        }
+        if (dto.idade_gestacional() != null && (dto.idade_gestacional() < 0 || dto.idade_gestacional() > 42)) {
+            throw new IllegalArgumentException("A idade gestacional deve estar entre 0 e 42 semanas.");
+        }
+        String tipoGestacao = normalizarTipo(dto.tipo_gestacao());
+        String tipoGestacaoDetalhe = normalizarTipo(dto.tipo_gestacao_detalhe());
+        validarTipo(tipoGestacao, tipoGestacaoDetalhe);
+        gestacao.setUltimaMestruacao(dto.ultima_mestruacao());
+        gestacao.setIdadeGestacional(dto.idade_gestacional() != null ? dto.idade_gestacional() : Gestacao.calcularIdadeGestacional(dto.ultima_mestruacao()));
+        gestacao.setDataParto(Gestacao.calcularDataParto(dto.ultima_mestruacao()));
+        gestacao.setTipoGestacao(tipoGestacao);
+        gestacao.setTipoGestacaoDetalhe(tipoGestacaoDetalhe);
+        gestacao.setPreNatal(dto.pre_natal());
+        return gestacaoRepository.save(gestacao);
+    }
+
+    private void validarTipo(String tipo, String detalhe) {
+        if (tipo == null || !tipo.matches("UNICA|GEMEOS|TRIGEMEOS_OU_MAIS|AINDA_NAO_SEI")) {
+            throw new IllegalArgumentException("Tipo de gestação inválido.");
+        }
+        boolean multipla = "GEMEOS".equals(tipo) || "TRIGEMEOS_OU_MAIS".equals(tipo);
+        if (multipla && (detalhe == null || !detalhe.matches("BIVITELINO|UNIVITELINO|AINDA_NAO_SEI"))) {
+            throw new IllegalArgumentException("Informe o tipo da gestação múltipla.");
+        }
+        if (!multipla && detalhe != null && !detalhe.isBlank()) {
+            throw new IllegalArgumentException("O detalhe só se aplica a gestações múltiplas.");
+        }
+    }
+
+    private String normalizarTipo(String valor) {
+        return valor == null || valor.isBlank()
+                ? null
+                : valor.trim().toUpperCase(Locale.ROOT);
     }
 }

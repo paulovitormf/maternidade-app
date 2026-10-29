@@ -68,6 +68,59 @@
     @apply hidden w-full gap-1 border-t border-[#fecdd3] pt-3 sm:flex sm:w-auto sm:border-0 sm:pt-0;
   }
 
+  .nav-login-button {
+    @apply inline-flex items-center gap-2 rounded-2xl border border-[#F4C4CD] bg-[#FFF8F9] px-4 py-2 text-sm font-extrabold text-[#B0435B] transition hover:bg-[#FADCE1] focus:outline-none focus:ring-4 focus:ring-[#FADCE1];
+  }
+
+  .profile-menu-wrap {
+    @apply relative ml-auto;
+  }
+
+  .profile-menu-trigger {
+    @apply inline-flex items-center gap-2 rounded-2xl border border-[#F4C4CD] bg-white px-2 py-1.5 text-sm font-extrabold text-slate-700 transition hover:bg-[#FFF8F9] focus:outline-none focus:ring-4 focus:ring-[#FADCE1];
+  }
+
+  .profile-photo {
+    @apply flex h-9 w-9 items-center justify-center rounded-xl bg-[#FADCE1] text-xs font-extrabold text-[#B0435B];
+  }
+
+  .profile-trigger-name {
+    @apply hidden max-w-28 truncate sm:inline;
+  }
+
+  .profile-chevron {
+    @apply text-[#C8526B] transition-transform;
+  }
+
+  .profile-dropdown {
+    @apply absolute right-0 top-[calc(100%+0.6rem)] z-50 w-64 overflow-hidden rounded-2xl border border-[#FADCE1] bg-white p-2 shadow-[0_18px_45px_-18px_rgba(30,41,59,0.35)];
+  }
+
+  .profile-dropdown-heading {
+    @apply border-b border-[#FADCE1] px-3 pb-3 pt-2;
+  }
+
+  .profile-dropdown-heading strong,
+  .profile-dropdown-heading span {
+    @apply block truncate;
+  }
+
+  .profile-dropdown-heading strong {
+    @apply text-sm text-slate-800;
+  }
+
+  .profile-dropdown-heading span {
+    @apply mt-1 text-xs text-slate-500;
+  }
+
+  .profile-dropdown-link {
+    @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-bold text-slate-600 transition hover:bg-[#FFF0F2] hover:text-[#B0435B];
+  }
+
+  .profile-logout {
+    @apply text-[#B0435B];
+  }
+
   .nav-link {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-center text-sm font-semibold text-slate-600 transition hover:bg-[#FADCE1] hover:text-[#B0435B] sm:text-left;
   }
@@ -113,6 +166,30 @@
 
   .form-card {
     @apply mx-auto my-auto w-full max-w-2xl;
+  }
+
+  .profile-header {
+    @apply flex flex-col items-start gap-5 sm:flex-row sm:items-center;
+  }
+
+  .profile-avatar {
+    @apply flex h-20 w-20 shrink-0 items-center justify-center rounded-[1.7rem] bg-[#FADCE1] text-[#C8526B] shadow-[0_8px_20px_-14px_rgba(200,82,107,0.5)];
+  }
+
+  .profile-details {
+    @apply mt-5 grid gap-4 sm:grid-cols-2;
+  }
+
+  .profile-details > div {
+    @apply flex items-start gap-3 rounded-2xl bg-[#FFF8F9] p-4 text-[#B0435B];
+  }
+
+  .profile-details span {
+    @apply flex flex-col gap-1 text-sm text-slate-600;
+  }
+
+  .profile-details strong {
+    @apply text-xs font-extrabold uppercase tracking-wide text-slate-800;
   }
 
   .form-icon {
@@ -163,6 +240,22 @@
     @apply rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700;
   }
 
+  .empty-state {
+    @apply flex flex-col items-center gap-3 py-14 text-center;
+  }
+
+  .empty-state > svg {
+    @apply text-[#C8526B];
+  }
+
+  .empty-state h2 {
+    @apply text-xl font-extrabold text-slate-800;
+  }
+
+  .empty-state p {
+    @apply mb-2 text-sm text-slate-500;
+  }
+
   .auth-layout {
     @apply grid min-h-[calc(100vh-8rem)] items-center gap-8 lg:grid-cols-[1fr_0.85fr];
   }
@@ -182,6 +275,51 @@
 
   .dashboard {
     @apply mx-auto w-full max-w-5xl pb-24;
+  }
+
+  .welcome-screen {
+    @apply mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center px-2 py-12 text-center sm:py-16;
+  }
+
+  .welcome-mark {
+    @apply mb-7 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-[#FADCE1] text-[#C8526B] shadow-[0_18px_35px_-22px_rgba(200,82,107,0.65)];
+  }
+
+  .welcome-title {
+    @apply max-w-xl text-4xl leading-tight sm:text-5xl;
+  }
+
+  .welcome-subtitle {
+    @apply max-w-lg;
+  }
+
+  .welcome-benefits {
+    @apply mt-10 grid w-full max-w-3xl gap-3 text-left sm:grid-cols-3;
+  }
+
+  .welcome-benefit {
+    @apply rounded-2xl border border-[#FADCE1] bg-white/80 p-4 shadow-[0_12px_30px_-24px_rgba(200,82,107,0.7)];
+  }
+
+  .welcome-benefit svg {
+    @apply mb-3 text-[#C8526B];
+  }
+
+  .welcome-benefit strong {
+    @apply block text-sm font-extrabold text-slate-800;
+  }
+
+  .welcome-benefit span {
+    @apply mt-1 block text-xs leading-5 text-slate-500;
+  }
+
+  .welcome-actions {
+    @apply mt-8 flex w-full max-w-sm flex-col gap-3 sm:flex-row;
+  }
+
+  .welcome-actions .primary-button,
+  .welcome-actions .secondary-button {
+    @apply flex-1;
   }
 
   .dashboard-header {
@@ -275,6 +413,101 @@
     @apply flex h-12 w-12 shrink-0 items-center justify-center rounded-[1.15rem];
   }
 
+  .milestones-section {
+    @apply rounded-3xl border border-[#D6E9ED] bg-white p-5 shadow-[0_18px_45px_-30px_rgba(59,114,128,0.35)] sm:p-6;
+  }
+
+  .milestones-heading {
+    @apply mb-4 flex items-start justify-between gap-4;
+  }
+
+  .milestones-subtitle {
+    @apply mt-1 text-sm text-slate-500;
+  }
+
+  .gestation-week-badge {
+    @apply shrink-0 rounded-2xl bg-[#3B7280] px-3 py-2 text-xs font-extrabold text-white;
+  }
+
+  .gestation-summary {
+    @apply mb-3 grid gap-3 rounded-2xl bg-[#EBF3F5] p-4 sm:grid-cols-2;
+  }
+
+  .gestation-summary div {
+    @apply flex flex-col gap-1;
+  }
+
+  .gestation-summary span {
+    @apply text-xs font-semibold text-[#3B7280];
+  }
+
+  .gestation-summary strong {
+    @apply text-sm text-slate-800;
+  }
+
+  .gestation-progress {
+    @apply mb-4 h-2 overflow-hidden rounded-full bg-[#D6E9ED];
+  }
+
+  .gestation-progress span {
+    @apply block h-full rounded-full bg-[#C8526B] transition-all duration-500;
+  }
+
+  .current-milestone {
+    @apply mb-4 rounded-2xl border border-[#FADCE1] bg-[#fffdfc] p-4 text-sm leading-6 text-slate-600;
+  }
+
+  .current-milestone strong {
+    @apply text-[#B0435B];
+  }
+
+  .milestones-disclaimer {
+    @apply mt-4 text-xs leading-5 text-slate-400;
+  }
+
+  .milestones-scroll {
+    @apply relative max-h-[25rem] overflow-y-auto overscroll-contain pr-2;
+    scrollbar-color: #c8526b #fdf1f3;
+    scrollbar-width: thin;
+  }
+
+  .milestones-scroll:focus-visible {
+    @apply rounded-2xl outline-none ring-4 ring-[#fadce1];
+  }
+
+  .milestone-item {
+    @apply relative flex gap-3 pb-4 last:pb-0;
+  }
+
+  .milestone-item:not(:last-child)::before {
+    content: '';
+    @apply absolute left-[1.05rem] top-9 h-[calc(100%-1rem)] w-px bg-[#D6E9ED];
+  }
+
+  .milestone-marker {
+    @apply relative z-10 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-[#D6E9ED] bg-white text-[#3B7280];
+  }
+
+  .milestone-marker-done {
+    @apply border-[#C8526B] bg-[#C8526B] text-white;
+  }
+
+  .milestone-card {
+    @apply min-w-0 flex-1 rounded-2xl border border-[#FADCE1] bg-[#fffdfc] px-4 py-3;
+  }
+
+  .milestone-age {
+    @apply text-xs font-extrabold uppercase tracking-[0.12em] text-[#C8526B];
+  }
+
+  .milestone-card h2 {
+    @apply mt-1 text-sm font-extrabold text-slate-800;
+  }
+
+  .milestone-card p {
+    @apply mt-1 text-xs leading-5 text-slate-500;
+  }
+
   .dashboard-tip {
     @apply mt-5 flex items-center gap-3 rounded-3xl border border-[#FADCE1] bg-white/80 p-4;
   }
@@ -317,3 +550,25 @@
     }
   }
 }
+
+.milestones-disclaimer a { @apply font-bold text-[#3B7280] underline; }
+.child-milestones-section { @apply mb-8 rounded-[2rem] border border-[#FADCE1] bg-white p-5 shadow-[0_18px_45px_-30px_rgba(200,82,107,0.35)] sm:p-6; }
+.child-milestones-section > .milestones-heading > svg { @apply bg-[#FADCE1] text-[#C8526B]; }
+.child-selector { @apply mb-4 block max-w-sm; }
+.child-selector span { @apply mb-2 block text-xs font-extrabold uppercase tracking-[0.12em] text-[#3B7280]; }
+.child-summary-grid { @apply mb-4 grid gap-3 rounded-2xl bg-[#FFF7F8] p-4 sm:grid-cols-2; }
+.child-summary-grid div { @apply flex flex-col gap-1; }
+.child-summary-grid span { @apply text-xs font-semibold text-[#B0435B]; }
+.child-summary-grid strong { @apply text-sm text-slate-800; }
+.child-topic-legend { @apply mb-4 flex flex-wrap gap-2; }
+.child-topic-legend span { @apply inline-flex items-center gap-1 rounded-full bg-[#EBF3F5] px-3 py-1.5 text-xs font-bold text-[#3B7280]; }
+.child-milestones-scroll { @apply max-h-[42rem] space-y-3 overflow-y-auto overscroll-contain pr-2; scrollbar-color: #c8526b #fdf1f3; scrollbar-width: thin; }
+.child-milestones-scroll:focus-visible { @apply rounded-2xl outline-none ring-4 ring-[#fadce1]; }
+.child-milestone-card { @apply rounded-3xl border border-[#E2E8F0] bg-[#fffdfc] p-4 transition sm:p-5; }
+.child-milestone-done { @apply border-[#FADCE1] bg-[#FFF9FA]; }
+.child-milestone-heading { @apply mb-4 flex items-center justify-between gap-3; }
+.child-done-label { @apply inline-flex items-center gap-1 text-xs font-bold text-emerald-600; }
+.child-info-grid { @apply grid gap-3 md:grid-cols-2; }
+.child-info-grid > div { @apply rounded-2xl bg-white p-3; }
+.child-info-grid strong { @apply text-xs font-extrabold text-slate-700; }
+.child-info-grid p { @apply mt-1 text-xs leading-5 text-slate-500; }

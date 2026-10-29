@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 
 import br.com.maternidade.model.Usuario;
 import java.util.Optional;
+import java.util.List;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
@@ -14,4 +15,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     // Busca usuário pelo e-mail (útil para autenticação e login)
     Optional<Usuario> findByEmail(String email);
+
+    Optional<Usuario> findByIdUsuario(Integer idUsuario);
+
+    List<Usuario> findTop8ByNomeContainingIgnoreCaseAndIdUsuarioNotOrderByNomeAsc(
+            String nome, Integer idUsuario);
 }

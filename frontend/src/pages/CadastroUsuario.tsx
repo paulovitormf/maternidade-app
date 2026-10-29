@@ -1,6 +1,13 @@
 import { FormEvent, useState } from 'react';
+import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { cadastrarUsuario, CadastroUsuarioPayload } from '../services/usuarioService';
+import {
+  AUTH_CHANGED_EVENT,
+  cadastrarUsuario,
+  CadastroUsuarioPayload,
+  loginUsuario,
+  USUARIO_STORAGE_KEY,
+} from '../services/usuarioService';
 
 export default function CadastroUsuario() {
   const navigate = useNavigate();
@@ -10,12 +17,30 @@ export default function CadastroUsuario() {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setErro('');
+
+    if(form.senha.length < 8){
+      setErro('A senha deve ter no mínimo 8 caracteres.');
+      return;
+    }
     try {
       const payload: CadastroUsuarioPayload = { usuario: { ...form, qnt_gestacao: 0 } };
       await cadastrarUsuario(payload);
-      navigate('/login');
-    } catch {
-      setErro('Não foi possível realizar o cadastro. Confira os dados e tente novamente.');
+    } catch (error) {
+      setErro(obterMensagemErro(error));
+      return;
+    }
+
+    try {
+      const respostaLogin = await loginUsuario({ email: form.email, senha: form.senha });
+      localStorage.setItem('access_token', respostaLogin.token);
+      localStorage.setItem('id_usuario', String(respostaLogin.usuario.id_usuario));
+      localStorage.setItem(USUARIO_STORAGE_KEY, JSON.stringify(respostaLogin.usuario));
+      window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
+      navigate('/continuar-cadastro', { state: { etapa: 'gestacao' }, replace: true });
+    } catch (error) {
+      setErro(
+        `Sua conta foi criada, mas não foi possível entrar automaticamente. ${obterMensagemErro(error)} Entre usando seu e-mail e senha.`,
+      );
     }
   };
 
@@ -42,9 +67,15 @@ export default function CadastroUsuario() {
               className="field-control"
               type={type}
               required={required}
+              minLength={name === 'senha' ? 8 : undefined}
               value={form[name]}
               onChange={(e) => setForm({ ...form, [name]: e.target.value })}
             />
+            {name === 'senha' && (
+              <span className="text-sm text-slate-500">
+                A senha deve ter no mínimo 8 caracteres.
+              </span>
+            )}
           </label>
         ))}
         {erro && <p className="alert-error field-wide">{erro}</p>}
@@ -57,4 +88,18 @@ export default function CadastroUsuario() {
       </form>
     </section>
   );
+}
+
+function obterMensagemErro(error: unknown) {
+  if (axios.isAxiosError(error)) {
+    const resposta = error.response?.data;
+    const mensagem = typeof resposta === 'string'
+      ? resposta
+      : resposta && typeof resposta.message === 'string'
+        ? resposta.message
+        : null;
+    return mensagem || 'Não foi possível conectar ao servidor. Tente novamente.';
+  }
+
+  return 'Não foi possível conectar ao servidor. Tente novamente.';
 }

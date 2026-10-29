@@ -2,15 +2,32 @@ package br.com.maternidade.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(name = "gestacao")
 public class Gestacao {
 
+    public static LocalDate calcularDataParto(LocalDate ultimaMestruacao) {
+        if (ultimaMestruacao == null) {
+            return null;
+        }
+        return ultimaMestruacao.plusDays(280);
+    }
+
+    public static Integer calcularIdadeGestacional(LocalDate ultimaMestruacao) {
+        if (ultimaMestruacao == null) {
+            return null;
+        }
+
+        long diasDesdeDum = ChronoUnit.DAYS.between(ultimaMestruacao, LocalDate.now());
+        return Math.max(0, Math.min(42, (int) (diasDesdeDum / 7)));
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_gestacao")
-    private Long idGestacao;
+    private Integer idGestacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
@@ -25,8 +42,11 @@ public class Gestacao {
     @Column(name = "data_parto")
     private LocalDate dataParto;
 
-    @Column(name = "tipo_gestacao", columnDefinition = "TEXT")
+    @Column(name = "tipo_gestacao", length = 30)
     private String tipoGestacao;
+
+    @Column(name = "tipo_gestacao_detalhe", length = 30)
+    private String tipoGestacaoDetalhe;
 
     @Column(name = "pre_natal")
     private Boolean preNatal;
@@ -35,22 +55,23 @@ public class Gestacao {
     public Gestacao() {}
 
     // Construtor Completo
-    public Gestacao(Long idGestacao, Usuario usuario, LocalDate ultimaMestruacao, Integer idadeGestacional, LocalDate dataParto, String tipoGestacao, Boolean preNatal) {
+    public Gestacao(Integer idGestacao, Usuario usuario, LocalDate ultimaMestruacao, Integer idadeGestacional, LocalDate dataParto, String tipoGestacao, String tipoGestacaoDetalhe, Boolean preNatal) {
         this.idGestacao = idGestacao;
         this.usuario = usuario;
         this.ultimaMestruacao = ultimaMestruacao;
         this.idadeGestacional = idadeGestacional;
         this.dataParto = dataParto;
         this.tipoGestacao = tipoGestacao;
+        this.tipoGestacaoDetalhe = tipoGestacaoDetalhe;
         this.preNatal = preNatal;
     }
 
     // Getters e Setters
-    public Long getIdGestacao() {
+    public Integer getIdGestacao() {
         return idGestacao;
     }
 
-    public void setIdGestacao(Long idGestacao) {
+    public void setIdGestacao(Integer idGestacao) {
         this.idGestacao = idGestacao;
     }
 
@@ -93,6 +114,10 @@ public class Gestacao {
     public void setTipoGestacao(String tipoGestacao) {
         this.tipoGestacao = tipoGestacao;
     }
+
+    public String getTipoGestacaoDetalhe() { return tipoGestacaoDetalhe; }
+
+    public void setTipoGestacaoDetalhe(String tipoGestacaoDetalhe) { this.tipoGestacaoDetalhe = tipoGestacaoDetalhe; }
 
     public Boolean getPreNatal() {
         return preNatal;

@@ -7,16 +7,23 @@ import org.springframework.web.bind.annotation.*;
 import br.com.maternidade.dto.UsuarioCadastroDTO;
 import br.com.maternidade.dto.LoginDTO;
 import br.com.maternidade.dto.UsuarioPublicoDTO;
+import br.com.maternidade.dto.LoginRespostaDTO;
+import br.com.maternidade.config.JwtService;
 import br.com.maternidade.services.UsuarioService;
+import br.com.maternidade.dto.UsuarioBuscaDTO;
+import org.springframework.security.core.Authentication;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final JwtService jwtService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, JwtService jwtService) {
         this.usuarioService = usuarioService;
+        this.jwtService = jwtService;
     }
 
     @PostMapping
@@ -32,7 +39,25 @@ public class UsuarioController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO dto) {
-        try { return ResponseEntity.ok(UsuarioPublicoDTO.from(usuarioService.autenticar(dto.email(), dto.senha()))); }
+        try {
+            if (dto == null) {
+                throw new IllegalArgumentException("E-mail ou senha inválidos.");
+            }
+            var usuario = usuarioService.autenticar(dto.email(), dto.senha());
+            return ResponseEntity.ok(new LoginRespostaDTO(
+                    jwtService.generateToken(usuario.getEmail()),
+                    UsuarioPublicoDTO.from(usuario)));
+        }
         catch (IllegalArgumentException e) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage()); }
+    }
+
+    @GetMapping("/busca")
+    public ResponseEntity<?> buscarResponsaveis(@RequestParam String q, Authentication authentication) {
+        try {
+            List<UsuarioBuscaDTO> usuarios = usuarioService.buscarResponsaveis(q, authentication.getName());
+            return ResponseEntity.ok(usuarios);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

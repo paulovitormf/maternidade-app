@@ -1,10 +1,20 @@
-import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
-import { Baby, CalendarDays, ChevronRight, CircleUserRound, Heart, HeartHandshake, Home, Menu, Plus, Sparkles } from 'lucide-react';
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import { Baby, CalendarDays, ChevronRight, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, Plus, Sparkles } from 'lucide-react';
 
 import CadastroBebe from './pages/CadastroCrianca';
 import CadastroGestacao from './pages/CadastroGestacao';
 import CadastroUsuario from './pages/CadastroUsuario';
+import ContinuarCadastro from './pages/ContinuarCadastro';
 import Login from './pages/Login';
+import JornadaGestacao from './pages/JornadaGestacao';
+import JornadaDesenvolvimento from './pages/JornadaDesenvolvimento';
+import VacinaBebe from './pages/VacinaBebe';
+import VacinaGestante from './pages/VacinaGestante';
+import Perfil from './pages/Perfil';
+import JornadaCrianca from './pages/JornadaCrianca';
+import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
 
 export default function App() {
   return (
@@ -16,7 +26,20 @@ export default function App() {
 
 function AppLayout() {
   const location = useLocation();
+  const [, setAuthVersion] = useState(0);
   const isHome = location.pathname === '/';
+  const isAuthenticated = hasValidSession();
+  const usuario = getStoredUser();
+
+  useEffect(() => {
+    const refresh = () => setAuthVersion((version) => version + 1);
+    window.addEventListener(AUTH_CHANGED_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(AUTH_CHANGED_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
 
   return (
     <div className="app-shell">
@@ -27,11 +50,17 @@ function AppLayout() {
             <span className="brand-name">Maternidade</span>
           </Link>
           <div className="nav-links">
-            <Link className="nav-link" to="/"><Home size={16} strokeWidth={1.8} />Início</Link>
-            <Link className="nav-link" to="/cadastrar-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Gestação</Link>
-            <Link className="nav-link" to="/cadastrar-bebe"><Baby size={16} strokeWidth={1.8} />Bebê</Link>
-            <Link className="nav-link" to="/login"><CircleUserRound size={16} strokeWidth={1.8} />Entrar</Link>
+            {isAuthenticated && <Link className="nav-link" to="/"><Home size={16} strokeWidth={1.8} />Início</Link>}
+            {isAuthenticated && <Link className="nav-link" to="/cadastrar-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Gestação</Link>}
+            {isAuthenticated && <Link className="nav-link" to="/cadastrar-bebe"><Baby size={16} strokeWidth={1.8} />Bebê</Link>}
+            {isAuthenticated && <Link className="nav-link" to="/jornadas-desenvolvimento"><Sparkles size={16} strokeWidth={1.8} />Jornadas</Link>}
+            {isAuthenticated && <Link className="nav-link" to="/jornada-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Jornada da gestação</Link>}
+            {isAuthenticated && (<Link className="nav-link" to="/vacinas-bebe"><Baby size={16} strokeWidth={1.8} />Vacinas do bebê</Link>)}
+            {isAuthenticated && (<Link className="nav-link" to="/vacinas-gestante"><Heart size={16} strokeWidth={1.8} />Vacinação</Link>)}
           </div>
+          {isAuthenticated && usuario ? <ProfileMenu usuario={usuario} /> : (
+            <Link className="nav-login-button" to="/login"><CircleUserRound size={18} />Entrar</Link>
+          )}
           <button className="mobile-menu-button" type="button" aria-label="Abrir menu"><Menu size={21} /></button>
         </div>
       </nav>
@@ -40,32 +69,127 @@ function AppLayout() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/cadastrar-usuario" element={<CadastroUsuario />} />
-          <Route path="/cadastrar-bebe" element={<CadastroBebe />} />
-          <Route path="/cadastrar-gestacao" element={<CadastroGestacao />} />
-          <Route path="/" element={<HomeDashboard />} />
+          <Route path="/continuar-cadastro" element={<ProtectedRoute><ContinuarCadastro /></ProtectedRoute>} />
+          <Route path="/cadastrar-bebe" element={<ProtectedRoute><CadastroBebe /></ProtectedRoute>} />
+          <Route path="/cadastrar-gestacao" element={<ProtectedRoute><CadastroGestacao /></ProtectedRoute>} />
+          <Route path="/jornadas-desenvolvimento" element={<ProtectedRoute><JornadaDesenvolvimento /></ProtectedRoute>} />
+          <Route path="/jornada-gestacao" element={<ProtectedRoute><JornadaGestacao /></ProtectedRoute>} />
+          <Route path="/vacinas-bebe" element={<ProtectedRoute><VacinaBebe /></ProtectedRoute>} />
+          <Route path="/vacinas-gestante" element={<ProtectedRoute><VacinaGestante /></ProtectedRoute>}/>
+          <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+          <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
+          <Route path="/jornada-crianca" element={<ProtectedRoute><JornadaCrianca /></ProtectedRoute>} />
         </Routes>
       </main>
 
-      {isHome && (
+      {isHome && isAuthenticated && (
         <nav className="mobile-bottom-nav" aria-label="Navegação principal">
           <Link className="mobile-bottom-link active" to="/"><Home size={19} strokeWidth={1.8} /><span>Início</span></Link>
           <Link className="mobile-bottom-link" to="/cadastrar-gestacao"><CalendarDays size={19} strokeWidth={1.8} /><span>Gestação</span></Link>
           <Link className="mobile-add-button" to="/cadastrar-gestacao" aria-label="Adicionar gestação"><Plus size={23} strokeWidth={1.8} /></Link>
           <Link className="mobile-bottom-link" to="/cadastrar-bebe"><Baby size={19} strokeWidth={1.8} /><span>Bebê</span></Link>
-          <Link className="mobile-bottom-link" to="/login"><CircleUserRound size={19} strokeWidth={1.8} /><span>Conta</span></Link>
+          <Link className="mobile-bottom-link" to="/perfil"><CircleUserRound size={19} strokeWidth={1.8} /><span>Perfil</span></Link>
         </nav>
       )}
     </div>
   );
 }
 
+function ProtectedRoute({ children }: { children: ReactNode }) {
+  return hasValidSession()
+    ? children
+    : <Navigate to="/login" replace />;
+}
+
+function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
+  const [aberto, setAberto] = useState(false);
+  const primeiroNome = usuario.nome.trim().split(/\s+/)[0];
+
+  const sair = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('id_usuario');
+    localStorage.removeItem(USUARIO_STORAGE_KEY);
+    window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
+  };
+
+  return (
+    <div className="profile-menu-wrap">
+      <button
+        className="profile-menu-trigger"
+        type="button"
+        aria-expanded={aberto}
+        aria-haspopup="menu"
+        onClick={() => setAberto((value) => !value)}
+        onMouseEnter={() => setAberto(true)}
+      >
+        <span className="profile-photo">{getInitials(usuario.nome)}</span>
+        <span className="profile-trigger-name">{primeiroNome}</span>
+        <ChevronRight size={15} className={`profile-chevron ${aberto ? 'rotate-90' : ''}`} />
+      </button>
+      {aberto && (
+        <div className="profile-dropdown" role="menu" onMouseLeave={() => setAberto(false)}>
+          <div className="profile-dropdown-heading">
+            <strong>{usuario.nome}</strong>
+            <span>{usuario.email}</span>
+          </div>
+          <Link to="/perfil" className="profile-dropdown-link" role="menuitem" onClick={() => setAberto(false)}>
+            <CircleUserRound size={17} /> Meu perfil
+          </Link>
+          <button className="profile-dropdown-link profile-logout" type="button" role="menuitem" onClick={sair}>
+            <span><LogOut size={17} /> Sair</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function WelcomeScreen() {
+  return (
+    <section className="welcome-screen">
+      <div className="welcome-mark" aria-hidden="true">
+        <HeartHandshake size={42} strokeWidth={1.35} />
+      </div>
+      <p className="eyebrow">Um espaço para cuidar</p>
+      <h1 className="display-title welcome-title">Acompanhe sua jornada com mais leveza.</h1>
+      <p className="page-subtitle welcome-subtitle">
+        Organize informações importantes da gestação e dos primeiros momentos do bebê em um só lugar.
+      </p>
+      <div className="welcome-actions">
+        <Link className="primary-button" to="/login">Entrar na minha conta</Link>
+        <Link className="secondary-button" to="/cadastrar-usuario">Criar cadastro</Link>
+      </div>
+      <div className="welcome-benefits">
+        <div className="welcome-benefit">
+          <Heart size={20} strokeWidth={1.8} fill="currentColor" />
+          <strong>Cuidado em um só lugar</strong>
+          <span>Organize sua gestação e os primeiros momentos do bebê.</span>
+        </div>
+        <div className="welcome-benefit">
+          <Baby size={20} strokeWidth={1.8} />
+          <strong>Acompanhe cada fase</strong>
+          <span>Registre informações importantes com praticidade e carinho.</span>
+        </div>
+        <div className="welcome-benefit">
+          <Sparkles size={20} strokeWidth={1.8} />
+          <strong>Mais tranquilidade</strong>
+          <span>Tenha uma rotina mais leve para cuidar do que realmente importa.</span>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function HomeDashboard() {
+  const usuario = getStoredUser();
+  const nome = usuario?.nome?.trim().split(/\s+/)[0] || 'querida';
+
   return (
     <section className="dashboard">
       <header className="dashboard-header">
         <div>
           <p className="eyebrow">Seu espaço de cuidado</p>
-          <h1 className="display-title">Olá, vamos cuidar de você?</h1>
+          <h1 className="display-title">Olá, {nome}!</h1>
           <p className="page-subtitle">Acompanhe sua jornada com leveza, informação e carinho.</p>
         </div>
         <div className="dashboard-avatar"><CircleUserRound size={24} strokeWidth={1.7} /></div>
@@ -99,12 +223,48 @@ function HomeDashboard() {
           <span><strong>Cadastrar bebê</strong><small>Registre os primeiros momentos</small></span>
           <ChevronRight size={18} />
         </Link>
+        <Link to="/jornadas-desenvolvimento" className="quick-action quick-action-blue group">
+          <span className="quick-action-icon"><Sparkles size={23} strokeWidth={1.7} /></span>
+          <span><strong>Acompanhar desenvolvimento</strong><small>Veja as jornadas por idade</small></span>
+          <ChevronRight size={18} />
+        </Link>
+        <Link to="/jornada-gestacao" className="quick-action quick-action-pink group">
+          <span className="quick-action-icon"><CalendarDays size={23} strokeWidth={1.7} /></span>
+          <span><strong>Jornada da gestação</strong><small>Acompanhe as semanas e a previsão de parto</small></span>
+          <ChevronRight size={18} />
+        </Link>
       </div>
 
-      <div className="dashboard-tip">
+  <div className="dashboard-tip">
         <span className="dashboard-tip-icon"><Heart size={18} strokeWidth={1.7} fill="currentColor" /></span>
         <div><strong>Um lembrete para você</strong><p>Pequenos registros ajudam a guardar grandes momentos.</p></div>
       </div>
     </section>
   );
+}
+
+function getStoredUser(): UsuarioPublico | null {
+  const data = localStorage.getItem(USUARIO_STORAGE_KEY);
+  if (!data) return null;
+  try {
+    return JSON.parse(data) as UsuarioPublico;
+  } catch {
+    return null;
+  }
+}
+
+function hasValidSession() {
+  const token = localStorage.getItem('access_token');
+  const usuario = getStoredUser();
+  if (!token || !usuario) return false;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1])) as { exp?: number };
+    return !payload.exp || payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+function getInitials(nome: string) {
+  return nome.trim().split(/\s+/).slice(0, 2).map((parte) => parte[0]).join('').toUpperCase();
 }

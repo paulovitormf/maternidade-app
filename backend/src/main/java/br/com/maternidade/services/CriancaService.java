@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.maternidade.dto.CriancaCadastroDTO;
+import br.com.maternidade.dto.CriancaAcessoDTO;
 import br.com.maternidade.model.Crianca;
 import br.com.maternidade.repository.CriancaRepository;
 import br.com.maternidade.repository.UsuarioCriancaRepository;
@@ -21,9 +22,9 @@ public class CriancaService {
     }
 
     @Transactional
-    public Crianca cadastrarCrianca(CriancaCadastroDTO dto) {
-        if (dto == null || dto.id_usuario() == null) {
-            throw new IllegalArgumentException("Usuário é obrigatório.");
+    public Crianca cadastrarCrianca(CriancaCadastroDTO dto, String emailAutenticado) {
+        if (dto == null || emailAutenticado == null || emailAutenticado.isBlank()) {
+            throw new IllegalArgumentException("Usuário autenticado é obrigatório.");
         }
         if (dto.nome() == null || dto.nome().isBlank()
                 || dto.data_nascimento() == null || dto.hora_nascimento() == null) {
@@ -39,9 +40,8 @@ public class CriancaService {
         if (dto.tipo_relacao() == null || !dto.tipo_relacao().matches("MAE|PAI|RESPONSAVEL")) {
             throw new IllegalArgumentException("Tipo de relação inválido.");
         }
-        if (!usuarioRepository.existsById(dto.id_usuario())) {
-            throw new IllegalArgumentException("Usuário não encontrado.");
-        }
+        var usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
 
         // 1. Instancia a entidade Crianca
         Crianca crianca = new Crianca();
@@ -57,8 +57,45 @@ public class CriancaService {
         Crianca criancaSalva = criancaRepository.save(crianca);
 
         vinculoRepository.save(new br.com.maternidade.model.UsuarioCrianca(
-                dto.id_usuario(), criancaSalva.getIdCrianca(), dto.tipo_relacao()));
+                usuario.getIdUsuario(), criancaSalva.getIdCrianca(), dto.tipo_relacao()));
 
         return criancaSalva;
+    }
+
+    @Transactional
+    public void adicionarResponsavel(Integer idCrianca, Integer idResponsavel, String emailAutenticado) {
+        if (idCrianca == null || idResponsavel == null || emailAutenticado == null || emailAutenticado.isBlank()) {
+            throw new IllegalArgumentException("Criança, responsável e usuário autenticado são obrigatórios.");
+        }
+
+        var usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+        boolean eResponsavelPrincipal = vinculoRepository.existsByIdUsuarioAndIdCriancaAndTipoAcessoAndAtivo(
+                usuario.getIdUsuario(), idCrianca, "PRINCIPAL", true);
+        if (!eResponsavelPrincipal) {
+            throw new IllegalArgumentException("Somente o responsável principal pode adicionar outro responsável.");
+        }
+        if (usuario.getIdUsuario().equals(idResponsavel)) {
+            throw new IllegalArgumentException("Você já está vinculado a esta criança.");
+        }
+
+        var responsavel = usuarioRepository.findByIdUsuario(idResponsavel)
+                .orElseThrow(() -> new IllegalArgumentException("Responsável selecionado não encontrado."));
+        if (vinculoRepository.existsByIdUsuarioAndIdCrianca(idResponsavel, idCrianca)) {
+            throw new IllegalArgumentException("Este usuário já está vinculado a esta criança.");
+        }
+
+        vinculoRepository.save(new br.com.maternidade.model.UsuarioCrianca(
+                responsavel.getIdUsuario(), idCrianca, "RESPONSAVEL",
+                "RESPONSAVEL", usuario.getIdUsuario(), false));
+    }
+
+    public java.util.List<CriancaAcessoDTO> listarPorUsuario(String emailAutenticado) {
+        var usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+        return criancaRepository.findByUsuarioId(usuario.getIdUsuario());
+    }
+    public java.util.List<Crianca> listarEntidadesPorUsuario(Long idUsuario) {
+        return criancaRepository.findEntidadesByUsuarioId(Math.toIntExact(idUsuario));
     }
 }
