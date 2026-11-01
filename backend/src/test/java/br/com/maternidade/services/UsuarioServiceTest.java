@@ -8,9 +8,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import br.com.maternidade.dto.UsuarioBuscaDTO;
 import br.com.maternidade.dto.UsuarioCadastroDTO;
 import br.com.maternidade.model.Gestacao;
 import br.com.maternidade.model.Usuario;
@@ -128,6 +131,40 @@ class UsuarioServiceTest {
     }
 
     @Test
+    @DisplayName("Deve rejeitar gestação com DUM no futuro no cadastro de usuário")
+    void deveRejeitarGestacaoComDumNoFuturo() {
+        UsuarioCadastroDTO dto = new UsuarioCadastroDTO(
+                new UsuarioCadastroDTO.UsuarioData(
+                        "Maria", "maria@example.com", "senha-segura", null, null, 0),
+                new UsuarioCadastroDTO.GestacaoData(
+                        LocalDate.now().plusDays(1), 10, "UNICA", true));
+        when(usuarioRepository.existsByEmail("maria@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("senha-segura")).thenReturn("senha-criptografada");
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertThatThrownBy(() -> usuarioService.cadastrarUsuario(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("A DUM é obrigatória e não pode estar no futuro.");
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar idade gestacional inválida no cadastro de usuário")
+    void deveRejeitarIdadeGestacionalInvalidaNoCadastro() {
+        UsuarioCadastroDTO dto = new UsuarioCadastroDTO(
+                new UsuarioCadastroDTO.UsuarioData(
+                        "Maria", "maria@example.com", "senha-segura", null, null, 0),
+                new UsuarioCadastroDTO.GestacaoData(
+                        LocalDate.now().minusWeeks(4), 50, "UNICA", true));
+        when(usuarioRepository.existsByEmail("maria@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("senha-segura")).thenReturn("senha-criptografada");
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        assertThatThrownBy(() -> usuarioService.cadastrarUsuario(dto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("A idade gestacional deve estar entre 0 e 42 semanas.");
+    }
+
+    @Test
     void deveAutenticarUsuarioComEmailNormalizado() {
         Usuario usuario = new Usuario();
         usuario.setEmail("maria@example.com");
@@ -171,6 +208,37 @@ class UsuarioServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("E-mail ou senha inválidos.");
         verify(usuarioRepository, never()).findByEmail(any(String.class));
+    }
+
+    @Test
+    @DisplayName("Deve buscar responsáveis mascarando o e-mail")
+    void deveBuscarResponsaveisMascarandoEmail() {
+        Usuario authUser = new Usuario();
+        authUser.setIdUsuario(1);
+        authUser.setEmail("auth@example.com");
+
+        Usuario resp1 = new Usuario();
+        resp1.setIdUsuario(2);
+        resp1.setNome("Carlos Silva");
+        resp1.setEmail("carlos.silva@example.com");
+
+        when(usuarioRepository.findByEmail("auth@example.com")).thenReturn(Optional.of(authUser));
+        when(usuarioRepository.findTop8ByNomeContainingIgnoreCaseAndIdUsuarioNotOrderByNomeAsc("Carlos", 1))
+                .thenReturn(List.of(resp1));
+
+        List<UsuarioBuscaDTO> resultado = usuarioService.buscarResponsaveis("Carlos", "auth@example.com");
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).nome()).isEqualTo("Carlos Silva");
+        assertThat(resultado.get(0).email_mascarado()).isEqualTo("c***@example.com");
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar busca com menos de 2 caracteres")
+    void deveRejeitarBuscaComMenosDe2Caracteres() {
+        assertThatThrownBy(() -> usuarioService.buscarResponsaveis("a", "auth@example.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Digite pelo menos 2 caracteres para buscar.");
     }
 
     private UsuarioCadastroDTO usuarioDto(String nome, String email, String senha) {
