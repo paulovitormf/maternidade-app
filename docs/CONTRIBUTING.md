@@ -72,6 +72,8 @@ docs/atualiza-guia-execucao
 
 Não abra Pull Requests de branches de trabalho diretamente para `main`. A `dev` é o ponto de integração do desenvolvimento; a `main` deve receber somente alterações estáveis.
 
+O workflow [Validate main PR source](../.github/workflows/validate-main-pr-source.yml) verifica automaticamente os Pull Requests cujo destino é `main` e falha quando a branch de origem não é exatamente `dev`. Configure o check `PR must come from dev` como obrigatório nas regras de proteção da branch `main` para impedir a integração de PRs de outras branches.
+
 ## 📝 Commits
 
 Todos os commits devem seguir o padrão [Conventional Commits](https://www.conventionalcommits.org/):

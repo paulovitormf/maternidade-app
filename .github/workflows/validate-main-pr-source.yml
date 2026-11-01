@@ -1,0 +1,30 @@
+name: Validate main PR source
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: read
+
+jobs:
+  require-dev-source:
+    name: PR must come from dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate source branch
+        env:
+          SOURCE_BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          if [ "$SOURCE_BRANCH" != "dev" ]; then
+            echo "::error::Pull Requests para main devem ser originados exclusivamente da branch dev. Origem recebida: $SOURCE_BRANCH"
+            exit 1
+          fi
+
+          echo "Pull Request válido: dev -> main"
