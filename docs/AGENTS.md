@@ -82,3 +82,51 @@ Você atuará como um **Assistente Técnico Sênior, Revisor de Código, Desenvo
 2. Exiba o trecho de código modificado em um bloco de visualização (diff ou trecho em código).
 3. **Pergunte explicitamente ao desenvolvedor:** *"Deseja que eu aplique essas alterações no arquivo [nome_do_arquivo]?"*
 4. Somente após o "Sim" ou confirmação clara do usuário, proceda com a alteração do arquivo.
+
+---
+
+## 🧪 6. VALIDAÇÃO E TESTES AUTOMATIZADOS
+
+Antes de concluir alterações, execute os testes unitários e o build:
+
+```bash
+# Back-end
+cd backend
+mvn --batch-mode test
+
+# Front-end
+cd ../frontend
+npm ci
+npm test
+npm run build
+```
+
+Os testes unitários não precisam de MySQL, Docker, variáveis secretas ou serviços externos. Não inicie containers durante essa validação. Testes que dependam de banco ou serviços externos devem ser explicitamente separados dos testes unitários.
+
+O workflow [.github/workflows/tests.yml](../.github/workflows/tests.yml) executa esses mesmos comandos automaticamente em todo `push` e `pull_request`.
+
+### Orientação para agentes de código
+
+Agentes como Jules devem usar os comandos acima para validar as alterações. O back-end utiliza Maven e Java 21; o front-end utiliza npm, Node.js 24 e Vitest. A instalação do front-end deve usar `npm ci`, respeitando o `package-lock.json`.
+
+## 🔎 ANÁLISE DE PROBLEMAS E CRIAÇÃO DE ISSUES
+
+Além de executar os testes, o agente deve analisar as alterações e o código relacionado em busca de:
+
+- erros de lógica, compilação ou integração;
+- inconsistências entre front-end, back-end, banco e documentação;
+- falhas de segurança ou validação;
+- regressões e problemas de manutenção;
+- melhorias necessárias para o comportamento esperado do projeto.
+
+Quando encontrar um problema real, reproduzível e fora do escopo da alteração atual, deve abrir uma Issue no GitHub contendo:
+
+- título claro e objetivo;
+- descrição do problema e impacto;
+- passos para reproduzir;
+- comportamento atual e esperado;
+- arquivos ou componentes afetados;
+- testes e evidências relevantes;
+- prioridade ou severidade, quando aplicável.
+
+Antes de abrir uma Issue, pesquise as Issues abertas e fechadas para evitar duplicidade. Não abra Issues para hipóteses não verificadas, preferências pessoais ou avisos sem impacto. Se o problema for pequeno, diretamente relacionado à alteração atual e seguro de corrigir, corrija-o em vez de abrir uma Issue. Ao final, informe ao usuário as Issues criadas e seus links.

@@ -118,17 +118,18 @@ O passo a passo completo, as variáveis de ambiente e a solução de problemas e
 ## 🧪 Validação local
 
 ```bash
-# Front-end
+# Front-end: testes unitários e build
 cd frontend
 npm ci
+npm test
 npm run build
 
-# Back-end
+# Back-end: testes unitários
 cd ../backend
-mvn test
+mvn --batch-mode test
 ```
 
-O build do front-end executa a checagem TypeScript antes da compilação do Vite. O comando do back-end executa a suíte configurada pelo Maven, caso existam testes no checkout.
+Os mesmos comandos são executados automaticamente pelo GitHub Actions em todo `push` e `pull_request`, por meio de [.github/workflows/tests.yml](.github/workflows/tests.yml). Os testes unitários não precisam de MySQL, Docker ou serviços externos.
 
 ## 📚 Documentação
 
