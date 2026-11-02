@@ -9,6 +9,7 @@ import br.com.maternidade.model.Crianca;
 import br.com.maternidade.repository.CriancaRepository;
 import br.com.maternidade.repository.UsuarioCriancaRepository;
 import br.com.maternidade.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class CriancaService {
@@ -16,9 +17,19 @@ public class CriancaService {
     private final CriancaRepository criancaRepository;
     private final UsuarioCriancaRepository vinculoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final NotificacaoService notificacaoService;
+
+    @Autowired
+    public CriancaService(CriancaRepository criancaRepository, UsuarioCriancaRepository vinculoRepository,
+            UsuarioRepository usuarioRepository, NotificacaoService notificacaoService) {
+        this.criancaRepository = criancaRepository;
+        this.vinculoRepository = vinculoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.notificacaoService = notificacaoService;
+    }
 
     public CriancaService(CriancaRepository criancaRepository, UsuarioCriancaRepository vinculoRepository, UsuarioRepository usuarioRepository) {
-        this.criancaRepository = criancaRepository; this.vinculoRepository = vinculoRepository; this.usuarioRepository = usuarioRepository;
+        this(criancaRepository, vinculoRepository, usuarioRepository, null);
     }
 
     @Transactional
@@ -88,6 +99,13 @@ public class CriancaService {
         vinculoRepository.save(new br.com.maternidade.model.UsuarioCrianca(
                 responsavel.getIdUsuario(), idCrianca, "RESPONSAVEL",
                 "RESPONSAVEL", usuario.getIdUsuario(), false));
+        if (notificacaoService != null) {
+            var crianca = criancaRepository.findById(idCrianca)
+                    .orElseThrow(() -> new IllegalArgumentException("Criança não encontrada."));
+            notificacaoService.registrarCompartilhamento(
+                    usuario.getIdUsuario(), responsavel.getIdUsuario(), idCrianca,
+                    usuario.getNome(), crianca.getNome());
+        }
     }
 
     public java.util.List<CriancaAcessoDTO> listarPorUsuario(String emailAutenticado) {

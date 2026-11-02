@@ -2,6 +2,8 @@ import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Baby, Bell, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
+import { listarNotificacoes, marcarNotificacoesComoLidas } from './services/notificacaoService';
+import type { Notificacao } from './services/notificacaoService';
 
 import CadastroBebe from './pages/CadastroCrianca';
 import CadastroGestacao from './pages/CadastroGestacao';
@@ -232,7 +234,24 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
 function NotificationCenter() {
   const [aberto, setAberto] = useState(false);
-  const quantidadeNotificacoes = 0;
+  const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
+  const [erro, setErro] = useState(false);
+
+  useEffect(() => {
+    listarNotificacoes()
+      .then(setNotificacoes)
+      .catch(() => setErro(true));
+  }, []);
+
+  const alternarNotificacoes = () => {
+    const novoEstado = !aberto;
+    setAberto(novoEstado);
+    if (novoEstado && notificacoes.some((notificacao) => notificacao.status !== 'LIDA')) {
+      marcarNotificacoesComoLidas()
+        .then(() => setNotificacoes((atuais) => atuais.map((notificacao) => ({ ...notificacao, status: 'LIDA' }))))
+        .catch(() => undefined);
+    }
+  };
 
   return (
     <div className="notification-menu-wrap">
@@ -242,14 +261,12 @@ function NotificationCenter() {
         aria-label="Abrir notificações"
         aria-expanded={aberto}
         aria-controls="notification-panel"
-        onClick={() => setAberto((value) => !value)}
+        onClick={alternarNotificacoes}
       >
         <Bell size={19} strokeWidth={1.8} />
-        {quantidadeNotificacoes > 0 && (
-          <span className="notification-badge" aria-label={`${quantidadeNotificacoes} notificações`}>
-            {quantidadeNotificacoes}
-          </span>
-        )}
+        <span className="notification-badge" aria-label={`${notificacoes.filter((notificacao) => notificacao.status !== 'LIDA').length} notificações`}>
+          {notificacoes.filter((notificacao) => notificacao.status !== 'LIDA').length}
+        </span>
       </button>
       {aberto && (
         <section className="notification-panel" id="notification-panel" aria-label="Notificações">
@@ -260,11 +277,30 @@ function NotificationCenter() {
             </div>
             <Bell size={18} aria-hidden="true" />
           </div>
-          <div className="notification-empty">
-            <Bell size={28} strokeWidth={1.5} aria-hidden="true" />
-            <strong>Nenhuma notificação nova</strong>
-            <p>Você está em dia por enquanto.</p>
-          </div>
+          {erro ? (
+            <div className="notification-empty">
+              <strong>Não foi possível carregar as notificações.</strong>
+            </div>
+          ) : notificacoes.length === 0 ? (
+            <div className="notification-empty">
+              <Bell size={28} strokeWidth={1.5} aria-hidden="true" />
+              <strong>Nenhuma notificação nova</strong>
+              <p>Você está em dia por enquanto.</p>
+            </div>
+          ) : (
+            <div className="notification-list">
+              {notificacoes.map((notificacao) => (
+                <article className={`notification-item ${notificacao.status === 'LIDA' ? 'read' : 'unread'}`} key={notificacao.id}>
+                  <Bell size={17} aria-hidden="true" />
+                  <div>
+                    <strong>{notificacao.titulo}</strong>
+                    <p>{notificacao.mensagem}</p>
+                    <time>{new Date(notificacao.dataAgendada).toLocaleString('pt-BR')}</time>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       )}
     </div>
