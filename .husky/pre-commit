@@ -1,0 +1,17 @@
+echo "Executando testes do backend..."
+mvn -f backend/pom.xml test
+
+if [ $? -ne 0 ]; then
+  echo "ERRO: Os testes do backend falharam. Commit cancelado."
+  exit 1
+fi
+
+echo "Executando testes do frontend..."
+npm --prefix frontend test
+
+if [ $? -ne 0 ]; then
+  echo "ERRO: Os testes do frontend falharam. Commit cancelado."
+  exit 1
+fi
+
+echo "Todos os testes passaram!"
