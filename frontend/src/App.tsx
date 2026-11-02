@@ -1,7 +1,7 @@
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Baby, CalendarDays, ChevronRight, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, Plus, Sparkles } from 'lucide-react';
+import { Baby, Bell, CalendarDays, ChevronRight, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, Plus, Sparkles } from 'lucide-react';
 
 import CadastroBebe from './pages/CadastroCrianca';
 import CadastroGestacao from './pages/CadastroGestacao';
@@ -58,6 +58,7 @@ function AppLayout() {
             {isAuthenticated && (<Link className="nav-link" to="/vacinas-bebe"><Baby size={16} strokeWidth={1.8} />Vacinas do bebê</Link>)}
             {isAuthenticated && (<Link className="nav-link" to="/vacinas-gestante"><Heart size={16} strokeWidth={1.8} />Vacinação</Link>)}
           </div>
+          {isAuthenticated && <NotificationCenter />}
           {isAuthenticated && usuario ? <ProfileMenu usuario={usuario} /> : (
             <Link className="nav-login-button" to="/login"><CircleUserRound size={18} />Entrar</Link>
           )}
@@ -99,6 +100,42 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return hasValidSession()
     ? children
     : <Navigate to="/login" replace />;
+}
+
+function NotificationCenter() {
+  const [aberto, setAberto] = useState(false);
+
+  return (
+    <div className="notification-menu-wrap">
+      <button
+        className="notification-trigger"
+        type="button"
+        aria-label="Abrir notificações"
+        aria-expanded={aberto}
+        aria-controls="notification-panel"
+        onClick={() => setAberto((value) => !value)}
+      >
+        <Bell size={19} strokeWidth={1.8} />
+        <span className="notification-badge" aria-label="0 notificações">0</span>
+      </button>
+      {aberto && (
+        <section className="notification-panel" id="notification-panel" aria-label="Notificações">
+          <div className="notification-panel-heading">
+            <div>
+              <strong>Notificações</strong>
+              <span>Avisos importantes aparecerão aqui.</span>
+            </div>
+            <Bell size={18} aria-hidden="true" />
+          </div>
+          <div className="notification-empty">
+            <Bell size={28} strokeWidth={1.5} aria-hidden="true" />
+            <strong>Nenhuma notificação nova</strong>
+            <p>Você está em dia por enquanto.</p>
+          </div>
+        </section>
+      )}
+    </div>
+  );
 }
 
 function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {

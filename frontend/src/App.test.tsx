@@ -34,6 +34,12 @@ describe('App Navigation and Layout', () => {
     expect(screen.getByText(/Olá, Maria!/i)).toBeInTheDocument();
     expect(screen.getByText(/Sua jornada começa aqui/i)).toBeInTheDocument();
 
+    const notificationTrigger = screen.getByRole('button', { name: /Abrir notificações/i });
+    fireEvent.click(notificationTrigger);
+    expect(screen.getByText(/Nenhuma notificação nova/i)).toBeInTheDocument();
+    fireEvent.click(notificationTrigger);
+    expect(screen.queryByText(/Nenhuma notificação nova/i)).not.toBeInTheDocument();
+
     const trigger = screen.getByRole('button', { name: /Maria/i });
     fireEvent.click(trigger);
 

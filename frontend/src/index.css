@@ -76,6 +76,51 @@
     @apply relative ml-auto;
   }
 
+  .notification-menu-wrap {
+    @apply relative;
+  }
+
+  .notification-trigger {
+    @apply relative inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[#F4C4CD] bg-white text-[#B0435B] transition hover:bg-[#FFF8F9] focus:outline-none focus:ring-4 focus:ring-[#FADCE1];
+  }
+
+  .notification-badge {
+    @apply absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#C8526B] px-1 text-[10px] font-extrabold leading-none text-white;
+  }
+
+  .notification-panel {
+    @apply absolute right-0 top-[calc(100%+0.6rem)] z-50 w-80 overflow-hidden rounded-2xl border border-[#FADCE1] bg-white shadow-[0_18px_45px_-18px_rgba(30,41,59,0.35)];
+  }
+
+  .notification-panel-heading {
+    @apply flex items-start justify-between gap-3 border-b border-[#FADCE1] px-4 py-3 text-[#B0435B];
+  }
+
+  .notification-panel-heading strong,
+  .notification-panel-heading span {
+    @apply block;
+  }
+
+  .notification-panel-heading strong {
+    @apply text-sm font-extrabold text-slate-800;
+  }
+
+  .notification-panel-heading span {
+    @apply mt-1 text-xs font-medium text-slate-500;
+  }
+
+  .notification-empty {
+    @apply flex flex-col items-center px-5 py-8 text-center text-[#C8526B];
+  }
+
+  .notification-empty strong {
+    @apply mt-3 text-sm font-extrabold text-slate-700;
+  }
+
+  .notification-empty p {
+    @apply mt-1 text-xs text-slate-500;
+  }
+
   .profile-menu-trigger {
     @apply inline-flex items-center gap-2 rounded-2xl border border-[#F4C4CD] bg-white px-2 py-1.5 text-sm font-extrabold text-slate-700 transition hover:bg-[#FFF8F9] focus:outline-none focus:ring-4 focus:ring-[#FADCE1];
   }
