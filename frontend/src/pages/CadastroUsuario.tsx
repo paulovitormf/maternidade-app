@@ -1,3 +1,4 @@
+import { Eye, EyeOff } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
@@ -12,6 +13,7 @@ import {
 export default function CadastroUsuario() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ nome: '', email: '', senha: '', data_nascimento: '', telefone: '' });
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState('');
 
   const submit = async (event: FormEvent) => {
@@ -63,14 +65,36 @@ export default function CadastroUsuario() {
         {fields.map(([name, label, type, required], index) => (
           <label className={`field ${index < 2 ? 'field-wide' : ''}`} key={name}>
             <span className="field-label">{label}{required ? ' *' : ''}</span>
-            <input
-              className="field-control"
-              type={type}
-              required={required}
-              minLength={name === 'senha' ? 8 : undefined}
-              value={form[name]}
-              onChange={(e) => setForm({ ...form, [name]: e.target.value })}
-            />
+            {name === 'senha' ? (
+              <div className="relative">
+                <input
+                  className="field-control pr-12"
+                  type={mostrarSenha ? 'text' : 'password'}
+                  required={required}
+                  minLength={8}
+                  placeholder="Mínimo 8 caracteres"
+                  value={form[name]}
+                  onChange={(e) => setForm({ ...form, [name]: e.target.value })}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-500 transition hover:text-[#B0435B] focus:outline-none focus:ring-4 focus:ring-[#FADCE1]"
+                  onClick={() => setMostrarSenha((visivel) => !visivel)}
+                  aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                  title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                >
+                  {mostrarSenha ? <EyeOff size={19} /> : <Eye size={19} />}
+                </button>
+              </div>
+            ) : (
+              <input
+                className="field-control"
+                type={type}
+                required={required}
+                value={form[name]}
+                onChange={(e) => setForm({ ...form, [name]: e.target.value })}
+              />
+            )}
             {name === 'senha' && (
               <span className="text-sm text-slate-500">
                 A senha deve ter no mínimo 8 caracteres.

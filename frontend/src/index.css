@@ -72,8 +72,12 @@
     @apply inline-flex items-center gap-2 rounded-2xl border border-[#F4C4CD] bg-[#FFF8F9] px-4 py-2 text-sm font-extrabold text-[#B0435B] transition hover:bg-[#FADCE1] focus:outline-none focus:ring-4 focus:ring-[#FADCE1];
   }
 
+  .nav-user-actions {
+    @apply ml-auto flex items-center gap-2;
+  }
+
   .profile-menu-wrap {
-    @apply relative ml-auto;
+    @apply relative;
   }
 
   .notification-menu-wrap {
@@ -138,18 +142,18 @@
   }
 
   .profile-dropdown {
-    @apply absolute right-0 top-[calc(100%+0.4rem)] z-50 w-64 overflow-hidden rounded-2xl border border-[#FADCE1] bg-white p-2 shadow-[0_18px_45px_-18px_rgba(30,41,59,0.35)];
+    @apply absolute right-0 top-0 z-50 w-72 overflow-hidden rounded-2xl border border-[#FADCE1] bg-white p-2 shadow-[0_18px_45px_-18px_rgba(30,41,59,0.35)];
   }
 
   .animate-dropdown {
-    animation: dropdownFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: dropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     transform-origin: top right;
   }
 
   @keyframes dropdownFadeIn {
     from {
       opacity: 0;
-      transform: translateY(-6px) scale(0.97);
+      transform: translateY(-4px) scale(0.98);
     }
     to {
       opacity: 1;
@@ -157,21 +161,8 @@
     }
   }
 
-  .profile-dropdown-heading {
-    @apply border-b border-[#FADCE1] px-3 pb-3 pt-2;
-  }
-
-  .profile-dropdown-heading strong,
-  .profile-dropdown-heading span {
-    @apply block truncate;
-  }
-
-  .profile-dropdown-heading strong {
-    @apply text-sm text-slate-800;
-  }
-
-  .profile-dropdown-heading span {
-    @apply mt-1 text-xs text-slate-500;
+  .profile-dropdown-header-card {
+    @apply flex items-center gap-3 rounded-xl bg-[#FFF8F9] p-2.5 border-b border-[#FADCE1]/60 mb-1 cursor-pointer;
   }
 
   .profile-dropdown-link {
@@ -179,7 +170,7 @@
   }
 
   .profile-logout {
-    @apply text-[#B0435B];
+    @apply flex items-center gap-3 text-[#B0435B];
   }
 
   .nav-link {

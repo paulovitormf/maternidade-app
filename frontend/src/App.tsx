@@ -1,7 +1,7 @@
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Baby, Bell, CalendarDays, ChevronDown, ChevronRight, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, Plus, Sparkles, Syringe, X } from 'lucide-react';
+import { Baby, Bell, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
 
 import CadastroBebe from './pages/CadastroCrianca';
 import CadastroGestacao from './pages/CadastroGestacao';
@@ -80,13 +80,20 @@ function AppLayout() {
               />
             )}
           </div>
-          {isAuthenticated && <NotificationCenter />}
-          {isAuthenticated && usuario ? <ProfileMenu usuario={usuario} /> : (
-            <Link className="nav-login-button" to="/login"><CircleUserRound size={18} />Entrar</Link>
+          {isAuthenticated && usuario ? (
+            <div className="nav-user-actions">
+              <NotificationCenter />
+              <ProfileMenu usuario={usuario} />
+            </div>
+          ) : (
+            <div className="nav-user-actions">
+              <Link className="nav-login-button" to="/login"><CircleUserRound size={17} />Entrar</Link>
+              <Link className="nav-login-button !bg-[#C8526B] !text-white !border-[#C8526B] hover:!bg-[#B0435B]" to="/cadastrar-usuario"><UserPlus size={17} />Me cadastrar</Link>
+            </div>
           )}
           {isAuthenticated && (
             <button
-              className="mobile-menu-button"
+              className="mobile-menu-button ml-2"
               type="button"
               aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
               aria-expanded={mobileMenuOpen}
@@ -287,31 +294,46 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
 
   return (
     <div className="profile-menu-wrap">
-      <button
-        className={`profile-menu-trigger ${aberto ? 'profile-menu-trigger-active ring-4 ring-[#FADCE1]' : ''}`}
-        type="button"
-        aria-expanded={aberto}
-        aria-haspopup="menu"
-        onClick={(e) => {
-          e.stopPropagation();
-          setAberto((value) => !value);
-        }}
-      >
-        <span className="profile-photo">{getInitials(usuario.nome)}</span>
-        <span className="profile-trigger-name">{primeiroNome}</span>
-        <ChevronRight size={15} className={`profile-chevron ${aberto ? 'rotate-90' : ''}`} />
-      </button>
-      {aberto && (
+      {!aberto ? (
+        <button
+          className="profile-menu-trigger"
+          type="button"
+          aria-expanded={false}
+          aria-haspopup="menu"
+          onClick={(e) => {
+            e.stopPropagation();
+            setAberto(true);
+          }}
+        >
+          <span className="profile-photo">{getInitials(usuario.nome)}</span>
+          <span className="profile-trigger-name">{primeiroNome}</span>
+          <ChevronRight size={15} className="profile-chevron" />
+        </button>
+      ) : (
         <div className="profile-dropdown animate-dropdown" role="menu">
-          <div className="profile-dropdown-heading">
-            <strong>{usuario.nome}</strong>
-            <span>{usuario.email}</span>
+          {/* Card integrado que substitui o gatilho inicial ao abrir */}
+          <div
+            className="profile-dropdown-header-card"
+            onClick={() => setAberto(false)}
+            role="button"
+            tabIndex={0}
+            title="Fechar menu"
+          >
+            <span className="profile-photo shrink-0">{getInitials(usuario.nome)}</span>
+            <div className="min-w-0 flex-1">
+              <strong className="block text-sm font-extrabold text-slate-800 truncate">{usuario.nome}</strong>
+              <span className="block text-xs text-slate-500 truncate">{usuario.email}</span>
+            </div>
+            <ChevronUp size={16} className="text-[#C8526B] shrink-0" />
           </div>
+
           <Link to="/perfil" className="profile-dropdown-link" role="menuitem" onClick={() => setAberto(false)}>
-            <CircleUserRound size={17} /> Meu perfil
+            <CircleUserRound size={17} />
+            <span>Meu perfil</span>
           </Link>
           <button className="profile-dropdown-link profile-logout" type="button" role="menuitem" onClick={sair}>
-            <span><LogOut size={17} /> Sair</span>
+            <LogOut size={17} />
+            <span>Sair</span>
           </button>
         </div>
       )}
@@ -357,15 +379,15 @@ function WelcomeScreen() {
 
 function HomeDashboard() {
   const usuario = getStoredUser();
-  const nome = usuario?.nome?.trim().split(/\s+/)[0] || 'querida';
+  const nome = usuario?.nome?.trim().split(/\s+/)[0];
 
   return (
     <section className="dashboard">
       <header className="dashboard-header">
         <div>
           <p className="eyebrow">Seu espaço de cuidado</p>
-          <h1 className="display-title">Olá, {nome}!</h1>
-          <p className="page-subtitle">Acompanhe sua jornada com leveza, informação e carinho.</p>
+          <h1 className="display-title">{nome ? `Olá, ${nome}!` : 'Olá!'}</h1>
+          <p className="page-subtitle">Acompanhe sua jornada de cuidado com leveza, informação e carinho.</p>
         </div>
         <div className="dashboard-avatar"><CircleUserRound size={24} strokeWidth={1.7} /></div>
       </header>
