@@ -195,18 +195,20 @@ function NavDropdown({
 
       {aberto && (
         <div className="nav-dropdown-menu" role="menu">
-          {itens.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={`nav-dropdown-item ${location.pathname === item.to ? 'nav-dropdown-item-active' : ''}`}
-              role="menuitem"
-              onClick={() => setAberto(false)}
-            >
-              {item.icone}
-              <span>{item.rotulo}</span>
-            </Link>
-          ))}
+          <div className="nav-dropdown-surface">
+            {itens.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={`nav-dropdown-item ${location.pathname === item.to ? 'nav-dropdown-item-active' : ''}`}
+                role="menuitem"
+                onClick={() => setAberto(false)}
+              >
+                {item.icone}
+                <span>{item.rotulo}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -221,6 +223,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
 function NotificationCenter() {
   const [aberto, setAberto] = useState(false);
+  const quantidadeNotificacoes = 0;
 
   return (
     <div className="notification-menu-wrap">
@@ -233,7 +236,11 @@ function NotificationCenter() {
         onClick={() => setAberto((value) => !value)}
       >
         <Bell size={19} strokeWidth={1.8} />
-        <span className="notification-badge" aria-label="0 notificações">0</span>
+        {quantidadeNotificacoes > 0 && (
+          <span className="notification-badge" aria-label={`${quantidadeNotificacoes} notificações`}>
+            {quantidadeNotificacoes}
+          </span>
+        )}
       </button>
       {aberto && (
         <section className="notification-panel" id="notification-panel" aria-label="Notificações">
@@ -259,6 +266,18 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
   const [aberto, setAberto] = useState(false);
   const primeiroNome = usuario.nome.trim().split(/\s+/)[0];
 
+  useEffect(() => {
+    if (!aberto) return;
+    const fecharAoClicarFora = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.profile-menu-wrap')) {
+        setAberto(false);
+      }
+    };
+    document.addEventListener('click', fecharAoClicarFora);
+    return () => document.removeEventListener('click', fecharAoClicarFora);
+  }, [aberto]);
+
   const sair = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('id_usuario');
@@ -269,19 +288,21 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
   return (
     <div className="profile-menu-wrap">
       <button
-        className="profile-menu-trigger"
+        className={`profile-menu-trigger ${aberto ? 'profile-menu-trigger-active ring-4 ring-[#FADCE1]' : ''}`}
         type="button"
         aria-expanded={aberto}
         aria-haspopup="menu"
-        onClick={() => setAberto((value) => !value)}
-        onMouseEnter={() => setAberto(true)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setAberto((value) => !value);
+        }}
       >
         <span className="profile-photo">{getInitials(usuario.nome)}</span>
         <span className="profile-trigger-name">{primeiroNome}</span>
         <ChevronRight size={15} className={`profile-chevron ${aberto ? 'rotate-90' : ''}`} />
       </button>
       {aberto && (
-        <div className="profile-dropdown" role="menu" onMouseLeave={() => setAberto(false)}>
+        <div className="profile-dropdown animate-dropdown" role="menu">
           <div className="profile-dropdown-heading">
             <strong>{usuario.nome}</strong>
             <span>{usuario.email}</span>
