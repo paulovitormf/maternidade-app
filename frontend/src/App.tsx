@@ -86,10 +86,7 @@ function AppLayout() {
               <ProfileMenu usuario={usuario} />
             </div>
           ) : (
-            <div className="nav-user-actions">
-              <Link className="nav-login-button" to="/login"><CircleUserRound size={17} />Entrar</Link>
-              <Link className="nav-login-button !bg-[#C8526B] !text-white !border-[#C8526B] hover:!bg-[#B0435B]" to="/cadastrar-usuario"><UserPlus size={17} />Me cadastrar</Link>
-            </div>
+            <Link className="nav-login-button" to="/login"><CircleUserRound size={18} />Entrar</Link>
           )}
           {isAuthenticated && (
             <button
@@ -109,32 +106,37 @@ function AppLayout() {
       {isAuthenticated && mobileMenuOpen && (
         <aside className="mobile-drawer-overlay sm:hidden" onClick={() => setMobileMenuOpen(false)}>
           <div className="mobile-drawer-content" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-[#FADCE1] pb-3 mb-4">
-              <span className="font-extrabold text-slate-800">Menu Principal</span>
+            <div className="flex items-center justify-between border-b border-[#FADCE1] pb-4 mb-4">
+              <div className="flex items-center gap-2.5">
+                <span className="brand-mark !h-9 !w-9 !rounded-xl text-[#C8526B]"><Heart size={18} strokeWidth={1.8} fill="currentColor" /></span>
+                <span className="brand-name !text-lg">Maternidade</span>
+              </div>
               <button
                 type="button"
-                className="p-1 rounded-lg text-slate-500 hover:bg-[#FADCE1]"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-[#FECDD3] text-slate-500 hover:bg-[#FADCE1] hover:text-[#B0435B] transition"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Fechar menu"
               >
-                <X size={20} />
+                <X size={19} />
               </button>
             </div>
-            <div className="space-y-1">
-              <Link className="mobile-nav-link" to="/"><Home size={18} /> Início</Link>
+
+            <div className="space-y-1.5 pb-6">
+              <Link className={`mobile-nav-link ${location.pathname === '/' ? 'mobile-nav-link-active' : ''}`} to="/"><Home size={18} /><span>Início</span></Link>
+
               <p className="mobile-nav-heading">Gestação</p>
-              <Link className="mobile-nav-link" to="/cadastrar-gestacao"><CalendarDays size={18} /> Minhas gestações</Link>
-              <Link className="mobile-nav-link" to="/jornada-gestacao"><Sparkles size={18} /> Jornada da gestação</Link>
-              <Link className="mobile-nav-link" to="/vacinas-gestante"><Syringe size={18} /> Vacinação materna</Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/cadastrar-gestacao' ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-gestacao"><CalendarDays size={18} /><span>Minhas gestações</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/jornada-gestacao' ? 'mobile-nav-link-active' : ''}`} to="/jornada-gestacao"><Sparkles size={18} /><span>Jornada da gestação</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/vacinas-gestante' ? 'mobile-nav-link-active' : ''}`} to="/vacinas-gestante"><Syringe size={18} /><span>Vacinação materna</span></Link>
 
               <p className="mobile-nav-heading">Bebê e Criança</p>
-              <Link className="mobile-nav-link" to="/cadastrar-bebe"><Baby size={18} /> Meus bebês</Link>
-              <Link className="mobile-nav-link" to="/jornadas-desenvolvimento"><Sparkles size={18} /> Jornadas de desenvolvimento</Link>
-              <Link className="mobile-nav-link" to="/jornada-crianca"><CalendarDays size={18} /> Acompanhamento até 5 anos</Link>
-              <Link className="mobile-nav-link" to="/vacinas-bebe"><Syringe size={18} /> Vacinas do bebê</Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/cadastrar-bebe' ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-bebe"><Baby size={18} /><span>Meus bebês</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/jornadas-desenvolvimento' ? 'mobile-nav-link-active' : ''}`} to="/jornadas-desenvolvimento"><Sparkles size={18} /><span>Jornadas de desenvolvimento</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/jornada-crianca' ? 'mobile-nav-link-active' : ''}`} to="/jornada-crianca"><CalendarDays size={18} /><span>Acompanhamento até 5 anos</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/vacinas-bebe' ? 'mobile-nav-link-active' : ''}`} to="/vacinas-bebe"><Syringe size={18} /><span>Vacinas do bebê</span></Link>
 
-              <p className="mobile-nav-heading">Conta</p>
-              <Link className="mobile-nav-link" to="/perfil"><CircleUserRound size={18} /> Meu perfil</Link>
+              <p className="mobile-nav-heading">Sua Conta</p>
+              <Link className={`mobile-nav-link ${location.pathname === '/perfil' ? 'mobile-nav-link-active' : ''}`} to="/perfil"><CircleUserRound size={18} /><span>Meu perfil</span></Link>
             </div>
           </div>
         </aside>
@@ -294,49 +296,37 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
 
   return (
     <div className="profile-menu-wrap">
-      {!aberto ? (
+      {/* Container único do perfil que expande lateralmente suavemente sem duplicar */}
+      <div className={`profile-morph-container ${aberto ? 'profile-morph-expanded' : 'profile-morph-collapsed'}`}>
         <button
-          className="profile-menu-trigger"
+          className="profile-morph-header"
           type="button"
-          aria-expanded={false}
+          aria-expanded={aberto}
           aria-haspopup="menu"
           onClick={(e) => {
             e.stopPropagation();
-            setAberto(true);
+            setAberto((val) => !val);
           }}
         >
-          <span className="profile-photo">{getInitials(usuario.nome)}</span>
+          <span className="profile-photo shrink-0">{getInitials(usuario.nome)}</span>
           <span className="profile-trigger-name">{primeiroNome}</span>
-          <ChevronRight size={15} className="profile-chevron" />
+          {aberto && <span className="profile-morph-email truncate">{usuario.email}</span>}
+          <ChevronRight size={15} className={`profile-chevron shrink-0 transition-transform duration-200 ${aberto ? 'rotate-90' : ''}`} />
         </button>
-      ) : (
-        <div className="profile-dropdown animate-dropdown" role="menu">
-          {/* Card integrado que substitui o gatilho inicial ao abrir */}
-          <div
-            className="profile-dropdown-header-card"
-            onClick={() => setAberto(false)}
-            role="button"
-            tabIndex={0}
-            title="Fechar menu"
-          >
-            <span className="profile-photo shrink-0">{getInitials(usuario.nome)}</span>
-            <div className="min-w-0 flex-1">
-              <strong className="block text-sm font-extrabold text-slate-800 truncate">{usuario.nome}</strong>
-              <span className="block text-xs text-slate-500 truncate">{usuario.email}</span>
-            </div>
-            <ChevronUp size={16} className="text-[#C8526B] shrink-0" />
-          </div>
 
-          <Link to="/perfil" className="profile-dropdown-link" role="menuitem" onClick={() => setAberto(false)}>
-            <CircleUserRound size={17} />
-            <span>Meu perfil</span>
-          </Link>
-          <button className="profile-dropdown-link profile-logout" type="button" role="menuitem" onClick={sair}>
-            <LogOut size={17} />
-            <span>Sair</span>
-          </button>
-        </div>
-      )}
+        {aberto && (
+          <div className="profile-morph-menu animate-dropdown" role="menu">
+            <Link to="/perfil" className="profile-dropdown-link" role="menuitem" onClick={() => setAberto(false)}>
+              <CircleUserRound size={17} />
+              <span>Meu perfil</span>
+            </Link>
+            <button className="profile-dropdown-link profile-logout" type="button" role="menuitem" onClick={sair}>
+              <LogOut size={17} />
+              <span>Sair</span>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -353,8 +343,14 @@ function WelcomeScreen() {
         Organize informações importantes da gestação e dos primeiros momentos do bebê em um só lugar.
       </p>
       <div className="welcome-actions">
-        <Link className="primary-button" to="/login">Entrar na minha conta</Link>
-        <Link className="secondary-button" to="/cadastrar-usuario">Criar cadastro</Link>
+        <Link className="primary-button flex items-center justify-center gap-2" to="/login">
+          <CircleUserRound size={18} />
+          <span>Entrar na minha conta</span>
+        </Link>
+        <Link className="secondary-button flex items-center justify-center gap-2" to="/cadastrar-usuario">
+          <UserPlus size={18} />
+          <span>Criar cadastro</span>
+        </Link>
       </div>
       <div className="welcome-benefits">
         <div className="welcome-benefit">
