@@ -1,6 +1,8 @@
+import { useState, useMemo } from 'react';
 import {
   Clock3,
   Info,
+  Search,
   Syringe,
   ClipboardList,
 } from 'lucide-react';
@@ -87,6 +89,40 @@ const etapas = [
 ];
 
 export default function VacinaGestante() {
+  const [busca, setBusca] = useState('');
+
+  const etapasFiltradas = useMemo(() => {
+    const termo = busca.trim().toLowerCase();
+    if (!termo) return etapas;
+
+    return etapas
+      .map((etapa) => {
+        const correspondeTitulo =
+          etapa.titulo.toLowerCase().includes(termo) ||
+          etapa.periodo.toLowerCase().includes(termo);
+        const vacinasCorrespondentes = etapa.vacinas.filter(
+          (v) =>
+            v.nome.toLowerCase().includes(termo) ||
+            v.descricao.toLowerCase().includes(termo) ||
+            v.detalhe.toLowerCase().includes(termo),
+        );
+
+        if (correspondeTitulo) {
+          return etapa;
+        }
+
+        if (vacinasCorrespondentes.length > 0) {
+          return {
+            ...etapa,
+            vacinas: vacinasCorrespondentes,
+          };
+        }
+
+        return null;
+      })
+      .filter((etapa): etapa is (typeof etapas)[number] => etapa !== null);
+  }, [busca]);
+
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Cabeçalho */}
@@ -171,8 +207,25 @@ export default function VacinaGestante() {
             </span>
           </div>
 
+          {/* Busca rápida de vacinas */}
+          <div className="mb-6 relative">
+            <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="search"
+              aria-label="Buscar por vacina da gestante"
+              placeholder="Buscar por vacina (ex: dTpa, Hepatite B, Gripe)..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-[#C8526B] focus:bg-white focus:ring-4 focus:ring-[#fadce1]"
+            />
+          </div>
+
           <div className="space-y-8">
-            {etapas.map((etapa, indice) => (
+            {etapasFiltradas.length === 0 ? (
+              <div className="py-8 text-center text-sm text-slate-500">
+                Nenhuma vacina encontrada para &quot;{busca}&quot;.
+              </div>
+            ) : etapasFiltradas.map((etapa, indice) => (
               <article
                 key={etapa.numero}
                 className="relative pl-12"

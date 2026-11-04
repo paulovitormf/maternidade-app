@@ -1,7 +1,7 @@
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Baby, Bell, CalendarDays, ChevronRight, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, Plus, Sparkles } from 'lucide-react';
+import { Baby, Bell, CalendarDays, ChevronDown, ChevronRight, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, Plus, Sparkles, Syringe, X } from 'lucide-react';
 
 import CadastroBebe from './pages/CadastroCrianca';
 import CadastroGestacao from './pages/CadastroGestacao';
@@ -27,7 +27,7 @@ export default function App() {
 function AppLayout() {
   const location = useLocation();
   const [, setAuthVersion] = useState(0);
-  const isHome = location.pathname === '/';
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isAuthenticated = hasValidSession();
   const usuario = getStoredUser();
 
@@ -41,6 +41,11 @@ function AppLayout() {
     };
   }, []);
 
+  // Fechar o menu móvel ao mudar de rota
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
   return (
     <div className="app-shell">
       <nav className="app-nav">
@@ -50,21 +55,83 @@ function AppLayout() {
             <span className="brand-name">Maternidade</span>
           </Link>
           <div className="nav-links">
-            {isAuthenticated && <Link className="nav-link" to="/"><Home size={16} strokeWidth={1.8} />Início</Link>}
-            {isAuthenticated && <Link className="nav-link" to="/cadastrar-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Gestação</Link>}
-            {isAuthenticated && <Link className="nav-link" to="/cadastrar-bebe"><Baby size={16} strokeWidth={1.8} />Bebê</Link>}
-            {isAuthenticated && <Link className="nav-link" to="/jornadas-desenvolvimento"><Sparkles size={16} strokeWidth={1.8} />Jornadas</Link>}
-            {isAuthenticated && <Link className="nav-link" to="/jornada-gestacao"><CalendarDays size={16} strokeWidth={1.8} />Jornada da gestação</Link>}
-            {isAuthenticated && (<Link className="nav-link" to="/vacinas-bebe"><Baby size={16} strokeWidth={1.8} />Vacinas do bebê</Link>)}
-            {isAuthenticated && (<Link className="nav-link" to="/vacinas-gestante"><Heart size={16} strokeWidth={1.8} />Vacinação</Link>)}
+            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/' ? 'nav-link-active' : ''}`} to="/"><Home size={16} strokeWidth={1.8} />Início</Link>}
+            {isAuthenticated && (
+              <NavDropdown
+                titulo="Gestação"
+                icone={<CalendarDays size={16} strokeWidth={1.8} />}
+                itens={[
+                  { to: '/cadastrar-gestacao', rotulo: 'Minhas gestações', icone: <CalendarDays size={15} /> },
+                  { to: '/jornada-gestacao', rotulo: 'Jornada da gestação', icone: <Sparkles size={15} /> },
+                  { to: '/vacinas-gestante', rotulo: 'Vacinação materna', icone: <Syringe size={15} /> },
+                ]}
+              />
+            )}
+            {isAuthenticated && (
+              <NavDropdown
+                titulo="Bebê & Criança"
+                icone={<Baby size={16} strokeWidth={1.8} />}
+                itens={[
+                  { to: '/cadastrar-bebe', rotulo: 'Meus bebês', icone: <Baby size={15} /> },
+                  { to: '/jornadas-desenvolvimento', rotulo: 'Jornada por fases', icone: <Sparkles size={15} /> },
+                  { to: '/jornada-crianca', rotulo: 'Acompanhamento até 5 anos', icone: <CalendarDays size={15} /> },
+                  { to: '/vacinas-bebe', rotulo: 'Vacinas do bebê', icone: <Syringe size={15} /> },
+                ]}
+              />
+            )}
           </div>
           {isAuthenticated && <NotificationCenter />}
           {isAuthenticated && usuario ? <ProfileMenu usuario={usuario} /> : (
             <Link className="nav-login-button" to="/login"><CircleUserRound size={18} />Entrar</Link>
           )}
-          <button className="mobile-menu-button" type="button" aria-label="Abrir menu"><Menu size={21} /></button>
+          {isAuthenticated && (
+            <button
+              className="mobile-menu-button"
+              type="button"
+              aria-label={mobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen((open) => !open)}
+            >
+              {mobileMenuOpen ? <X size={21} /> : <Menu size={21} />}
+            </button>
+          )}
         </div>
       </nav>
+
+      {/* Gaveta de navegação Mobile */}
+      {isAuthenticated && mobileMenuOpen && (
+        <aside className="mobile-drawer-overlay sm:hidden" onClick={() => setMobileMenuOpen(false)}>
+          <div className="mobile-drawer-content" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-[#FADCE1] pb-3 mb-4">
+              <span className="font-extrabold text-slate-800">Menu Principal</span>
+              <button
+                type="button"
+                className="p-1 rounded-lg text-slate-500 hover:bg-[#FADCE1]"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Fechar menu"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-1">
+              <Link className="mobile-nav-link" to="/"><Home size={18} /> Início</Link>
+              <p className="mobile-nav-heading">Gestação</p>
+              <Link className="mobile-nav-link" to="/cadastrar-gestacao"><CalendarDays size={18} /> Minhas gestações</Link>
+              <Link className="mobile-nav-link" to="/jornada-gestacao"><Sparkles size={18} /> Jornada da gestação</Link>
+              <Link className="mobile-nav-link" to="/vacinas-gestante"><Syringe size={18} /> Vacinação materna</Link>
+
+              <p className="mobile-nav-heading">Bebê e Criança</p>
+              <Link className="mobile-nav-link" to="/cadastrar-bebe"><Baby size={18} /> Meus bebês</Link>
+              <Link className="mobile-nav-link" to="/jornadas-desenvolvimento"><Sparkles size={18} /> Jornadas de desenvolvimento</Link>
+              <Link className="mobile-nav-link" to="/jornada-crianca"><CalendarDays size={18} /> Acompanhamento até 5 anos</Link>
+              <Link className="mobile-nav-link" to="/vacinas-bebe"><Syringe size={18} /> Vacinas do bebê</Link>
+
+              <p className="mobile-nav-heading">Conta</p>
+              <Link className="mobile-nav-link" to="/perfil"><CircleUserRound size={18} /> Meu perfil</Link>
+            </div>
+          </div>
+        </aside>
+      )}
 
       <main className="page-main">
         <Routes>
@@ -83,14 +150,64 @@ function AppLayout() {
         </Routes>
       </main>
 
-      {isHome && isAuthenticated && (
+      {isAuthenticated && (
         <nav className="mobile-bottom-nav" aria-label="Navegação principal">
-          <Link className="mobile-bottom-link active" to="/"><Home size={19} strokeWidth={1.8} /><span>Início</span></Link>
-          <Link className="mobile-bottom-link" to="/cadastrar-gestacao"><CalendarDays size={19} strokeWidth={1.8} /><span>Gestação</span></Link>
+          <Link className={`mobile-bottom-link ${location.pathname === '/' ? 'active' : ''}`} to="/"><Home size={19} strokeWidth={1.8} /><span>Início</span></Link>
+          <Link className={`mobile-bottom-link ${location.pathname.startsWith('/cadastrar-gestacao') || location.pathname.startsWith('/jornada-gestacao') ? 'active' : ''}`} to="/cadastrar-gestacao"><CalendarDays size={19} strokeWidth={1.8} /><span>Gestação</span></Link>
           <Link className="mobile-add-button" to="/cadastrar-gestacao" aria-label="Adicionar gestação"><Plus size={23} strokeWidth={1.8} /></Link>
-          <Link className="mobile-bottom-link" to="/cadastrar-bebe"><Baby size={19} strokeWidth={1.8} /><span>Bebê</span></Link>
-          <Link className="mobile-bottom-link" to="/perfil"><CircleUserRound size={19} strokeWidth={1.8} /><span>Perfil</span></Link>
+          <Link className={`mobile-bottom-link ${location.pathname.startsWith('/cadastrar-bebe') || location.pathname.startsWith('/jornada') ? 'active' : ''}`} to="/cadastrar-bebe"><Baby size={19} strokeWidth={1.8} /><span>Bebê</span></Link>
+          <Link className={`mobile-bottom-link ${location.pathname === '/perfil' ? 'active' : ''}`} to="/perfil"><CircleUserRound size={19} strokeWidth={1.8} /><span>Perfil</span></Link>
         </nav>
+      )}
+    </div>
+  );
+}
+
+function NavDropdown({
+  titulo,
+  icone,
+  itens,
+}: {
+  titulo: string;
+  icone: ReactNode;
+  itens: { to: string; rotulo: string; icone: ReactNode }[];
+}) {
+  const [aberto, setAberto] = useState(false);
+  const location = useLocation();
+  const ativo = itens.some((item) => location.pathname === item.to);
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setAberto(true)}
+      onMouseLeave={() => setAberto(false)}
+    >
+      <button
+        type="button"
+        className={`nav-link ${ativo ? 'nav-link-active' : ''}`}
+        onClick={() => setAberto((val) => !val)}
+        aria-expanded={aberto}
+      >
+        {icone}
+        {titulo}
+        <ChevronDown size={14} className={`transition-transform ${aberto ? 'rotate-180' : ''}`} />
+      </button>
+
+      {aberto && (
+        <div className="nav-dropdown-menu" role="menu">
+          {itens.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`nav-dropdown-item ${location.pathname === item.to ? 'nav-dropdown-item-active' : ''}`}
+              role="menuitem"
+              onClick={() => setAberto(false)}
+            >
+              {item.icone}
+              <span>{item.rotulo}</span>
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -243,36 +360,47 @@ function HomeDashboard() {
         <div className="dashboard-hero-illustration" aria-hidden="true"><HeartHandshake size={112} strokeWidth={1.15} /></div>
       </div>
 
-      <div className="section-heading">
+      <div className="space-y-6">
         <div>
-          <p className="eyebrow">Acesso rápido</p>
-          <h2 className="section-title">O que você deseja registrar?</h2>
+          <div className="section-heading">
+            <p className="eyebrow">Para a gestação</p>
+            <h2 className="section-title">Acompanhamento gestacional</h2>
+          </div>
+          <div className="quick-actions">
+            <Link to="/cadastrar-gestacao" className="quick-action quick-action-pink group">
+              <span className="quick-action-icon"><CalendarDays size={23} strokeWidth={1.7} /></span>
+              <span><strong>Registrar gestação</strong><small>Calcule a previsão de parto e acompanhe histórico</small></span>
+              <ChevronRight size={18} />
+            </Link>
+            <Link to="/jornada-gestacao" className="quick-action quick-action-pink group">
+              <span className="quick-action-icon"><Sparkles size={23} strokeWidth={1.7} /></span>
+              <span><strong>Jornada da gestação</strong><small>Acompanhe as semanas e marcos estimados</small></span>
+              <ChevronRight size={18} />
+            </Link>
+          </div>
+        </div>
+
+        <div>
+          <div className="section-heading">
+            <p className="eyebrow">Para o bebê e a infância</p>
+            <h2 className="section-title">Acompanhamento infantil</h2>
+          </div>
+          <div className="quick-actions">
+            <Link to="/cadastrar-bebe" className="quick-action quick-action-blue group">
+              <span className="quick-action-icon"><Baby size={23} strokeWidth={1.7} /></span>
+              <span><strong>Meus bebês</strong><small>Registre dados de nascimento e compartilhe acesso</small></span>
+              <ChevronRight size={18} />
+            </Link>
+            <Link to="/vacinas-bebe" className="quick-action quick-action-blue group">
+              <span className="quick-action-icon"><Syringe size={23} strokeWidth={1.7} /></span>
+              <span><strong>Vacinação do bebê</strong><small>Consulte o calendário do Ministério da Saúde</small></span>
+              <ChevronRight size={18} />
+            </Link>
+          </div>
         </div>
       </div>
-      <div className="quick-actions">
-        <Link to="/cadastrar-gestacao" className="quick-action quick-action-blue group">
-          <span className="quick-action-icon"><CalendarDays size={23} strokeWidth={1.7} /></span>
-          <span><strong>Acompanhar gestação</strong><small>Calcule a previsão de parto</small></span>
-          <ChevronRight size={18} />
-        </Link>
-        <Link to="/cadastrar-bebe" className="quick-action quick-action-pink group">
-          <span className="quick-action-icon"><Baby size={23} strokeWidth={1.7} /></span>
-          <span><strong>Cadastrar bebê</strong><small>Registre os primeiros momentos</small></span>
-          <ChevronRight size={18} />
-        </Link>
-        <Link to="/jornadas-desenvolvimento" className="quick-action quick-action-blue group">
-          <span className="quick-action-icon"><Sparkles size={23} strokeWidth={1.7} /></span>
-          <span><strong>Acompanhar desenvolvimento</strong><small>Veja as jornadas por idade</small></span>
-          <ChevronRight size={18} />
-        </Link>
-        <Link to="/jornada-gestacao" className="quick-action quick-action-pink group">
-          <span className="quick-action-icon"><CalendarDays size={23} strokeWidth={1.7} /></span>
-          <span><strong>Jornada da gestação</strong><small>Acompanhe as semanas e a previsão de parto</small></span>
-          <ChevronRight size={18} />
-        </Link>
-      </div>
 
-  <div className="dashboard-tip">
+      <div className="dashboard-tip">
         <span className="dashboard-tip-icon"><Heart size={18} strokeWidth={1.7} fill="currentColor" /></span>
         <div><strong>Um lembrete para você</strong><p>Pequenos registros ajudam a guardar grandes momentos.</p></div>
       </div>
