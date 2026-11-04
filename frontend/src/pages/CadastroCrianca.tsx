@@ -60,6 +60,7 @@ export default function CadastroCrianca() {
   const [responsavelSelecionado, setResponsavelSelecionado] = useState<UsuarioBusca | null>(null);
   const [carregandoResponsaveis, setCarregandoResponsaveis] = useState(false);
   const [salvandoResponsavel, setSalvandoResponsavel] = useState(false);
+  const [salvandoCrianca, setSalvandoCrianca] = useState(false);
   const [erroResponsavel, setErroResponsavel] = useState('');
   const [mensagemResponsavel, setMensagemResponsavel] = useState('');
 
@@ -156,9 +157,11 @@ export default function CadastroCrianca() {
     event.preventDefault();
     setErro('');
     setMensagem('');
+    setSalvandoCrianca(true);
     const idUsuario = Number(localStorage.getItem('id_usuario'));
     if (!Number.isInteger(idUsuario) || idUsuario <= 0) {
       setErro('Faça login antes de cadastrar uma criança.');
+      setSalvandoCrianca(false);
       return;
     }
     try {
@@ -183,6 +186,8 @@ export default function CadastroCrianca() {
           ? resposta.message
           : 'Não foi possível registrar os dados. Confira as informações e tente novamente.';
       setErro(mensagem);
+    } finally {
+      setSalvandoCrianca(false);
     }
   };
 
@@ -457,7 +462,9 @@ export default function CadastroCrianca() {
           <span className="field-label">Observações</span>
           <textarea className="field-control min-h-28 resize-y" rows={3} placeholder="Conte algo importante sobre o nascimento..." value={form.observacoes} onChange={(e) => set('observacoes', e.target.value)} />
         </label>
-        <button className="primary-button field-wide mt-2" type="submit">Salvar dados do bebê</button>
+        <button className="primary-button field-wide mt-2" type="submit" disabled={salvandoCrianca}>
+          {salvandoCrianca ? 'Salvando dados...' : 'Salvar dados do bebê'}
+        </button>
       </form>
     </section>
   );

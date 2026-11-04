@@ -45,9 +45,9 @@ export default function Login() {
       <section className="auth-intro">
         <p className="mb-12 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-[#FADCE1]"><Heart size={29} strokeWidth={1.6} fill="currentColor" /></p>
         <p className="eyebrow !text-[#FADCE1]">Seu espaço de cuidado</p>
-        <h1 className="font-display text-5xl font-bold leading-tight">Bem-vinda de volta.</h1>
+        <h1 className="font-display text-5xl font-bold leading-tight">Cuidado e carinho em cada etapa.</h1>
         <p className="mt-5 max-w-sm text-base leading-7 text-white/80">
-          Acompanhe sua jornada com leveza, informação e tudo organizado em um só lugar.
+          Apoio e acolhimento para mães, pais e responsáveis acompanharem essa jornada com leveza e tudo em um só lugar.
         </p>
       </section>
       <section className="auth-card">
