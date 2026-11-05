@@ -234,8 +234,6 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
 function NotificationCenter() {
   const [aberto, setAberto] = useState(false);
-  const [painelVisivel, setPainelVisivel] = useState(false);
-  const [fechando, setFechando] = useState(false);
   const [animacoesAtivas, setAnimacoesAtivas] = useState(false);
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [erro, setErro] = useState(false);
@@ -258,21 +256,6 @@ function NotificationCenter() {
     return () => document.removeEventListener('click', fecharAoClicarFora);
   }, [aberto]);
 
-  useEffect(() => {
-    if (aberto) {
-      setPainelVisivel(true);
-      setFechando(false);
-      return;
-    }
-    setFechando(true);
-    const recolher = window.setTimeout(() => setFechando(false), 120);
-    const desmontar = window.setTimeout(() => setPainelVisivel(false), 500);
-    return () => {
-      window.clearTimeout(recolher);
-      window.clearTimeout(desmontar);
-    };
-  }, [aberto]);
-
   const alternarNotificacoes = () => {
     setAnimacoesAtivas(true);
     const novoEstado = !aberto;
@@ -284,21 +267,19 @@ function NotificationCenter() {
     }
   };
 
-  const visualmenteAberto = aberto || fechando;
-
   return (
-    <div className={`notification-menu-wrap ${visualmenteAberto ? 'notification-menu-wrap-open' : ''} ${animacoesAtivas ? 'notification-animations-ready' : ''}`}>
-      <div className={`notification-morph-container ${visualmenteAberto ? 'notification-morph-expanded' : ''}`}>
+    <div className={`notification-menu-wrap ${aberto ? 'notification-menu-wrap-open' : ''} ${animacoesAtivas ? 'notification-animations-ready' : ''}`}>
+      <div className={`notification-morph-container ${aberto ? 'notification-morph-expanded' : ''}`}>
         <button
-          className={`notification-trigger ${visualmenteAberto ? 'notification-trigger-open' : ''}`}
+          className={`notification-trigger ${aberto ? 'notification-trigger-open' : ''}`}
           type="button"
           aria-label="Abrir notificações"
           aria-expanded={aberto}
           aria-controls="notification-panel"
           onClick={alternarNotificacoes}
         >
-          {visualmenteAberto && (
-            <span className={`notification-trigger-copy ${fechando ? 'notification-trigger-copy-closing' : ''}`}>
+          {aberto && (
+            <span className="notification-trigger-copy">
               <strong>Notificações</strong>
               <span>Avisos importantes aparecerão aqui.</span>
             </span>
@@ -309,34 +290,34 @@ function NotificationCenter() {
             </span>
           )}
         </button>
-        {painelVisivel && (
-          <section className={`notification-panel ${aberto ? 'notification-panel-open' : 'notification-panel-closed'}`} id="notification-panel" aria-label="Notificações" aria-hidden={!aberto}>
-          {erro ? (
-            <div className="notification-empty">
-              <strong>Não foi possível carregar as notificações.</strong>
-            </div>
-          ) : notificacoes.length === 0 ? (
-            <div className="notification-empty">
-              <Bell size={27} strokeWidth={1.8} aria-hidden="true" />
-              <strong>Nenhuma notificação nova</strong>
-              <p>Você está em dia por enquanto.</p>
-            </div>
-          ) : (
-            <div className="notification-list">
-              {notificacoes.map((notificacao) => (
-                <article className={`notification-item ${notificacao.status === 'LIDA' ? 'read' : 'unread'}`} key={notificacao.id}>
-                  <Bell size={17} aria-hidden="true" />
-                  <div>
-                    <strong>{notificacao.titulo}</strong>
-                    <p>{notificacao.mensagem}</p>
-                    <time>{new Date(notificacao.dataAgendada).toLocaleString('pt-BR')}</time>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
-          </section>
-        )}
+        <section className={`notification-panel ${aberto ? 'notification-panel-open' : 'notification-panel-closed'}`} id="notification-panel" aria-label="Notificações" aria-hidden={!aberto}>
+          <div className="notification-panel-content">
+            {erro ? (
+              <div className="notification-empty">
+                <strong>Não foi possível carregar as notificações.</strong>
+              </div>
+            ) : notificacoes.length === 0 ? (
+              <div className="notification-empty">
+                <Bell size={27} strokeWidth={1.8} aria-hidden="true" />
+                <strong>Nenhuma notificação nova</strong>
+                <p>Você está em dia por enquanto.</p>
+              </div>
+            ) : (
+              <div className="notification-list">
+                {notificacoes.map((notificacao) => (
+                  <article className={`notification-item ${notificacao.status === 'LIDA' ? 'read' : 'unread'}`} key={notificacao.id}>
+                    <Bell size={17} aria-hidden="true" />
+                    <div>
+                      <strong>{notificacao.titulo}</strong>
+                      <p>{notificacao.mensagem}</p>
+                      <time>{new Date(notificacao.dataAgendada).toLocaleString('pt-BR')}</time>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
       <span className="notification-fixed-icon" aria-hidden="true">
         <Bell size={18} strokeWidth={2.2} />
