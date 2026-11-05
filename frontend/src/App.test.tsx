@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
 
@@ -17,7 +17,7 @@ describe('App Navigation and Layout', () => {
     expect(screen.getByRole('link', { name: /Criar cadastro/i })).toBeInTheDocument();
   });
 
-  it('deve exibir o dashboard e menu de perfil para usuário autenticado', () => {
+  it('deve exibir o dashboard e menu de perfil para usuário autenticado', async () => {
     const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
     const payload = btoa(JSON.stringify({ sub: 'maria@example.com', exp: Math.floor(Date.now() / 1000) + 3600 }));
     const token = `${header}.${payload}.signature`;
@@ -38,7 +38,7 @@ describe('App Navigation and Layout', () => {
     fireEvent.click(notificationTrigger);
     expect(screen.getByText(/Nenhuma notificação nova/i)).toBeInTheDocument();
     fireEvent.click(notificationTrigger);
-    expect(screen.queryByText(/Nenhuma notificação nova/i)).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByText(/Nenhuma notificação nova/i)).not.toBeInTheDocument());
 
     const trigger = screen.getByRole('button', { name: /Maria/i });
     fireEvent.click(trigger);

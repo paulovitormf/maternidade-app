@@ -234,6 +234,9 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
 function NotificationCenter() {
   const [aberto, setAberto] = useState(false);
+  const [painelVisivel, setPainelVisivel] = useState(false);
+  const [fechando, setFechando] = useState(false);
+  const [animacoesAtivas, setAnimacoesAtivas] = useState(false);
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [erro, setErro] = useState(false);
 
@@ -243,7 +246,35 @@ function NotificationCenter() {
       .catch(() => setErro(true));
   }, []);
 
+  useEffect(() => {
+    if (!aberto) return;
+    const fecharAoClicarFora = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.notification-menu-wrap')) {
+        setAberto(false);
+      }
+    };
+    document.addEventListener('click', fecharAoClicarFora);
+    return () => document.removeEventListener('click', fecharAoClicarFora);
+  }, [aberto]);
+
+  useEffect(() => {
+    if (aberto) {
+      setPainelVisivel(true);
+      setFechando(false);
+      return;
+    }
+    setFechando(true);
+    const recolher = window.setTimeout(() => setFechando(false), 120);
+    const desmontar = window.setTimeout(() => setPainelVisivel(false), 500);
+    return () => {
+      window.clearTimeout(recolher);
+      window.clearTimeout(desmontar);
+    };
+  }, [aberto]);
+
   const alternarNotificacoes = () => {
+    setAnimacoesAtivas(true);
     const novoEstado = !aberto;
     setAberto(novoEstado);
     if (novoEstado && notificacoes.some((notificacao) => notificacao.status !== 'LIDA')) {
@@ -253,37 +284,40 @@ function NotificationCenter() {
     }
   };
 
+  const visualmenteAberto = aberto || fechando;
+
   return (
-    <div className="notification-menu-wrap">
-      <button
-        className="notification-trigger"
-        type="button"
-        aria-label="Abrir notificações"
-        aria-expanded={aberto}
-        aria-controls="notification-panel"
-        onClick={alternarNotificacoes}
-      >
-        <Bell size={19} strokeWidth={1.8} />
-        <span className="notification-badge" aria-label={`${notificacoes.filter((notificacao) => notificacao.status !== 'LIDA').length} notificações`}>
-          {notificacoes.filter((notificacao) => notificacao.status !== 'LIDA').length}
-        </span>
-      </button>
-      {aberto && (
-        <section className="notification-panel" id="notification-panel" aria-label="Notificações">
-          <div className="notification-panel-heading">
-            <div>
+    <div className={`notification-menu-wrap ${visualmenteAberto ? 'notification-menu-wrap-open' : ''} ${animacoesAtivas ? 'notification-animations-ready' : ''}`}>
+      <div className={`notification-morph-container ${visualmenteAberto ? 'notification-morph-expanded' : ''}`}>
+        <button
+          className={`notification-trigger ${visualmenteAberto ? 'notification-trigger-open' : ''}`}
+          type="button"
+          aria-label="Abrir notificações"
+          aria-expanded={aberto}
+          aria-controls="notification-panel"
+          onClick={alternarNotificacoes}
+        >
+          {visualmenteAberto && (
+            <span className={`notification-trigger-copy ${fechando ? 'notification-trigger-copy-closing' : ''}`}>
               <strong>Notificações</strong>
               <span>Avisos importantes aparecerão aqui.</span>
-            </div>
-            <Bell size={18} aria-hidden="true" />
-          </div>
+            </span>
+          )}
+          {notificacoes.some((notificacao) => notificacao.status !== 'LIDA') && (
+            <span className="notification-badge" aria-label={`${notificacoes.filter((notificacao) => notificacao.status !== 'LIDA').length} notificações`}>
+              {notificacoes.filter((notificacao) => notificacao.status !== 'LIDA').length}
+            </span>
+          )}
+        </button>
+        {painelVisivel && (
+          <section className={`notification-panel ${aberto ? 'notification-panel-open' : 'notification-panel-closed'}`} id="notification-panel" aria-label="Notificações" aria-hidden={!aberto}>
           {erro ? (
             <div className="notification-empty">
               <strong>Não foi possível carregar as notificações.</strong>
             </div>
           ) : notificacoes.length === 0 ? (
             <div className="notification-empty">
-              <Bell size={28} strokeWidth={1.5} aria-hidden="true" />
+              <Bell size={27} strokeWidth={1.8} aria-hidden="true" />
               <strong>Nenhuma notificação nova</strong>
               <p>Você está em dia por enquanto.</p>
             </div>
@@ -301,8 +335,12 @@ function NotificationCenter() {
               ))}
             </div>
           )}
-        </section>
-      )}
+          </section>
+        )}
+      </div>
+      <span className="notification-fixed-icon" aria-hidden="true">
+        <Bell size={18} strokeWidth={2.2} />
+      </span>
     </div>
   );
 }
@@ -331,11 +369,10 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
   };
 
   return (
-    <div className="profile-menu-wrap">
-      {/* Container único do perfil que expande lateralmente suavemente sem duplicar */}
+    <div className={`profile-menu-wrap ${aberto ? 'profile-menu-wrap-open' : ''}`}>
       <div className={`profile-morph-container ${aberto ? 'profile-morph-expanded' : 'profile-morph-collapsed'}`}>
         <button
-          className="profile-morph-header"
+          className={`profile-morph-header ${aberto ? 'profile-morph-header-open' : ''}`}
           type="button"
           aria-expanded={aberto}
           aria-haspopup="menu"
@@ -345,23 +382,23 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
           }}
         >
           <span className="profile-photo shrink-0">{getInitials(usuario.nome)}</span>
-          <span className="profile-trigger-name">{primeiroNome}</span>
-          {aberto && <span className="profile-morph-email truncate">{usuario.email}</span>}
+          <span className="profile-morph-identity">
+            <span className="profile-trigger-name">{primeiroNome}</span>
+            {aberto && <span className="profile-morph-email truncate">{usuario.email}</span>}
+          </span>
           <ChevronRight size={15} className={`profile-chevron shrink-0 transition-transform duration-200 ${aberto ? 'rotate-90' : ''}`} />
         </button>
 
-        {aberto && (
-          <div className="profile-morph-menu animate-dropdown" role="menu">
-            <Link to="/perfil" className="profile-dropdown-link" role="menuitem" onClick={() => setAberto(false)}>
-              <CircleUserRound size={17} />
-              <span>Meu perfil</span>
-            </Link>
-            <button className="profile-dropdown-link profile-logout" type="button" role="menuitem" onClick={sair}>
-              <LogOut size={17} />
-              <span>Sair</span>
-            </button>
-          </div>
-        )}
+        <div className={`profile-morph-menu ${aberto ? 'profile-morph-menu-open' : 'profile-morph-menu-closed'}`} role="menu" aria-hidden={!aberto}>
+          <Link to="/perfil" className="profile-dropdown-link" role="menuitem" onClick={() => setAberto(false)}>
+            <CircleUserRound size={17} />
+            <span>Meu perfil</span>
+          </Link>
+          <button className="profile-dropdown-link profile-logout" type="button" role="menuitem" onClick={sair}>
+            <LogOut size={17} />
+            <span>Sair</span>
+          </button>
+        </div>
       </div>
     </div>
   );
