@@ -56,8 +56,8 @@ Para manter a organização entre múltiplos desenvolvedores, o projeto segue um
 3. **Branches Temporárias (`feature/*`, `fix/*`, `refactor/*`, `docs/*`):** Ramificadas obrigatoriamente a partir da `dev` para o desenvolvimento de demandas específicas.
 
 ### Estratégia de Merge e Pull Request (MUITO IMPORTANTE):
-* **Desenvolvimento e Testes em `dev`:** O desenvolvedor cria sua branch a partir da `dev`, codifica, valida localmente e realiza o **merge direto na branch `dev`**. A `dev` centraliza os testes combinados da equipe.
-* **Pull Request (PR) restrito para `main`:** Os Pull Requests são utilizados **exclusivamente na promoção do código da branch `dev` para a branch `main`**, exigindo *Code Review* e aprovação antes do release oficial de produção.
+* **Desenvolvimento e Testes em `dev`:** O desenvolvedor cria sua branch a partir da `dev`, codifica e envia commits para sua branch. Cada `push` executa os testes automatizados para feedback rápido. A branch de trabalho é integrada na `dev` por Pull Request, que executa os testes novamente como gate de integração.
+* **Pull Request (PR) restrito para `main`:** Pull Requests destinados à `main` devem ter origem exclusivamente na branch `dev`, exigindo *Code Review* e aprovação antes do release oficial de produção.
 
 adronização de Commits (Conventional Commits):
 Sintaxe obrigatória: <tipo>(escopo): <descrição curta no imperativo>

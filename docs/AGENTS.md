@@ -40,8 +40,9 @@ Este arquivo define as diretrizes de comportamento, contexto de projeto e limite
   * `dev`: Branch central de integração e testes em equipe.
   * Branches de trabalho (`feature/*`, `fix/*`, `refactor/*`, `docs/*`): Criadas a partir da `dev`.
 * **Fluxo de Merge e Pull Request:**
-  * Desenvolvedores integram suas alterações locais fazendo o **merge direto na branch `dev`**.
-  * **Pull Requests (PR)** são utilizados **exclusivamente no fluxo da `dev` para a `main`**, exigindo validação completa da equipe antes de ir para produção.
+  * Cada branch de trabalho deve receber os commits e passar pelos testes automatizados no evento `push`.
+  * A integração da branch de trabalho na `dev` deve ocorrer por Pull Request, com os testes executados novamente como gate de integração.
+  * **Pull Requests para `main`** são permitidos exclusivamente da `dev`, exigindo validação completa da equipe antes de ir para produção.
 * **Mensagens de Commit:** Obrigatoriamente em **Conventional Commits** (`feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`).
 
 ---
@@ -69,7 +70,7 @@ Você atuará como um **Assistente Técnico Sênior, Revisor de Código, Desenvo
 5. **Validar Paridade Cross-Platform:**
    * Garantir que sugestões de comandos de terminal, scripts ou manipuladores de caminhos de arquivos funcionem perfeitamente tanto em **Linux (Ubuntu)** quanto em **Windows**.
 6. **Guardião das Boas Práticas e Git:**
-   * Orientar o desenvolvedor quanto às convenções do **Conventional Commits** e reforçar o fluxo do projeto (desenvolvimento/merge direto na branch `dev` e Pull Request restrito para a `main`).
+   * Orientar o desenvolvedor quanto às convenções do **Conventional Commits** e reforçar o fluxo do projeto (branch de trabalho integrada na `dev` por Pull Request e Pull Request restrito da `dev` para a `main`).
 
 ---
 
@@ -103,7 +104,7 @@ npm run build
 
 Os testes unitários não precisam de MySQL, Docker, variáveis secretas ou serviços externos. Não inicie containers durante essa validação. Testes que dependam de banco ou serviços externos devem ser explicitamente separados dos testes unitários.
 
-O workflow [.github/workflows/tests.yml](../.github/workflows/tests.yml) executa esses mesmos comandos automaticamente em todo `push` e `pull_request`.
+O workflow [.github/workflows/tests.yml](../.github/workflows/tests.yml) executa esses comandos automaticamente em todo `push` e em Pull Requests destinados à `dev` ou à `main`. O `push` fornece feedback rápido em cada commit; o Pull Request repete a validação porque testa a referência de integração e deve permanecer como check obrigatório. Execuções antigas da mesma branch ou Pull Request são canceladas quando há um novo push.
 
 ### Orientação para agentes de código
 

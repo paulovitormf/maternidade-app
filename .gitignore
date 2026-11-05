@@ -17,6 +17,7 @@ backend/target/
 # Node / Frontend (React, Angular, Vue)
 # ==========================================
 frontend/node_modules/
+/node_modules/
 frontend/dist/
 frontend/build/
 .npm

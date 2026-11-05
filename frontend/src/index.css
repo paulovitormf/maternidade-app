@@ -125,6 +125,40 @@
     @apply mt-1 text-xs text-slate-500;
   }
 
+  .notification-list {
+    @apply max-h-80 overflow-y-auto;
+  }
+
+  .notification-item {
+    @apply flex gap-3 border-b border-[#FFF0F2] px-4 py-3 text-[#B0435B] last:border-b-0;
+  }
+
+  .notification-item.unread {
+    @apply bg-slate-100;
+  }
+
+  .notification-item.read {
+    @apply bg-white;
+  }
+
+  .notification-item strong,
+  .notification-item p,
+  .notification-item time {
+    @apply block;
+  }
+
+  .notification-item strong {
+    @apply text-sm font-extrabold text-slate-700;
+  }
+
+  .notification-item p {
+    @apply mt-1 text-xs text-slate-600;
+  }
+
+  .notification-item time {
+    @apply mt-1 text-[11px] text-slate-400;
+  }
+
   .profile-menu-trigger {
     @apply inline-flex items-center gap-2 rounded-2xl border border-[#F4C4CD] bg-white px-2 py-1.5 text-sm font-extrabold text-slate-700 transition hover:bg-[#FFF8F9] focus:outline-none focus:ring-4 focus:ring-[#FADCE1];
   }

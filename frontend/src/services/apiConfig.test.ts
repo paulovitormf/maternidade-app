@@ -10,7 +10,7 @@ describe('resolveApiBaseUrl', () => {
     expect(resolveApiBaseUrl('http://localhost:8080/api/')).toBe('http://localhost:8080/api/');
   });
 
-  it('usa o endereço local padrão', () => {
-    expect(resolveApiBaseUrl()).toBe('http://localhost:8080/api');
+  it('rejeita ambiente sem URL da API', () => {
+    expect(() => resolveApiBaseUrl()).toThrow('VITE_API_URL não está configurada.');
   });
 });
