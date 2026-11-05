@@ -129,7 +129,7 @@ cd ../backend
 mvn --batch-mode test
 ```
 
-Os mesmos comandos são executados automaticamente pelo GitHub Actions em todo `push` e `pull_request`, por meio de [.github/workflows/tests.yml](.github/workflows/tests.yml). Os testes unitários não precisam de MySQL, Docker ou serviços externos.
+Os mesmos comandos são executados automaticamente pelo GitHub Actions em todo `push` e em Pull Requests destinados à `dev` ou à `main`, por meio de [.github/workflows/tests.yml](.github/workflows/tests.yml). Os testes unitários não precisam de MySQL, Docker ou serviços externos. As execuções antigas da mesma branch ou Pull Request são canceladas quando há um novo push.
 
 ## 📚 Documentação
 

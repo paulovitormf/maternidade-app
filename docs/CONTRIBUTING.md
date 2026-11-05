@@ -65,10 +65,10 @@ docs/atualiza-guia-execucao
 ### Fluxo de integração
 
 1. Crie a branch de trabalho a partir da `dev`.
-2. Desenvolva e valide a alteração localmente.
+2. Desenvolva e faça commits na branch de trabalho. Cada push executa os testes automatizados para fornecer feedback rápido.
 3. Atualize a branch com a `dev` antes da integração, quando necessário.
-4. Integre a branch de trabalho na `dev` e execute as validações do projeto.
-5. Use Pull Request para promover a `dev` para a `main` depois da revisão e da validação da equipe.
+4. Abra um Pull Request da branch de trabalho para a `dev`. O Pull Request executa novamente os testes na referência de integração e funciona como gate obrigatório.
+5. Use Pull Request somente da `dev` para a `main` depois da revisão e da validação da equipe.
 
 Não abra Pull Requests de branches de trabalho diretamente para `main`. A `dev` é o ponto de integração do desenvolvimento; a `main` deve receber somente alterações estáveis.
 
@@ -135,6 +135,8 @@ Evite commits genéricos, como `ajustes`, `mudanças` ou `final`, e não misture
 
 - [ ] A alteração tem escopo claro e não inclui arquivos ou segredos locais.
 - [ ] A branch foi criada a partir da `dev` e possui nome padronizado.
+- [ ] Cada push da branch passou pelos testes automatizados.
+- [ ] O Pull Request tem como destino a `dev` (ou, para promoção, a `main`).
 - [ ] Os commits seguem Conventional Commits.
 - [ ] O front-end passa em `npm run build`.
 - [ ] O back-end passa em `mvn test`.
