@@ -72,7 +72,7 @@ export default function Login() {
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-500 transition hover:text-[#B0435B] focus:outline-none focus:ring-4 focus:ring-[#FADCE1]"
+                className="absolute inset-y-0 right-0 flex items-center px-4 text-slate-500 transition hover:text-[#B0435B] focus:outline-none"
                 onClick={() => setMostrarSenha((visivel) => !visivel)}
                 aria-label={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
                 title={mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}
