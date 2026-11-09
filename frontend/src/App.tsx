@@ -399,11 +399,11 @@ function WelcomeScreen() {
       <div className="welcome-actions">
         <Link className="primary-button flex items-center justify-center gap-2" to="/login">
           <CircleUserRound size={18} />
-          <span>Entrar na minha conta</span>
+          <span>Entrar</span>
         </Link>
         <Link className="secondary-button flex items-center justify-center gap-2" to="/cadastrar-usuario">
           <UserPlus size={18} />
-          <span>Criar cadastro</span>
+          <span>Cadastre-se</span>
         </Link>
       </div>
       <div className="welcome-benefits">
