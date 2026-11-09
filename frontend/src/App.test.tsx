@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
 
@@ -13,8 +13,9 @@ describe('App Navigation and Layout', () => {
     render(<App />);
 
     expect(screen.getByText(/Acompanhe sua jornada com mais leveza/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Entrar na minha conta/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Criar cadastro/i })).toBeInTheDocument();
+    const welcome = within(screen.getByRole('main'));
+    expect(welcome.getByRole('link', { name: /^Entrar$/i })).toBeInTheDocument();
+    expect(welcome.getByRole('link', { name: /Cadastre-se/i })).toBeInTheDocument();
   });
 
   it('deve exibir o dashboard e menu de perfil para usuário autenticado', async () => {
