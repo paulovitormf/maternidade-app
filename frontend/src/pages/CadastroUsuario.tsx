@@ -63,7 +63,7 @@ export default function CadastroUsuario() {
       </div>
       <form onSubmit={submit} className="form-grid">
         {fields.map(([name, label, type, required], index) => (
-          <label className={`field ${index < 2 ? 'field-wide' : ''}`} key={name}>
+          <label className={`field ${index < 2 || name === 'senha' ? 'field-wide' : ''}`} key={name}>
             <span className="field-label">{label}{required ? ' *' : ''}</span>
             {name === 'senha' ? (
               <div className="relative">
