@@ -1,8 +1,3 @@
-CREATE DATABASE IF NOT EXISTS maternidade
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-USE maternidade;
-
 SET NAMES utf8mb4;
 
 /* usuario: pai, mae ou responsavel */
@@ -781,6 +776,74 @@ CREATE TABLE grupo_apoio_usuario (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+/* fórum de discussão */
+CREATE TABLE forum_categoria (
+    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    descricao TEXT,
+    tipo VARCHAR(20) NOT NULL,
+    idade_min_meses SMALLINT UNSIGNED,
+    idade_max_meses SMALLINT UNSIGNED,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT uq_forum_categoria_tipo_nome UNIQUE (tipo, nome),
+    CONSTRAINT ck_forum_categoria_tipo
+        CHECK (tipo IN ('INTERESSE', 'FAIXA_ETARIA')),
+    CONSTRAINT ck_forum_categoria_idade
+        CHECK (
+            (tipo = 'INTERESSE' AND idade_min_meses IS NULL AND idade_max_meses IS NULL)
+            OR
+            (tipo = 'FAIXA_ETARIA'
+                AND idade_min_meses IS NOT NULL
+                AND idade_max_meses IS NOT NULL
+                AND idade_min_meses <= idade_max_meses)
+        )
+) ENGINE=InnoDB;
+
+CREATE TABLE forum_topico (
+    id_topico BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_categoria INT NOT NULL,
+    id_usuario INT NOT NULL,
+    titulo VARCHAR(200) NOT NULL,
+    conteudo TEXT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ABERTO',
+    fixado BOOLEAN NOT NULL DEFAULT FALSE,
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_atualizacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_forum_topico_categoria
+        FOREIGN KEY (id_categoria) REFERENCES forum_categoria(id_categoria) ON DELETE RESTRICT,
+    CONSTRAINT fk_forum_topico_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT ck_forum_topico_status
+        CHECK (status IN ('ABERTO', 'FECHADO', 'ARQUIVADO')),
+
+    INDEX idx_forum_topico_categoria_lista
+        (id_categoria, status, fixado, data_atualizacao),
+    INDEX idx_forum_topico_usuario_data (id_usuario, data_criacao)
+) ENGINE=InnoDB;
+
+CREATE TABLE forum_resposta (
+    id_resposta BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_topico BIGINT NOT NULL,
+    id_usuario INT NOT NULL,
+    conteudo TEXT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ATIVA',
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    data_atualizacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_forum_resposta_topico
+        FOREIGN KEY (id_topico) REFERENCES forum_topico(id_topico) ON DELETE CASCADE,
+    CONSTRAINT fk_forum_resposta_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT ck_forum_resposta_status
+        CHECK (status IN ('ATIVA', 'OCULTA', 'EXCLUIDA')),
+
+    INDEX idx_forum_resposta_topico_lista (id_topico, status, data_criacao),
+    INDEX idx_forum_resposta_usuario_data (id_usuario, data_criacao)
+) ENGINE=InnoDB;
+
 /* produtos: alergênicos, avaliações e código de barras */
 ALTER TABLE produto
     ADD COLUMN codigo_barras VARCHAR(50) UNIQUE,
@@ -838,4 +901,3 @@ CREATE TABLE disponibilidade_especialista (
     CONSTRAINT ck_disponibilidade_dia CHECK (dia_semana BETWEEN 0 AND 6),
     CONSTRAINT ck_disponibilidade_modalidade CHECK (modalidade IN ('PRESENCIAL', 'ONLINE'))
 ) ENGINE=InnoDB;
-
