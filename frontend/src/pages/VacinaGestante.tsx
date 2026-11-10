@@ -88,7 +88,7 @@ const etapas = [
   },
 ];
 
-export default function VacinaGestante() {
+export default function CalendarioVacinaGestante() {
   const [busca, setBusca] = useState('');
 
   const etapasFiltradas = useMemo(() => {
@@ -124,24 +124,7 @@ export default function VacinaGestante() {
   }, [busca]);
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Cabeçalho */}
-      <header className="mb-8">
-        <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#B84A62]">
-          Saúde materna
-        </p>
-
-        <h1 className="text-3xl font-bold tracking-tight text-slate-800">
-          Calendário de vacinação
-        </h1>
-
-        <p className="mt-2 max-w-2xl text-slate-600">
-          Visualize as etapas da vacinação e acompanhe as orientações
-          importantes durante a gestação.
-        </p>
-      </header>
-
-      <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+    <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
         {/* Resumo lateral */}
         <aside className="space-y-4">
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -301,6 +284,5 @@ export default function VacinaGestante() {
           </footer>
         </section>
       </div>
-    </main>
   );
 }
