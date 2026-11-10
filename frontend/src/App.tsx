@@ -12,8 +12,7 @@ import ContinuarCadastro from './pages/ContinuarCadastro';
 import Login from './pages/Login';
 import JornadaGestacao from './pages/JornadaGestacao';
 import JornadaDesenvolvimento from './pages/JornadaDesenvolvimento';
-import VacinaBebe from './pages/VacinaBebe';
-import VacinaGestante from './pages/VacinaGestante';
+import Vacinas from './pages/Vacinas';
 import Perfil from './pages/Perfil';
 import JornadaCrianca from './pages/JornadaCrianca';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
@@ -65,7 +64,6 @@ function AppLayout() {
                 itens={[
                   { to: '/cadastrar-gestacao', rotulo: 'Minhas gestações', icone: <CalendarDays size={15} /> },
                   { to: '/jornada-gestacao', rotulo: 'Jornada da gestação', icone: <Sparkles size={15} /> },
-                  { to: '/vacinas-gestante', rotulo: 'Vacinação materna', icone: <Syringe size={15} /> },
                 ]}
               />
             )}
@@ -77,9 +75,13 @@ function AppLayout() {
                   { to: '/cadastrar-bebe', rotulo: 'Meus bebês', icone: <Baby size={15} /> },
                   { to: '/jornadas-desenvolvimento', rotulo: 'Jornada por fases', icone: <Sparkles size={15} /> },
                   { to: '/jornada-crianca', rotulo: 'Acompanhamento até 5 anos', icone: <CalendarDays size={15} /> },
-                  { to: '/vacinas-bebe', rotulo: 'Vacinas do bebê', icone: <Syringe size={15} /> },
                 ]}
               />
+            )}
+            {isAuthenticated && (
+              <Link className={`nav-link ${location.pathname.startsWith('/vacinas') ? 'nav-link-active' : ''}`} to="/vacinas">
+                <Syringe size={16} strokeWidth={1.8} />Vacinas
+              </Link>
             )}
           </div>
           {isAuthenticated && usuario ? (
@@ -129,13 +131,14 @@ function AppLayout() {
               <p className="mobile-nav-heading">Gestação</p>
               <Link className={`mobile-nav-link ${location.pathname === '/cadastrar-gestacao' ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-gestacao"><CalendarDays size={18} /><span>Minhas gestações</span></Link>
               <Link className={`mobile-nav-link ${location.pathname === '/jornada-gestacao' ? 'mobile-nav-link-active' : ''}`} to="/jornada-gestacao"><Sparkles size={18} /><span>Jornada da gestação</span></Link>
-              <Link className={`mobile-nav-link ${location.pathname === '/vacinas-gestante' ? 'mobile-nav-link-active' : ''}`} to="/vacinas-gestante"><Syringe size={18} /><span>Vacinação materna</span></Link>
 
               <p className="mobile-nav-heading">Bebê e Criança</p>
               <Link className={`mobile-nav-link ${location.pathname === '/cadastrar-bebe' ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-bebe"><Baby size={18} /><span>Meus bebês</span></Link>
               <Link className={`mobile-nav-link ${location.pathname === '/jornadas-desenvolvimento' ? 'mobile-nav-link-active' : ''}`} to="/jornadas-desenvolvimento"><Sparkles size={18} /><span>Jornadas de desenvolvimento</span></Link>
               <Link className={`mobile-nav-link ${location.pathname === '/jornada-crianca' ? 'mobile-nav-link-active' : ''}`} to="/jornada-crianca"><CalendarDays size={18} /><span>Acompanhamento até 5 anos</span></Link>
-              <Link className={`mobile-nav-link ${location.pathname === '/vacinas-bebe' ? 'mobile-nav-link-active' : ''}`} to="/vacinas-bebe"><Syringe size={18} /><span>Vacinas do bebê</span></Link>
+
+              <p className="mobile-nav-heading">Vacinas</p>
+              <Link className={`mobile-nav-link ${location.pathname.startsWith('/vacinas') ? 'mobile-nav-link-active' : ''}`} to="/vacinas"><Syringe size={18} /><span>Vacinas da mãe e do bebê</span></Link>
 
               <p className="mobile-nav-heading">Sua Conta</p>
               <Link className={`mobile-nav-link ${location.pathname === '/perfil' ? 'mobile-nav-link-active' : ''}`} to="/perfil"><CircleUserRound size={18} /><span>Meu perfil</span></Link>
@@ -153,8 +156,9 @@ function AppLayout() {
           <Route path="/cadastrar-gestacao" element={<ProtectedRoute><CadastroGestacao /></ProtectedRoute>} />
           <Route path="/jornadas-desenvolvimento" element={<ProtectedRoute><JornadaDesenvolvimento /></ProtectedRoute>} />
           <Route path="/jornada-gestacao" element={<ProtectedRoute><JornadaGestacao /></ProtectedRoute>} />
-          <Route path="/vacinas-bebe" element={<ProtectedRoute><VacinaBebe /></ProtectedRoute>} />
-          <Route path="/vacinas-gestante" element={<ProtectedRoute><VacinaGestante /></ProtectedRoute>}/>
+          <Route path="/vacinas" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
+          <Route path="/vacinas-bebe" element={<ProtectedRoute><Vacinas publicoInicial="bebe" /></ProtectedRoute>} />
+          <Route path="/vacinas-gestante" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
           <Route path="/jornada-crianca" element={<ProtectedRoute><JornadaCrianca /></ProtectedRoute>} />
@@ -484,9 +488,9 @@ function HomeDashboard() {
               <span><strong>Meus bebês</strong><small>Registre dados de nascimento e compartilhe acesso</small></span>
               <ChevronRight size={18} />
             </Link>
-            <Link to="/vacinas-bebe" className="quick-action quick-action-blue group">
+            <Link to="/vacinas" className="quick-action quick-action-blue group">
               <span className="quick-action-icon"><Syringe size={23} strokeWidth={1.7} /></span>
-              <span><strong>Vacinação do bebê</strong><small>Consulte o calendário do Ministério da Saúde</small></span>
+              <span><strong>Vacinas da família</strong><small>Consulte os calendários da mãe e do bebê</small></span>
               <ChevronRight size={18} />
             </Link>
           </div>

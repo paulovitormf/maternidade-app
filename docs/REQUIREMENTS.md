@@ -34,6 +34,7 @@ O sistema atualmente oferece:
 - cadastro, listagem e edição de gestações;
 - cadastro e listagem de crianças vinculadas ao usuário;
 - consulta de jornada do desenvolvimento infantil;
+- consulta dos calendários de vacinação materna e infantil em uma página unificada;
 - consulta e edição do perfil;
 - navegação responsiva para desktop e dispositivos móveis.
 
@@ -50,6 +51,7 @@ O sistema atualmente oferece:
 | RF-07 | Exibir jornada do desenvolvimento infantil. | ✅ Implementado |
 | RF-08 | Permitir consultar dados básicos do perfil. | ✅ Implementado |
 | RF-09 | Exibir o calendário de vacinação de rotina do bebê até os 5 anos. | ✅ Implementado |
+| RF-10 | Reunir os calendários de vacinação materna e infantil em uma página com seletor entre mãe e bebê, iniciando na vacinação materna. | ✅ Implementado |
 
 ## 🎨 Requisitos de experiência
 

@@ -106,7 +106,7 @@ const totalVacinas = etapas.reduce(
   0,
 );
 
-export default function VacinaBebe() {
+export default function CalendarioVacinaBebe() {
   const [busca, setBusca] = useState('');
 
   const etapasFiltradas = useMemo(() => {
@@ -139,24 +139,7 @@ export default function VacinaBebe() {
   }, [busca]);
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Cabeçalho */}
-      <header className="mb-8">
-        <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#3B7280]">
-          Acompanhamento infantil
-        </p>
-
-        <h1 className="text-3xl font-bold tracking-tight text-slate-800">
-          Vacinação do bebê
-        </h1>
-
-        <p className="mt-2 max-w-2xl text-slate-600">
-          Acompanhe as etapas da vacinação infantil e consulte
-          as doses previstas para cada idade.
-        </p>
-      </header>
-
-      <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
+    <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
         {/* Resumo lateral */}
         <aside className="space-y-4">
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -318,6 +301,5 @@ export default function VacinaBebe() {
           </footer>
         </section>
       </div>
-    </main>
   );
 }
