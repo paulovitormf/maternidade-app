@@ -164,6 +164,7 @@ function AppLayout() {
           <Route path="/vacinas-gestante" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/foruns" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
+          <Route path="/foruns/:topicId" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
           <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
           <Route path="/jornada-crianca" element={<ProtectedRoute><JornadaCrianca /></ProtectedRoute>} />
         </Routes>

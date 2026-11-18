@@ -879,6 +879,14 @@
     @apply ml-2 text-[#C8526B];
   }
 
+  .discussion-like {
+    @apply ml-1 inline-flex items-center gap-1 rounded-full px-1.5 py-1 text-[#64748b] transition hover:bg-[#FFF0F2] hover:text-[#C8526B];
+  }
+
+  .discussion-like.liked {
+    @apply text-[#C8526B];
+  }
+
   .discussion-arrow {
     @apply absolute right-4 top-5 text-slate-300 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[#C8526B];
   }
@@ -973,6 +981,70 @@
 
   .forum-tip p {
     @apply text-xs leading-5 text-slate-500;
+  }
+
+  .forum-detail {
+    @apply mx-auto w-full max-w-4xl space-y-5;
+  }
+
+  .forum-back-button {
+    @apply inline-flex items-center gap-2 text-sm font-extrabold text-[#3B7280] transition hover:text-[#C8526B];
+  }
+
+  .forum-detail-topic {
+    @apply p-5 sm:p-7;
+  }
+
+  .forum-detail-content {
+    @apply my-5 whitespace-pre-wrap text-base leading-7 text-slate-600;
+  }
+
+  .forum-like-button {
+    @apply inline-flex items-center gap-2 rounded-full border border-[#FADCE1] bg-white px-3 py-2 text-xs font-extrabold text-slate-500 transition hover:border-[#C8526B] hover:text-[#C8526B] focus:outline-none focus:ring-4 focus:ring-[#FADCE1];
+  }
+
+  .forum-like-button.liked {
+    @apply border-[#C8526B] bg-[#FFF0F2] text-[#C8526B];
+  }
+
+  .forum-replies {
+    @apply space-y-5 p-5 sm:p-7;
+  }
+
+  .forum-replies h2 span {
+    @apply ml-2 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-[#FADCE1] px-2 text-xs text-[#B0435B];
+  }
+
+  .forum-reply {
+    @apply flex gap-3 border-b border-[#FADCE1] pb-5;
+  }
+
+  .forum-reply-avatar {
+    @apply flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#EBF3F5] text-sm font-extrabold text-[#3B7280];
+  }
+
+  .forum-reply-heading {
+    @apply flex items-center gap-3;
+  }
+
+  .forum-reply-heading strong {
+    @apply text-sm text-slate-800;
+  }
+
+  .forum-reply-heading time {
+    @apply text-xs text-slate-400;
+  }
+
+  .forum-reply p {
+    @apply mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600;
+  }
+
+  .forum-no-replies {
+    @apply rounded-2xl bg-[#FFF8F9] p-4 text-sm text-slate-500;
+  }
+
+  .forum-answer {
+    @apply flex flex-col items-end gap-3;
   }
 
   .mobile-bottom-nav {
