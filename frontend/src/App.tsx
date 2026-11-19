@@ -30,6 +30,7 @@ function AppLayout() {
   const location = useLocation();
   const [, setAuthVersion] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<'notifications' | 'profile' | null>(null);
   const isAuthenticated = hasValidSession();
   const usuario = getStoredUser();
 
@@ -88,8 +89,16 @@ function AppLayout() {
           </div>
           {isAuthenticated && usuario ? (
             <div className="nav-user-actions">
-              <NotificationCenter />
-              <ProfileMenu usuario={usuario} />
+              <NotificationCenter
+                open={openMenu === 'notifications'}
+                onOpenChange={(open) => setOpenMenu(open ? 'notifications' : null)}
+              />
+              <ProfileMenu
+                usuario={usuario}
+                compact={openMenu === 'notifications'}
+                open={openMenu === 'profile'}
+                onOpenChange={(open) => setOpenMenu(open ? 'profile' : null)}
+              />
             </div>
           ) : (
             <Link className="nav-login-button" to="/login"><CircleUserRound size={18} />Entrar</Link>
@@ -241,8 +250,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
     : <Navigate to="/login" replace />;
 }
 
-function NotificationCenter() {
-  const [aberto, setAberto] = useState(false);
+function NotificationCenter({ open: aberto, onOpenChange }: { open: boolean; onOpenChange: (aberto: boolean) => void }) {
   const [animacoesAtivas, setAnimacoesAtivas] = useState(false);
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [erro, setErro] = useState(false);
@@ -258,17 +266,17 @@ function NotificationCenter() {
     const fecharAoClicarFora = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target.closest('.notification-menu-wrap')) {
-        setAberto(false);
+        onOpenChange(false);
       }
     };
     document.addEventListener('click', fecharAoClicarFora);
     return () => document.removeEventListener('click', fecharAoClicarFora);
-  }, [aberto]);
+  }, [aberto, onOpenChange]);
 
   const alternarNotificacoes = () => {
     setAnimacoesAtivas(true);
     const novoEstado = !aberto;
-    setAberto(novoEstado);
+    onOpenChange(novoEstado);
     if (novoEstado && notificacoes.some((notificacao) => notificacao.status !== 'LIDA')) {
       marcarNotificacoesComoLidas()
         .then(() => setNotificacoes((atuais) => atuais.map((notificacao) => ({ ...notificacao, status: 'LIDA' }))))
@@ -290,7 +298,6 @@ function NotificationCenter() {
           {aberto && (
             <span className="notification-trigger-copy">
               <strong>Notificações</strong>
-              <span>Avisos importantes aparecerão aqui.</span>
             </span>
           )}
           {notificacoes.some((notificacao) => notificacao.status !== 'LIDA') && (
@@ -335,8 +342,17 @@ function NotificationCenter() {
   );
 }
 
-function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
-  const [aberto, setAberto] = useState(false);
+function ProfileMenu({
+  usuario,
+  compact,
+  open: aberto,
+  onOpenChange,
+}: {
+  usuario: UsuarioPublico;
+  compact: boolean;
+  open: boolean;
+  onOpenChange: (aberto: boolean) => void;
+}) {
   const primeiroNome = usuario.nome.trim().split(/\s+/)[0];
 
   useEffect(() => {
@@ -344,12 +360,12 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
     const fecharAoClicarFora = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target.closest('.profile-menu-wrap')) {
-        setAberto(false);
+        onOpenChange(false);
       }
     };
     document.addEventListener('click', fecharAoClicarFora);
     return () => document.removeEventListener('click', fecharAoClicarFora);
-  }, [aberto]);
+  }, [aberto, onOpenChange]);
 
   const sair = () => {
     localStorage.removeItem('access_token');
@@ -359,7 +375,7 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
   };
 
   return (
-    <div className={`profile-menu-wrap ${aberto ? 'profile-menu-wrap-open' : ''}`}>
+    <div className={`profile-menu-wrap ${aberto ? 'profile-menu-wrap-open' : ''} ${compact ? 'profile-menu-wrap-compact' : ''}`}>
       <div className={`profile-morph-container ${aberto ? 'profile-morph-expanded' : 'profile-morph-collapsed'}`}>
         <button
           className={`profile-morph-header ${aberto ? 'profile-morph-header-open' : ''}`}
@@ -368,7 +384,7 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
           aria-haspopup="menu"
           onClick={(e) => {
             e.stopPropagation();
-            setAberto((val) => !val);
+            onOpenChange(!aberto);
           }}
         >
           <span className="profile-photo shrink-0">{getInitials(usuario.nome)}</span>
@@ -380,7 +396,7 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
         </button>
 
         <div className={`profile-morph-menu ${aberto ? 'profile-morph-menu-open' : 'profile-morph-menu-closed'}`} role="menu" aria-hidden={!aberto}>
-          <Link to="/perfil" className="profile-dropdown-link" role="menuitem" onClick={() => setAberto(false)}>
+          <Link to="/perfil" className="profile-dropdown-link" role="menuitem" onClick={() => onOpenChange(false)}>
             <CircleUserRound size={17} />
             <span>Meu perfil</span>
           </Link>

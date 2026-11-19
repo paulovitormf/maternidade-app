@@ -1072,6 +1072,69 @@
       display: none;
     }
   }
+
+  @media (max-width: 639px) {
+    .nav-inner {
+      flex-wrap: nowrap;
+      gap: 0.5rem;
+    }
+
+    .brand {
+      min-width: 2.75rem;
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      display: none;
+    }
+
+    .nav-user-actions {
+      flex-wrap: nowrap;
+      margin-left: auto;
+    }
+
+    .profile-menu-wrap {
+      width: 7.5rem;
+    }
+
+    .profile-menu-wrap-open {
+      width: 11rem;
+    }
+
+    .notification-morph-expanded {
+      width: min(14rem, calc(100vw - 1.5rem));
+      max-height: calc(100dvh - 7rem);
+    }
+
+    .profile-menu-wrap-compact {
+      width: 3.25rem;
+    }
+
+    .profile-morph-container {
+      position: relative;
+      width: 100%;
+    }
+
+    .profile-menu-wrap-compact .profile-morph-header {
+      justify-content: center;
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .profile-menu-wrap-compact .profile-morph-identity,
+    .profile-menu-wrap-compact .profile-chevron {
+      display: none;
+    }
+
+    .notification-panel-content {
+      max-height: calc(100dvh - 10.25rem);
+    }
+
+    .notification-list {
+      max-height: calc(100dvh - 10.25rem);
+      overscroll-behavior: contain;
+    }
+  }
 }
 
 .milestones-disclaimer a { @apply font-bold text-[#3B7280] underline; }
