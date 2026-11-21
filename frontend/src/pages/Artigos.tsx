@@ -1,6 +1,12 @@
 
 import { useMemo, useState } from 'react';
-import { ArrowUpRight, BookOpen, Clock3, Search } from 'lucide-react';
+import {
+  ArrowUpRight,
+  BookOpen,
+  Clock3,
+  Heart,
+  Search,
+} from 'lucide-react';
 
 type Article = {
   id: number;
@@ -8,6 +14,7 @@ type Article = {
   title: string;
   excerpt: string;
   readTime: string;
+  accent: 'pink' | 'blue' | 'cream';
   image: string;
 };
 
@@ -16,32 +23,40 @@ const articles: Article[] = [
     id: 1,
     category: 'Bem-estar',
     title: 'Como cuidar de si nos primeiros meses',
-    excerpt: 'Descanso, limites e pequenas pausas podem fazer diferença em uma fase cheia de novas responsabilidades.',
+    excerpt:
+      'Descanso, limites e pequenas pausas podem fazer diferença em uma fase cheia de novas responsabilidades.',
     readTime: '6 min',
+    accent: 'pink',
     image: '/images/artigos/bem-estar.jpg',
   },
   {
     id: 2,
     category: 'Amamentação',
     title: 'Amamentar sem pressões: encontre o seu ritmo',
-    excerpt: 'Informações acolhedoras para entender sinais de fome, conforto e momentos em que buscar ajuda profissional.',
+    excerpt:
+      'Informações acolhedoras para entender sinais de fome, conforto e momentos em que buscar ajuda profissional.',
     readTime: '8 min',
+    accent: 'blue',
     image: '/images/artigos/amamentacao.jpg',
   },
   {
     id: 3,
     category: 'Desenvolvimento',
     title: 'Marcos do bebê: observação sem comparação',
-    excerpt: 'Entenda o desenvolvimento infantil como um caminho único e reconheça sinais para conversar com o pediatra.',
+    excerpt:
+      'Entenda o desenvolvimento infantil como um caminho único e reconheça sinais para conversar com o pediatra.',
     readTime: '5 min',
+    accent: 'cream',
     image: '/images/artigos/desenvolvimento.jpg',
   },
   {
     id: 4,
     category: 'Gestação',
     title: 'Preparando um espaço emocional para o parto',
-    excerpt: 'Informação, apoio e escolhas conscientes ajudam a viver o nascimento com mais tranquilidade.',
+    excerpt:
+      'Informação, apoio e escolhas conscientes ajudam a viver o nascimento com mais tranquilidade.',
     readTime: '7 min',
+    accent: 'pink',
     image: '/images/artigos/gestacao.jpg',
   },
 ];
@@ -50,16 +65,19 @@ const books = [
   {
     title: 'O bebê é meu',
     author: 'Penelope Leach',
+    tone: 'rose',
     cover: '/images/livros/bebe-e-meu.jpg',
   },
   {
     title: 'Mães que se cuidam',
     author: 'Leitura recomendada',
+    tone: 'sage',
     cover: '/images/livros/maes-que-se-cuidam.jpg',
   },
   {
     title: 'Família feliz',
     author: 'Fábio & Alexandra',
+    tone: 'blue',
     cover: '/images/livros/familia-feliz.jpg',
   },
 ];
@@ -70,58 +88,68 @@ export default function Artigos() {
 
   const categories = [
     'Todos',
-    ...Array.from(new Set(articles.map((article) => article.category))),
+    ...Array.from(
+      new Set(articles.map((article) => article.category))
+    ),
   ];
 
-  const visibleArticles = useMemo(() => {
-    return articles.filter((article) => {
-      const matchesCategory =
-        category === 'Todos' || article.category === category;
+  const visibleArticles = useMemo(
+    () =>
+      articles.filter((article) => {
+        const matchesCategory =
+          category === 'Todos' || article.category === category;
 
-      const query = search.trim().toLowerCase();
+        const query = search.trim().toLowerCase();
 
-      const matchesSearch =
-        !query ||
-        `${article.title} ${article.excerpt} ${article.category}`
-          .toLowerCase()
-          .includes(query);
+        const matchesSearch =
+          !query ||
+          `${article.title} ${article.excerpt} ${article.category}`
+            .toLowerCase()
+            .includes(query);
 
-      return matchesCategory && matchesSearch;
-    });
-  }, [category, search]);
+        return matchesCategory && matchesSearch;
+      }),
+    [category, search]
+  );
 
   return (
     <section className="articles-page">
 
+      {/* Cabeçalho */}
       <header className="articles-header">
         <div>
-          <p className="eyebrow">Biblioteca materna</p>
-          <h1 className="display-title">Artigos e leituras</h1>
+          <p className="eyebrow">Conteúdo para sua jornada</p>
+
+          <h1 className="display-title">Leituras para mães</h1>
+
           <p className="page-subtitle">
-            Um espaço para descobrir, aprender e encontrar informações
-            para cada fase da maternidade.
+            Encontre informações acolhedoras e sugestões de livros
+            para viver cada fase com mais confiança.
           </p>
         </div>
 
         <label className="articles-search">
           <Search size={18} />
+
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar artigos..."
+            placeholder="Buscar artigos"
             aria-label="Buscar artigos"
           />
         </label>
       </header>
 
+      {/* Conteúdo principal */}
       <div className="articles-layout">
 
         <main className="articles-main">
 
+          {/* Título e filtros */}
           <div className="articles-toolbar">
             <div>
-              <p className="eyebrow">Conteúdos</p>
-              <h2 className="section-title">Explore os artigos</h2>
+              <p className="eyebrow">Descubra mais</p>
+              <h2 className="section-title">Artigos recentes</h2>
             </div>
 
             <div
@@ -141,11 +169,14 @@ export default function Artigos() {
             </div>
           </div>
 
+          {/* Cards de artigos */}
           <div className="article-grid">
             {visibleArticles.map((article) => (
               <article className="article-card" key={article.id}>
 
-                <div className="article-card-image">
+                <div
+                  className={`article-card-art article-card-art-${article.accent}`}
+                >
                   <img
                     src={article.image}
                     alt=""
@@ -181,23 +212,29 @@ export default function Artigos() {
             ))}
           </div>
 
+          {/* Nenhum resultado */}
           {visibleArticles.length === 0 && (
             <div className="card empty-state">
               <Search size={30} />
+
               <h2>Nenhum artigo encontrado</h2>
-              <p>Tente outro termo ou escolha outra categoria.</p>
+
+              <p>
+                Tente outro termo ou escolha outra categoria.
+              </p>
             </div>
           )}
 
         </main>
 
+        {/* Barra lateral de livros */}
         <aside className="books-sidebar">
 
           <div className="books-card">
 
             <div className="books-heading">
               <div>
-                <p className="eyebrow">Boas leituras</p>
+                <p className="eyebrow">Para a estante</p>
                 <h2 className="section-title">Livros sugeridos</h2>
               </div>
 
@@ -208,7 +245,9 @@ export default function Artigos() {
               {books.map((book) => (
                 <article className="book-item" key={book.title}>
 
-                  <div className="book-cover">
+                  <div
+                    className={`book-cover book-cover-${book.tone}`}
+                  >
                     <img
                       src={book.cover}
                       alt={`Capa do livro ${book.title}`}
@@ -216,7 +255,7 @@ export default function Artigos() {
                     />
                   </div>
 
-                  <div className="book-info">
+                  <div>
                     <h3>{book.title}</h3>
                     <p>{book.author}</p>
                   </div>
@@ -227,12 +266,16 @@ export default function Artigos() {
 
           </div>
 
+          {/* Aviso */}
           <div className="reading-note">
+            <Heart size={18} fill="currentColor" />
+
             <p>
               <strong>Um cuidado importante</strong>
+
               <span>
-                As informações aqui não substituem orientação médica
-                ou profissional.
+                As informações aqui não substituem orientação
+                médica ou profissional.
               </span>
             </p>
           </div>
