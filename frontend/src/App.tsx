@@ -1,7 +1,7 @@
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Baby, Bell, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
+import { Baby, Bell, BookOpen, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
 import { listarNotificacoes, marcarNotificacoesComoLidas } from './services/notificacaoService';
 import type { Notificacao } from './services/notificacaoService';
 
@@ -16,6 +16,7 @@ import Vacinas from './pages/Vacinas';
 import Perfil from './pages/Perfil';
 import JornadaCrianca from './pages/JornadaCrianca';
 import Foruns from './pages/Foruns';
+import Artigos from './pages/Artigos';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
 
 export default function App() {
@@ -86,6 +87,7 @@ function AppLayout() {
               </Link>
             )}
             {isAuthenticated && <Link className={`nav-link ${location.pathname === '/foruns' ? 'nav-link-active' : ''}`} to="/foruns"><MessageCircle size={16} strokeWidth={1.8} />Fóruns</Link>}
+            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/artigos' ? 'nav-link-active' : ''}`} to="/artigos"><BookOpen size={16} strokeWidth={1.8} />Artigos</Link>}
           </div>
           {isAuthenticated && usuario ? (
             <div className="nav-user-actions">
@@ -139,6 +141,7 @@ function AppLayout() {
             <div className="space-y-1.5 pb-6">
               <Link className={`mobile-nav-link ${location.pathname === '/' ? 'mobile-nav-link-active' : ''}`} to="/"><Home size={18} /><span>Início</span></Link>
               <Link className={`mobile-nav-link ${location.pathname === '/foruns' ? 'mobile-nav-link-active' : ''}`} to="/foruns"><MessageCircle size={18} /><span>Fóruns</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/artigos' ? 'mobile-nav-link-active' : ''}`} to="/artigos"><BookOpen size={18} /><span>Artigos & leituras</span></Link>
 
               <p className="mobile-nav-heading">Gestação</p>
               <Link className={`mobile-nav-link ${location.pathname === '/cadastrar-gestacao' ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-gestacao"><CalendarDays size={18} /><span>Minhas gestações</span></Link>
@@ -174,6 +177,7 @@ function AppLayout() {
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/foruns" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
           <Route path="/foruns/:topicId" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
+          <Route path="/artigos" element={<ProtectedRoute><Artigos /></ProtectedRoute>} />
           <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
           <Route path="/jornada-crianca" element={<ProtectedRoute><JornadaCrianca /></ProtectedRoute>} />
         </Routes>
