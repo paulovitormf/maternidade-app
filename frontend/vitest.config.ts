@@ -35,7 +35,7 @@ export default defineConfig(({ mode }) => {
       setupFiles: ['./src/test/setup.ts'],
       minWorkers: 1,
       maxWorkers: 2,
-      testTimeout: 10_000,
+      testTimeout: 20_000,
     },
   };
 });

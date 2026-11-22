@@ -18,6 +18,7 @@ import JornadaCrianca from './pages/JornadaCrianca';
 import Foruns from './pages/Foruns';
 import Registros from './pages/Registros';
 import PerfilBebe from './pages/PerfilBebe';
+import Calendario from './pages/Calendario';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
 
 export default function App() {
@@ -76,8 +77,8 @@ function AppLayout() {
                 icone={<Baby size={16} strokeWidth={1.8} />}
                 itens={[
                   { to: '/cadastrar-bebe', rotulo: 'Meus bebês', icone: <Baby size={15} /> },
-                  { to: '/jornadas-desenvolvimento', rotulo: 'Jornada por fases', icone: <Sparkles size={15} /> },
-                  { to: '/jornada-crianca', rotulo: 'Acompanhamento até 5 anos', icone: <CalendarDays size={15} /> },
+                  { to: '/jornada-bebe', rotulo: 'Jornada do bebê — 0 a 2 anos', icone: <Sparkles size={15} /> },
+                  { to: '/jornada-crianca', rotulo: 'Jornada da criança — 2 a 12 anos', icone: <CalendarDays size={15} /> },
                 ]}
               />
             )}
@@ -87,6 +88,7 @@ function AppLayout() {
               </Link>
             )}
             {isAuthenticated && <Link className={`nav-link ${location.pathname === '/registros' ? 'nav-link-active' : ''}`} to="/registros"><ClipboardList size={16} strokeWidth={1.8} />Registros</Link>}
+            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/calendario' ? 'nav-link-active' : ''}`} to="/calendario"><CalendarDays size={16} strokeWidth={1.8} />Calendário</Link>}
             {isAuthenticated && <Link className={`nav-link ${location.pathname === '/foruns' ? 'nav-link-active' : ''}`} to="/foruns"><MessageCircle size={16} strokeWidth={1.8} />Fóruns</Link>}
           </div>
           {isAuthenticated && usuario ? (
@@ -140,14 +142,15 @@ function AppLayout() {
 
               <p className="mobile-nav-heading">Bebê e Criança</p>
               <Link className={`mobile-nav-link ${location.pathname.startsWith('/cadastrar-bebe') || location.pathname.startsWith('/bebes/') ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-bebe"><Baby size={18} /><span>Meus bebês</span></Link>
-              <Link className={`mobile-nav-link ${location.pathname === '/jornadas-desenvolvimento' ? 'mobile-nav-link-active' : ''}`} to="/jornadas-desenvolvimento"><Sparkles size={18} /><span>Jornadas de desenvolvimento</span></Link>
-              <Link className={`mobile-nav-link ${location.pathname === '/jornada-crianca' ? 'mobile-nav-link-active' : ''}`} to="/jornada-crianca"><CalendarDays size={18} /><span>Acompanhamento até 5 anos</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/jornada-bebe' ? 'mobile-nav-link-active' : ''}`} to="/jornada-bebe"><Sparkles size={18} /><span>Jornada do bebê — 0 a 2 anos</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/jornada-crianca' ? 'mobile-nav-link-active' : ''}`} to="/jornada-crianca"><CalendarDays size={18} /><span>Jornada da criança — 2 a 12 anos</span></Link>
 
               <p className="mobile-nav-heading">Vacinas</p>
               <Link className={`mobile-nav-link ${location.pathname.startsWith('/vacinas') ? 'mobile-nav-link-active' : ''}`} to="/vacinas"><Syringe size={18} /><span>Vacinas da mãe e do bebê</span></Link>
 
               <p className="mobile-nav-heading">Memórias</p>
               <Link className={`mobile-nav-link ${location.pathname === '/registros' ? 'mobile-nav-link-active' : ''}`} to="/registros"><ClipboardList size={18} /><span>Registros e galeria</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/calendario' ? 'mobile-nav-link-active' : ''}`} to="/calendario"><CalendarDays size={18} /><span>Calendário</span></Link>
 
               <p className="mobile-nav-heading">Sua Conta</p>
               <Link className={`mobile-nav-link ${location.pathname === '/perfil' ? 'mobile-nav-link-active' : ''}`} to="/perfil"><CircleUserRound size={18} /><span>Meu perfil</span></Link>
@@ -165,6 +168,8 @@ function AppLayout() {
           <Route path="/bebes/:id" element={<ProtectedRoute><PerfilBebe /></ProtectedRoute>} />
           <Route path="/cadastrar-gestacao" element={<ProtectedRoute><CadastroGestacao /></ProtectedRoute>} />
           <Route path="/jornadas-desenvolvimento" element={<ProtectedRoute><JornadaDesenvolvimento /></ProtectedRoute>} />
+          <Route path="/jornada-bebe" element={<ProtectedRoute><JornadaCrianca faixa="bebe" /></ProtectedRoute>} />
+          <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
           <Route path="/jornada-gestacao" element={<ProtectedRoute><JornadaGestacao /></ProtectedRoute>} />
           <Route path="/vacinas" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
           <Route path="/vacinas-bebe" element={<ProtectedRoute><Vacinas publicoInicial="bebe" /></ProtectedRoute>} />

@@ -78,6 +78,9 @@ export default function PerfilBebe() {
   const medidas = useMemo(() => ({
     peso: registros.find((registro) => registro.tipo === 'PESO' && registro.valor != null),
     altura: registros.find((registro) => registro.tipo === 'ALTURA' && registro.valor != null),
+    perimetro: registros.find((registro) => registro.tipo === 'PERIMETRO_CEFALICO' && registro.valor != null),
+    pesos: registros.filter((registro) => registro.tipo === 'PESO' && registro.valor != null).sort((a, b) => a.data_registro.localeCompare(b.data_registro)).slice(-8),
+    alturas: registros.filter((registro) => registro.tipo === 'ALTURA' && registro.valor != null).sort((a, b) => a.data_registro.localeCompare(b.data_registro)).slice(-8),
   }), [registros]);
 
   if (carregando) {
@@ -114,9 +117,14 @@ export default function PerfilBebe() {
           <h1 className="display-title !text-3xl">{crianca.nome}</h1>
           <p className="page-subtitle">{idade}</p>
         </div>
-        <Link className="secondary-button sm:!w-auto" to={`/registros?crianca=${crianca.id_crianca}`}>
-          <Camera size={17} className="mr-2" /> Ver registros
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link className="secondary-button sm:!w-auto" to={`/registros?crianca=${crianca.id_crianca}`}>
+            <Camera size={17} className="mr-2" /> Ver registros
+          </Link>
+          <button type="button" className="secondary-button sm:!w-auto" onClick={() => window.print()}>
+            Exportar / imprimir
+          </button>
+        </div>
       </header>
 
       {!crianca.pode_editar && (
@@ -151,6 +159,28 @@ export default function PerfilBebe() {
           <strong className="mt-1 block text-slate-800">{registros.filter((registro) => registro.tipo === 'VACINA').length}</strong>
           <span className="text-sm text-slate-500">Anotações vinculadas a este perfil</span>
         </article>
+      </section>
+
+      <section className="card">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="eyebrow">Evolução individual</p>
+            <h2 className="section-title">Crescimento de {crianca.nome}</h2>
+          </div>
+          {crianca.pode_editar && (
+            <Link className="secondary-button !w-auto" to={`/registros?crianca=${crianca.id_crianca}`}>
+              Registrar medidas
+            </Link>
+          )}
+        </div>
+        {medidas.pesos.length === 0 && medidas.alturas.length === 0 ? (
+          <p className="mt-4 text-sm text-slate-500">Nenhuma medida registrada. Use “Registrar medidas” para iniciar o acompanhamento.</p>
+        ) : (
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <GraficoMedidas titulo="Peso" unidade="kg" registros={medidas.pesos} cor="#C8526B" />
+            <GraficoMedidas titulo="Altura" unidade="cm" registros={medidas.alturas} cor="#3B7280" />
+          </div>
+        )}
       </section>
 
       {crianca.observacoes && (
@@ -214,6 +244,46 @@ export default function PerfilBebe() {
   );
 }
 
+function GraficoMedidas({ titulo, unidade, registros, cor }: { titulo: string; unidade: string; registros: Registro[]; cor: string }) {
+  if (registros.length === 0) {
+    return (
+      <article className="rounded-2xl border border-slate-200 p-4">
+        <strong className="text-sm text-slate-700">{titulo}</strong>
+        <p className="mt-2 text-sm text-slate-500">Sem registros de {titulo.toLowerCase()}.</p>
+      </article>
+    );
+  }
+  const valores = registros.map((registro) => registro.valor || 0);
+  const minimo = Math.min(...valores);
+  const maximo = Math.max(...valores);
+  const amplitude = Math.max(1, maximo - minimo);
+  const pontos = valores.map((valor, indice) => {
+    const x = registros.length === 1 ? 50 : 8 + (indice / (registros.length - 1)) * 84;
+    const y = 86 - ((valor - minimo) / amplitude) * 68;
+    return `${x},${y}`;
+  }).join(' ');
+
+  return (
+    <article className="rounded-2xl border border-slate-200 p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <strong className="text-sm text-slate-700">{titulo}</strong>
+        <span className="text-xs font-bold" style={{ color: cor }}>{formatarMedida(valores[valores.length - 1], unidade)}</span>
+      </div>
+      <svg viewBox="0 0 100 96" className="h-32 w-full" role="img" aria-label={`Gráfico de ${titulo.toLowerCase()}`}>
+        <polyline points={pontos} fill="none" stroke={cor} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        {valores.map((valor, indice) => {
+          const [x, y] = pontos.split(' ')[indice].split(',');
+          return <circle key={`${valor}-${indice}`} cx={x} cy={y} r="2.5" fill={cor} />;
+        })}
+      </svg>
+      <div className="flex justify-between text-[11px] text-slate-400">
+        <span>{formatarData(registros[0].data_registro)}</span>
+        <span>{formatarData(registros[registros.length - 1].data_registro)}</span>
+      </div>
+    </article>
+  );
+}
+
 function formatarData(valor: string) {
   return new Intl.DateTimeFormat('pt-BR').format(new Date(`${valor}T00:00:00`));
 }
@@ -228,6 +298,8 @@ function labelTipo(tipo: string) {
     VACINA: 'Vacina',
     PESO: 'Peso',
     ALTURA: 'Altura',
+    PERIMETRO_CEFALICO: 'Perímetro cefálico',
+    MARCO_DESENVOLVIMENTO: 'Marco do desenvolvimento',
     INTRODUCAO_ALIMENTAR: 'Introdução alimentar',
     FOTO: 'Foto',
     INTERACAO: 'Interação',

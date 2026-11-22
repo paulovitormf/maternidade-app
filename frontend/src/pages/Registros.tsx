@@ -10,7 +10,7 @@ type Registro = { id_registro: number; id_crianca: number | null; nome_crianca: 
 type Formulario = { vinculo: string; tipo: string; titulo: string; descricao: string; valor: string; unidade: string; dose: string; data_registro: string; horario: string; confirmado: boolean; foto_base64: string };
 
 const tipos = [
-  ['VACINA', 'Vacina'], ['PESO', 'Peso'], ['ALTURA', 'Altura'], ['INTRODUCAO_ALIMENTAR', 'Introdução alimentar'], ['FOTO', 'Foto'], ['INTERACAO', 'Interação'], ['PRIMEIRA_PALAVRA', 'Primeira palavra'], ['CONSULTA', 'Consulta'], ['EXAME', 'Exame'], ['OUTRO', 'Outro'],
+  ['VACINA', 'Vacina'], ['PESO', 'Peso'], ['ALTURA', 'Altura'], ['PERIMETRO_CEFALICO', 'Perímetro cefálico'], ['INTRODUCAO_ALIMENTAR', 'Introdução alimentar'], ['FOTO', 'Foto'], ['INTERACAO', 'Interação'], ['PRIMEIRA_PALAVRA', 'Primeira palavra'], ['MARCO_DESENVOLVIMENTO', 'Marco do desenvolvimento'], ['CONSULTA', 'Consulta'], ['EXAME', 'Exame'], ['OUTRO', 'Outro'],
 ];
 const vazio: Formulario = { vinculo: '', tipo: 'OUTRO', titulo: '', descricao: '', valor: '', unidade: '', dose: '', data_registro: new Date().toISOString().slice(0, 10), horario: '', confirmado: false, foto_base64: '' };
 
@@ -21,7 +21,9 @@ export default function Registros() {
   const [gestacoes, setGestacoes] = useState<Gestacao[]>([]);
   const [form, setForm] = useState<Formulario>(() => {
     const crianca = searchParams.get('crianca');
-    return { ...vazio, vinculo: crianca ? `crianca:${crianca}` : '' };
+    const tipo = searchParams.get('tipo');
+    const tipoPermitido = tipos.some(([valor]) => valor === tipo);
+    return { ...vazio, vinculo: crianca ? `crianca:${crianca}` : '', tipo: tipoPermitido ? tipo as string : vazio.tipo };
   });
   const [aberto, setAberto] = useState(false);
   const [registroEditando, setRegistroEditando] = useState<number | null>(null);
@@ -304,7 +306,7 @@ export default function Registros() {
               <label>Hora <span>(opcional)</span><input className="field-control" type="time" value={form.horario} onChange={(event) => alterar('horario', event.target.value)} /></label>
             </div>
             <label>Título<input className="field-control" value={form.titulo} onChange={(event) => alterar('titulo', event.target.value)} placeholder="Ex.: Primeira palavra" required /></label>
-            {(form.tipo === 'PESO' || form.tipo === 'ALTURA') && (
+            {(form.tipo === 'PESO' || form.tipo === 'ALTURA' || form.tipo === 'PERIMETRO_CEFALICO') && (
               <div className="record-form-grid">
                 <label>Valor<input className="field-control" type="number" step="0.01" value={form.valor} onChange={(event) => alterar('valor', event.target.value)} required /></label>
                 <label>Unidade<input className="field-control" value={form.unidade} onChange={(event) => alterar('unidade', event.target.value)} placeholder={form.tipo === 'PESO' ? 'kg' : 'cm'} required /></label>

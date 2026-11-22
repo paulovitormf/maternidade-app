@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Clock3,
   Info,
@@ -6,6 +6,7 @@ import {
   Syringe,
   ClipboardList,
 } from 'lucide-react';
+import api from '../services/api';
 
 const etapas = [
   {
@@ -90,6 +91,23 @@ const etapas = [
 
 export default function CalendarioVacinaGestante() {
   const [busca, setBusca] = useState('');
+  const [gestacaoId, setGestacaoId] = useState<number>();
+  const [vacinasRegistradas, setVacinasRegistradas] = useState<Array<{ id_registro: number; tipo: string; titulo: string; confirmado: boolean }>>([]);
+  const [erro, setErro] = useState('');
+  const idUsuario = Number(localStorage.getItem('id_usuario'));
+
+  useEffect(() => {
+    api.get<{ id_gestacao: number }>(`/gestacoes/usuario/${idUsuario}/mais-recente`)
+      .then(({ data }) => setGestacaoId(data.id_gestacao))
+      .catch(() => setGestacaoId(undefined));
+  }, [idUsuario]);
+
+  useEffect(() => {
+    if (!gestacaoId) return;
+    api.get<Array<{ id_registro: number; tipo: string; titulo: string; confirmado: boolean }>>(`/registros/usuario/${idUsuario}`)
+      .then(({ data }) => setVacinasRegistradas(data.filter((registro) => registro.tipo === 'VACINA')))
+      .catch(() => setErro('Não foi possível carregar as vacinas da gestação.'));
+  }, [gestacaoId, idUsuario]);
 
   const etapasFiltradas = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -122,6 +140,40 @@ export default function CalendarioVacinaGestante() {
       })
       .filter((etapa): etapa is (typeof etapas)[number] => etapa !== null);
   }, [busca]);
+
+  const vacinaTomada = (nome: string) =>
+    vacinasRegistradas.some((registro) => registro.confirmado && registro.titulo.trim().toLowerCase() === nome.trim().toLowerCase());
+
+  const alternarVacina = async (nome: string) => {
+    if (!gestacaoId) {
+      setErro('Cadastre uma gestação antes de registrar vacinas maternas.');
+      return;
+    }
+    const existente = vacinasRegistradas.find((registro) =>
+      registro.confirmado && registro.titulo.trim().toLowerCase() === nome.trim().toLowerCase(),
+    );
+    try {
+      if (existente) {
+        await api.delete(`/registros/${existente.id_registro}`);
+      } else {
+        await api.post('/registros', {
+          id_usuario: idUsuario,
+          id_crianca: null,
+          id_gestacao: gestacaoId,
+          tipo: 'VACINA',
+          titulo: nome,
+          descricao: 'Vacina materna registrada na jornada da gestação.',
+          confirmado: true,
+          data_registro: new Date().toISOString().slice(0, 10),
+        });
+      }
+      const atualizados = await api.get<Array<{ id_registro: number; tipo: string; titulo: string; confirmado: boolean }>>(`/registros/usuario/${idUsuario}`);
+      setVacinasRegistradas(atualizados.data.filter((registro) => registro.tipo === 'VACINA'));
+      setErro('');
+    } catch {
+      setErro('Não foi possível atualizar a vacina materna.');
+    }
+  };
 
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
@@ -203,6 +255,8 @@ export default function CalendarioVacinaGestante() {
             />
           </div>
 
+          {erro && <div className="alert-error mb-5" role="alert">{erro}</div>}
+
           <div className="space-y-8">
             {etapasFiltradas.length === 0 ? (
               <div className="py-8 text-center text-sm text-slate-500">
@@ -250,7 +304,7 @@ export default function CalendarioVacinaGestante() {
                           <Syringe size={19} />
                         </div>
 
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                           <h4 className="text-sm font-semibold text-slate-800">
                             {vacina.nome}
                           </h4>
@@ -263,6 +317,17 @@ export default function CalendarioVacinaGestante() {
                             {vacina.detalhe}
                           </p>
                         </div>
+                        {gestacaoId && (
+                          <button
+                            type="button"
+                            role="checkbox"
+                            aria-checked={vacinaTomada(vacina.nome)}
+                            onClick={() => alternarVacina(vacina.nome)}
+                            className={`ml-auto min-w-24 rounded-xl border px-3 py-2 text-xs font-bold transition ${vacinaTomada(vacina.nome) ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-600 hover:border-[#C8526B]'}`}
+                          >
+                            {vacinaTomada(vacina.nome) ? 'Tomada' : 'Marcar tomada'}
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>

@@ -59,7 +59,7 @@ describe('PerfilBebe', () => {
     expect(api.get).toHaveBeenCalledWith('/registros/crianca/7');
     expect(screen.getByText('Nascimento tranquilo.')).toBeInTheDocument();
     expect(screen.getByText('Peso da consulta')).toBeInTheDocument();
-    expect(screen.getByText('10,1 kg')).toBeInTheDocument();
+    expect(screen.getAllByText('10,1 kg').length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole('link', { name: /Adicionar registro/i })).toHaveAttribute(
       'href',
       '/registros?crianca=7',

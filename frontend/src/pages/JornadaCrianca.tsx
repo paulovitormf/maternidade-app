@@ -49,6 +49,17 @@ const JORNADAS: JornadaCriancaResumo[] = [
   { meses: 60, desenvolvimento: 'Pode narrar experiências, seguir regras, desenhar pessoas e realizar tarefas com mais autonomia.', alimentacao: 'Consolide hábitos de alimentação saudável para toda a família.', crescimento: 'Avalie crescimento, desenvolvimento, visão, audição e saúde bucal.', vacinas: 'Revise todo o calendário até 5 anos com a UBS.', cuidados: 'Prepare a transição para a escola, mantendo rotina, afeto e acompanhamento.' },
 ];
 
+JORNADAS.push(
+  { meses: 24, desenvolvimento: 'Frases simples, brincadeiras imaginárias e maior autonomia em atividades conhecidas.', alimentacao: 'Refeições da família, com variedade e respeito aos sinais de fome e saciedade.', crescimento: 'Acompanhe peso, altura e desenvolvimento em consultas periódicas.', vacinas: 'Revise reforços da rotina e consulte a caderneta na UBS.', cuidados: 'Escovação, sono, segurança doméstica e estímulo à conversa.' },
+  { meses: 36, desenvolvimento: 'Formas de brincar em grupo, palavras mais completas e perguntas frequentes.', alimentacao: 'Alimentos variados, pouca adição de açúcar e água nas refeições.', crescimento: 'Registre altura e peso; compare a tendência da curva pelo pediatra.', vacinas: 'Confira vacinas atrasadas e reforços previstos pelo calendário vigente.', cuidados: 'Atividade física livre, segurança, escovação e visitas regulares.' },
+  { meses: 48, desenvolvimento: 'Maior contagem, reconhecimento de cores e cooperação em brincadeiras.', alimentacao: 'Rotina de refeições e lanches, incentivando autonomia sem pressão.', crescimento: 'Avaliação periódica da altura, peso e desenvolvimento global.', vacinas: 'Revise reforços previstos aos 4 anos e mantenha a caderneta atualizada.', cuidados: 'Saúde bucal, sono suficiente, brincadeiras educativas e limites com afeto.' },
+  { meses: 60, desenvolvimento: 'Pode seguir regras simples, reconhecer emoções e se comunicar com mais clareza.', alimentacao: 'Refeições em família, variedade e incentivo à experimentação.', crescimento: 'Acompanhe crescimento, visão, audição e coordenação na consulta escolar.', vacinas: 'Confira os reforços da rotina e vacinas sazonais com a equipe de saúde.', cuidados: 'Preparação para a escola, higiene, sono e proteção em atividades físicas.' },
+  { meses: 72, desenvolvimento: 'Expande leitura, escrita e raciocínio em brincadeiras e tarefas escolares.', alimentacao: 'Alimentação equilibrada e participação das crianças no preparo seguro.', crescimento: 'Avaliação anual de crescimento, saúde física e emocional.', vacinas: 'Verifique vacinas faltantes antes de novos ciclos escolares.', cuidados: 'Higiene, atividade física, sono adequado e acompanhamento escolar.' },
+  { meses: 96, desenvolvimento: 'Amplia interesse, amizades, responsabilidade e raciocínio de situações cotidianas.', alimentacao: 'Privilegie alimentos naturais e ajude a construir escolhas saudáveis.', crescimento: 'Converse sobre mudanças corporais e acompanhe consultas anuais.', vacinas: 'Confira reforços e campanhas do calendário nacional.', cuidados: 'Escuta ativa, saúde mental, exercícios, sono e limites claros.' },
+  { meses: 120, desenvolvimento: 'Maior autonomia, pensamento abstrato, identidade e relações sociais.', alimentacao: 'Estimule escolhas balanceadas, sem rótulos de “bom” ou “ruim”.', crescimento: 'Acompanhe puberdade, postura e curvas de crescimento com o pediatra.', vacinas: 'Revise HPV, meningocócica e demais vacinas na faixa de 9 a 12 anos.', cuidados: 'Saúde emocional, internet segura, atividade física e educação em saúde.' },
+  { meses: 144, desenvolvimento: 'Aumenta capacidade de planejamento, valores pessoais e comunicação adulta.', alimentacao: 'Oriente refeições regulares, água e equilíbrio sem dietas restritivas.', crescimento: 'Consulta anual e acompanhamento da maturação puberal.', vacinas: 'Mantenha a carteira atualizada e confirme reforços conforme a idade.', cuidados: 'Privacidade, apoio emocional, sono, escola e acesso a atendimento adequado.' },
+);
+
 function idadeEmMeses(dataNascimento: string) {
   const nascimento = new Date(`${dataNascimento}T00:00:00`);
   const hoje = new Date();
@@ -57,7 +68,7 @@ function idadeEmMeses(dataNascimento: string) {
   return Math.max(0, meses);
 }
 
-export default function JornadaCrianca() {
+export default function JornadaCrianca({ faixa = 'crianca' }: { faixa?: 'bebe' | 'crianca' }) {
   const [criancas, setCriancas] = useState<CriancaResumo[]>([]);
   const [idSelecionado, setIdSelecionado] = useState<number>();
   const [carregando, setCarregando] = useState(true);
@@ -71,10 +82,14 @@ export default function JornadaCrianca() {
 
   const crianca = criancas.find((item) => item.id_crianca === idSelecionado) ?? criancas[0];
   const meses = crianca ? idadeEmMeses(crianca.data_nascimento) : 0;
+  const jornadasExibidas = useMemo(
+    () => JORNADAS.filter((jornada) => faixa === 'bebe' ? jornada.meses <= 24 : jornada.meses >= 24),
+    [faixa],
+  );
   const jornadaAtual = useMemo(() => {
-    const jornadasAcompanhadas = JORNADAS.filter((jornada) => jornada.meses <= meses);
+    const jornadasAcompanhadas = jornadasExibidas.filter((jornada) => jornada.meses <= meses);
     return jornadasAcompanhadas[jornadasAcompanhadas.length - 1];
-  }, [meses]);
+  }, [meses, jornadasExibidas]);
 
   if (carregando) return <section className="child-milestones-section"><p className="text-sm text-slate-500">Carregando acompanhamento da criança...</p></section>;
   if (!crianca) {
@@ -84,7 +99,7 @@ export default function JornadaCrianca() {
   return (
     <section className="child-milestones-section" aria-labelledby="child-milestones-title">
       <div className="section-heading milestones-heading">
-        <div><p className="eyebrow">Acompanhamento infantil</p><h2 id="child-milestones-title" className="section-title">Jornada de {crianca.nome}</h2><p className="milestones-subtitle">Informações organizadas até 5 anos de idade.</p></div>
+        <div><p className="eyebrow">{faixa === 'bebe' ? 'Primeira infância' : 'Desenvolvimento infantil'}</p><h2 id="child-milestones-title" className="section-title">Jornada de {crianca.nome}</h2><p className="milestones-subtitle">{faixa === 'bebe' ? 'Desenvolvimento organizado dos 0 aos 2 anos.' : 'Desenvolvimento organizado dos 2 aos 12 anos.'}</p></div>
         <Baby size={30} strokeWidth={1.7} aria-hidden="true" />
       </div>
       {criancas.length > 1 && <label className="child-selector"><span>Criança acompanhada</span><select className="field-control" value={crianca.id_crianca} onChange={(e) => setIdSelecionado(Number(e.target.value))}>{criancas.map((item) => <option key={item.id_crianca} value={item.id_crianca}>{item.nome}</option>)}</select></label>}
@@ -93,8 +108,31 @@ export default function JornadaCrianca() {
         <div><span>Próximo foco</span><strong>{jornadaAtual ? `Até ${jornadaAtual.meses} meses` : 'Nascimento'}</strong></div>
       </div>
       <div className="child-topic-legend"><span><Ruler size={15} />Crescimento</span><span><Syringe size={15} />Vacinas</span><span><Utensils size={15} />Alimentação</span><span><ShieldCheck size={15} />Cuidados</span></div>
-      <div className="child-milestones-scroll" tabIndex={0} aria-label={`Jornada de ${crianca.nome} até 5 anos`}>
-        {JORNADAS.map((jornada) => { const concluido = jornada.meses <= meses; const idade = jornada.meses === 0 ? 'Nascimento' : jornada.meses < 24 ? `${jornada.meses} meses` : `${jornada.meses / 12} anos`; return <article className={`child-milestone-card ${concluido ? 'child-milestone-done' : ''}`} key={jornada.meses}><div className="child-milestone-heading"><span className="milestone-age">{idade}</span>{concluido && <span className="child-done-label"><CheckCircle2 size={15} />Acompanhado</span>}</div><div className="child-info-grid"><div><strong>Desenvolvimento</strong><p>{jornada.desenvolvimento}</p></div><div><strong>Alimentação</strong><p>{jornada.alimentacao}</p></div><div><strong>Crescimento e peso</strong><p>{jornada.crescimento}</p></div><div><strong>Vacinas</strong><p>{jornada.vacinas}</p></div><div><strong>Cuidados</strong><p>{jornada.cuidados}</p></div><div><strong>Registro</strong><p><CalendarCheck2 size={15} className="inline mr-1" />Leve a caderneta nas consultas.</p></div></div></article>; })}
+      <div className="child-milestones-scroll" tabIndex={0} aria-label={`Jornada de ${crianca.nome} ${faixa === 'bebe' ? 'até 2 anos' : 'dos 2 aos 12 anos'}`}>
+        {jornadasExibidas.map((jornada) => {
+          const concluido = jornada.meses <= meses;
+          const idade = jornada.meses === 0 ? 'Nascimento' : jornada.meses < 24 ? `${jornada.meses} meses` : `${jornada.meses / 12} anos`;
+          return (
+            <article className={`child-milestone-card ${concluido ? 'child-milestone-done' : ''}`} key={jornada.meses}>
+              <div className="child-milestone-heading">
+                <span className="milestone-age">{idade}</span>
+                {concluido && <span className="child-done-label"><CheckCircle2 size={15} />Acompanhado</span>}
+              </div>
+              <div className="child-info-grid">
+                <div><strong>Desenvolvimento esperado</strong><p>{jornada.desenvolvimento}</p></div>
+                <div><strong>Alimentação</strong><p>{jornada.alimentacao}</p></div>
+                <div><strong>Crescimento e peso</strong><p>{jornada.crescimento}</p></div>
+                <div><strong>Vacinas</strong><p>{jornada.vacinas}</p></div>
+                <div><strong>Cuidados</strong><p>{jornada.cuidados}</p></div>
+                <div>
+                  <strong>Registro</strong>
+                  <p><CalendarCheck2 size={15} className="inline mr-1" />Leve a caderneta nas consultas.</p>
+                  <Link to={`/registros?crianca=${crianca.id_crianca}&tipo=MARCO_DESENVOLVIMENTO`} className="inline-flex items-center gap-1 text-sm font-bold text-[#B0435B]">Registrar nesta fase <ChevronRight size={14} /></Link>
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </div>
       <p className="milestones-disclaimer">Conteúdo educativo baseado em orientações do Ministério da Saúde. Vacinas, peso, alimentação e desenvolvimento devem ser confirmados com a equipe que acompanha a criança. <a href="https://www.gov.br/saude/pt-br/vacinacao/calendario" target="_blank" rel="noreferrer">Consultar calendário oficial</a>.</p>
     </section>
