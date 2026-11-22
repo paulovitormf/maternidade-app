@@ -39,7 +39,7 @@ describe('App Navigation and Layout', () => {
     fireEvent.click(notificationTrigger);
     expect(screen.getByText(/Nenhuma notificação nova/i)).toBeInTheDocument();
     fireEvent.click(notificationTrigger);
-    await waitFor(() => expect(screen.queryByText(/Nenhuma notificação nova/i)).not.toBeInTheDocument());
+    await waitFor(() => expect(notificationTrigger).toHaveAttribute('aria-expanded', 'false'));
 
     const trigger = screen.getByRole('button', { name: /Maria/i });
     fireEvent.click(trigger);

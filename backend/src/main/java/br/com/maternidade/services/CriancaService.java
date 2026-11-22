@@ -5,11 +5,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.maternidade.dto.CriancaCadastroDTO;
 import br.com.maternidade.dto.CriancaAcessoDTO;
+import br.com.maternidade.dto.CriancaDetalheDTO;
 import br.com.maternidade.model.Crianca;
 import br.com.maternidade.repository.CriancaRepository;
 import br.com.maternidade.repository.UsuarioCriancaRepository;
 import br.com.maternidade.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 
 @Service
 public class CriancaService {
@@ -113,7 +115,23 @@ public class CriancaService {
                 .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
         return criancaRepository.findByUsuarioId(usuario.getIdUsuario());
     }
-    public java.util.List<Crianca> listarEntidadesPorUsuario(Long idUsuario) {
-        return criancaRepository.findEntidadesByUsuarioId(Math.toIntExact(idUsuario));
+    public java.util.List<Crianca> listarEntidadesPorUsuario(Long idUsuario, String emailAutenticado) {
+        var usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new AccessDeniedException("Usuário autenticado não encontrado."));
+        if (!usuario.getIdUsuario().equals(Math.toIntExact(idUsuario))) {
+            throw new AccessDeniedException("Você não tem permissão para consultar estas crianças.");
+        }
+        return criancaRepository.findEntidadesByUsuarioId(usuario.getIdUsuario());
+    }
+
+    public CriancaDetalheDTO buscarDetalhe(Integer idCrianca, String emailAutenticado) {
+        var usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new AccessDeniedException("Usuário autenticado não encontrado."));
+        var vinculo = vinculoRepository.findByIdUsuarioAndIdCriancaAndAtivo(
+                usuario.getIdUsuario(), idCrianca, true)
+                .orElseThrow(() -> new AccessDeniedException("Você não tem acesso aos dados desta criança."));
+        var crianca = criancaRepository.findById(idCrianca)
+                .orElseThrow(() -> new IllegalArgumentException("Criança não encontrada."));
+        return CriancaDetalheDTO.from(crianca, vinculo.isPodeEditar());
     }
 }

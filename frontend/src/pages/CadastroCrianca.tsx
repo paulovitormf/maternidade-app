@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Baby, CalendarDays, Plus, RotateCcw, MoreVertical, Search, X } from 'lucide-react';
 import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 type Form = {
@@ -248,7 +248,9 @@ export default function CadastroCrianca() {
                     <div>
                       <p className="eyebrow">Perfil do bebê</p>
                       <h2 className="text-xl font-extrabold text-slate-800">
+                        <Link className="hover:text-[#B0435B] hover:underline" to={`/bebes/${crianca.idCrianca}`}>
                         {crianca.nome}
+                        </Link>
                       </h2>
                     </div>
                     {crianca.tipoAcesso === 'PRINCIPAL' && crianca.podeEditar && (
@@ -284,6 +286,9 @@ export default function CadastroCrianca() {
                     <CalendarDays size={16} className="text-[#C8526B]" />
                     Nascimento: {formatarData(crianca.dataNascimento)}
                   </p>
+                  <Link className="mt-4 inline-flex text-sm font-bold text-[#B0435B] hover:underline" to={`/bebes/${crianca.idCrianca}`}>
+                    Ver perfil individual
+                  </Link>
                 </article>
 
 

@@ -25,4 +25,8 @@ public class UsuarioCrianca {
         this.podeEditar = podeEditar;
         this.ativo = true;
     }
+
+    public boolean isPodeEditar() {
+        return podeEditar;
+    }
 }

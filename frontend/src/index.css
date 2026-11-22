@@ -1003,6 +1003,24 @@
 }
 
 .milestones-disclaimer a { @apply font-bold text-[#3B7280] underline; }
+
+.week-topics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; margin-top: 1rem; }
+.journey-topic { position: relative; min-height: 4.25rem; padding: .8rem .9rem; border: 1px solid #f0d5dc; border-radius: 1rem; background: #fffafb; cursor: help; outline: none; }
+.journey-topic:hover, .journey-topic:focus, .journey-topic:focus-within { border-color: #d05370; box-shadow: 0 8px 20px rgba(119, 46, 70, .12); }
+.journey-topic-label, .journey-topic-hint { display: flex; align-items: center; gap: .4rem; }
+.journey-topic-label { color: #7d2947; font-size: .82rem; font-weight: 800; }
+.journey-topic-hint { margin-top: .35rem; color: #8b7280; font-size: .7rem; }
+.journey-popover { position: absolute; z-index: 20; top: calc(100% + .55rem); left: 0; width: min(24rem, calc(100vw - 3rem)); padding: 1rem; border: 1px solid #edc3ce; border-radius: 1rem; background: #fff; box-shadow: 0 16px 32px rgba(48, 28, 39, .18); color: #4d4350; opacity: 0; pointer-events: none; transform: translateY(-4px); transition: opacity .18s ease, transform .18s ease; }
+.journey-topic:hover .journey-popover, .journey-topic:focus .journey-popover, .journey-topic:focus-within .journey-popover { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.journey-popover p { display: flex; gap: .4rem; margin: .55rem 0 0; font-size: .78rem; line-height: 1.45; }
+.journey-popover p svg { flex: 0 0 auto; color: #c94c6d; margin-top: .12rem; }
+.fruit-illustration { font-size: 2.25rem; line-height: 1; margin-bottom: .35rem; }
+.topic-note { padding-top: .55rem; border-top: 1px solid #f5e4e8; }
+@media (max-width: 640px) {
+  .week-topics { grid-template-columns: 1fr; }
+  .journey-popover { position: relative; top: auto; width: 100%; margin-top: .7rem; }
+  .journey-topic:hover .journey-popover, .journey-topic:focus .journey-popover { transform: none; }
+}
 .child-milestones-section { @apply mb-8 rounded-[2rem] border border-[#FADCE1] bg-white p-5 shadow-[0_18px_45px_-30px_rgba(200,82,107,0.35)] sm:p-6; }
 .child-milestones-section > .milestones-heading > svg { @apply bg-[#FADCE1] text-[#C8526B]; }
 .child-selector { @apply mb-4 block max-w-sm; }
@@ -1015,11 +1033,60 @@
 .child-topic-legend span { @apply inline-flex items-center gap-1 rounded-full bg-[#EBF3F5] px-3 py-1.5 text-xs font-bold text-[#3B7280]; }
 .child-milestones-scroll { @apply max-h-[42rem] space-y-3 overflow-y-auto overscroll-contain pr-2; scrollbar-color: #c8526b #fdf1f3; scrollbar-width: thin; }
 .child-milestones-scroll:focus-visible { @apply rounded-2xl outline-none ring-4 ring-[#fadce1]; }
-.child-milestone-card { @apply rounded-3xl border border-[#E2E8F0] bg-[#fffdfc] p-4 transition sm:p-5; }
+.child-milestones-scroll { scroll-behavior: smooth; scroll-snap-type: y proximity; }
+.child-milestone-card { @apply relative rounded-3xl border border-[#E2E8F0] bg-[#fffdfc] p-5 transition sm:p-6; scroll-snap-align: center; }
 .child-milestone-done { @apply border-[#FADCE1] bg-[#FFF9FA]; }
 .child-milestone-heading { @apply mb-4 flex items-center justify-between gap-3; }
 .child-done-label { @apply inline-flex items-center gap-1 text-xs font-bold text-emerald-600; }
 .child-info-grid { @apply grid gap-3 md:grid-cols-2; }
-.child-info-grid > div { @apply rounded-2xl bg-white p-3; }
-.child-info-grid strong { @apply text-xs font-extrabold text-slate-700; }
-.child-info-grid p { @apply mt-1 text-xs leading-5 text-slate-500; }
+.child-info-grid > div { @apply relative min-h-[5.2rem] cursor-help rounded-2xl border border-[#F0E3E7] bg-white p-4 transition; outline: none; }
+.child-info-grid > div:hover, .child-info-grid > div:focus, .child-info-grid > div:focus-within { @apply z-10 border-[#D9879A] shadow-[0_12px_24px_-18px_rgba(185,70,99,0.8)]; }
+.child-info-grid > div::after { content: 'Passe o mouse ou toque'; @apply mt-2 block text-[0.68rem] font-semibold text-slate-400; }
+.child-info-grid strong { @apply flex items-center gap-2 text-sm font-extrabold text-[#7D2947]; }
+.child-info-grid strong svg { @apply text-[#C8526B]; }
+.child-info-grid p { max-height: 0; margin-top: 0; overflow: hidden; opacity: 0; color: #64748b; font-size: .78rem; line-height: 1.5; transition: max-height .2s ease, margin-top .2s ease, opacity .2s ease; }
+.child-info-grid > div:hover p, .child-info-grid > div:focus p, .child-info-grid > div:focus-within p { max-height: 10rem; margin-top: .65rem; opacity: 1; }
+.child-info-grid > div:hover::after, .child-info-grid > div:focus::after, .child-info-grid > div:focus-within::after { content: 'Informação aberta'; color: #C8526B; }
+@media (max-width: 640px) {
+  .child-info-grid > div { min-height: 4.7rem; }
+}
+
+.records-page { @apply space-y-6; }
+.records-header { @apply flex flex-wrap items-end justify-between gap-5; }
+.records-header .dashboard-hero-button, .record-submit { @apply inline-flex items-center gap-2; }
+.records-tabs { @apply flex gap-2 border-b border-[#FADCE1]; }
+.records-tabs button { @apply inline-flex items-center gap-2 border-b-2 border-transparent px-4 py-3 text-sm font-bold text-slate-500 transition; }
+.records-tabs button:hover, .records-tabs .records-tab-active { @apply border-[#C8526B] text-[#B0435B]; }
+.records-list { @apply grid gap-4; }
+.record-card { @apply flex overflow-hidden rounded-3xl border border-[#F0E3E7] bg-white shadow-[0_14px_30px_-25px_rgba(130,49,72,0.8)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-24px_rgba(130,49,72,0.55)]; }
+.records-gallery { @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3; }
+.records-gallery .record-card { @apply block; }
+.record-photo { @apply h-48 w-48 shrink-0 object-cover sm:h-52 sm:w-52; }
+.records-gallery .record-photo { @apply h-56 w-full; }
+.record-card-body { @apply min-w-0 flex-1 p-5; }
+.record-card-top { @apply flex flex-wrap items-center justify-between gap-2; }
+.record-type { @apply rounded-full bg-[#FFF0F3] px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-[#B0435B]; }
+.record-card time { @apply inline-flex items-center gap-1 text-xs font-semibold text-slate-400; }
+.record-card h2 { @apply mt-3 text-lg font-extrabold text-slate-800; }
+.record-card-body > p { @apply mt-1 text-sm leading-6 text-slate-600; }
+.record-card-meta { @apply mt-4 flex flex-wrap gap-2 text-xs font-semibold text-[#3B7280]; }
+.record-card-meta span { @apply inline-flex items-center gap-1 rounded-full bg-[#EBF3F5] px-2.5 py-1; }
+.record-confirmed { @apply !bg-emerald-50 !text-emerald-700; }
+.records-empty { @apply rounded-3xl border border-dashed border-[#E8B9C5] bg-[#FFF9FA] p-12 text-center text-slate-500; }
+.records-empty svg { @apply mx-auto mb-3 text-[#C8526B]; }
+.records-empty h2 { @apply text-xl font-extrabold text-slate-800; }
+.records-empty p { @apply mx-auto my-2 max-w-md text-sm; }
+.record-modal-backdrop { @apply fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4; }
+.record-modal { @apply max-h-[92vh] w-full max-w-2xl space-y-4 overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl sm:p-7; }
+.record-modal-heading { @apply flex items-start justify-between gap-4 border-b border-slate-100 pb-4; }
+.record-modal-heading h2 { @apply text-2xl font-extrabold text-slate-800; }
+.record-modal-heading button { @apply rounded-xl p-2 text-slate-400 transition hover:bg-[#FFF0F3] hover:text-[#B0435B]; }
+.record-modal label { @apply block text-sm font-bold text-slate-700; }
+.record-modal label > span { @apply font-normal text-slate-400; }
+.record-modal .field-control { @apply mt-1.5 w-full; }
+.record-form-grid { @apply grid gap-4 sm:grid-cols-2; }
+.record-check { @apply flex items-center gap-2 rounded-2xl bg-emerald-50 p-3 text-emerald-800; }
+.record-check input { @apply h-4 w-4 accent-[#C8526B]; }
+.record-file input { @apply mt-2 block w-full rounded-xl border border-dashed border-[#E8B9C5] p-3 text-sm; }
+.record-file img { @apply mt-3 max-h-40 rounded-2xl object-cover; }
+@media (max-width: 640px) { .record-photo { @apply h-32 w-32; } }

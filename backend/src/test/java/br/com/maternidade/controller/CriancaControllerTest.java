@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import br.com.maternidade.dto.CriancaAcessoDTO;
 import br.com.maternidade.dto.CriancaCadastroDTO;
+import br.com.maternidade.dto.CriancaDetalheDTO;
 import br.com.maternidade.model.Crianca;
 import br.com.maternidade.services.CriancaService;
 
@@ -121,6 +122,38 @@ class CriancaControllerTest {
                 .andExpect(jsonPath("$[0].nome").value("Lucas"))
                 .andExpect(jsonPath("$[0].tipoAcesso").value("PRINCIPAL"))
                 .andExpect(jsonPath("$[0].podeEditar").value(true));
+    }
+
+    @Test
+    @DisplayName("GET /api/criancas/{id} - Deve retornar perfil individual autorizado")
+    void deveBuscarPerfilIndividualDaCrianca() throws Exception {
+        when(criancaService.buscarDetalhe(7, "maria@example.com"))
+                .thenReturn(new CriancaDetalheDTO(
+                        7, "Sofia", LocalDate.of(2025, 6, 10), LocalTime.of(8, 30),
+                        "F", new BigDecimal("3.20"), new BigDecimal("49.00"),
+                        "Nascimento tranquilo.", 17, true));
+
+        var auth = new UsernamePasswordAuthenticationToken("maria@example.com", null, List.of());
+
+        mockMvc.perform(get("/api/criancas/7").principal(auth))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id_crianca").value(7))
+                .andExpect(jsonPath("$.nome").value("Sofia"))
+                .andExpect(jsonPath("$.idade_meses").value(17))
+                .andExpect(jsonPath("$.pode_editar").value(true));
+    }
+
+    @Test
+    @DisplayName("GET /api/criancas/{id} - Deve negar perfil sem vínculo ativo")
+    void deveNegarPerfilSemAcesso() throws Exception {
+        org.mockito.Mockito.doThrow(new org.springframework.security.access.AccessDeniedException("Sem acesso."))
+                .when(criancaService).buscarDetalhe(7, "maria@example.com");
+
+        var auth = new UsernamePasswordAuthenticationToken("maria@example.com", null, List.of());
+
+        mockMvc.perform(get("/api/criancas/7").principal(auth))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$").value("Sem acesso."));
     }
 
     @Test

@@ -1,7 +1,7 @@
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Baby, Bell, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
+import { Baby, Bell, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, ClipboardList, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
 import { listarNotificacoes, marcarNotificacoesComoLidas } from './services/notificacaoService';
 import type { Notificacao } from './services/notificacaoService';
 
@@ -16,6 +16,8 @@ import Vacinas from './pages/Vacinas';
 import Perfil from './pages/Perfil';
 import JornadaCrianca from './pages/JornadaCrianca';
 import Foruns from './pages/Foruns';
+import Registros from './pages/Registros';
+import PerfilBebe from './pages/PerfilBebe';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
 
 export default function App() {
@@ -84,6 +86,7 @@ function AppLayout() {
                 <Syringe size={16} strokeWidth={1.8} />Vacinas
               </Link>
             )}
+            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/registros' ? 'nav-link-active' : ''}`} to="/registros"><ClipboardList size={16} strokeWidth={1.8} />Registros</Link>}
             {isAuthenticated && <Link className={`nav-link ${location.pathname === '/foruns' ? 'nav-link-active' : ''}`} to="/foruns"><MessageCircle size={16} strokeWidth={1.8} />Fóruns</Link>}
           </div>
           {isAuthenticated && usuario ? (
@@ -136,12 +139,15 @@ function AppLayout() {
               <Link className={`mobile-nav-link ${location.pathname === '/jornada-gestacao' ? 'mobile-nav-link-active' : ''}`} to="/jornada-gestacao"><Sparkles size={18} /><span>Jornada da gestação</span></Link>
 
               <p className="mobile-nav-heading">Bebê e Criança</p>
-              <Link className={`mobile-nav-link ${location.pathname === '/cadastrar-bebe' ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-bebe"><Baby size={18} /><span>Meus bebês</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname.startsWith('/cadastrar-bebe') || location.pathname.startsWith('/bebes/') ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-bebe"><Baby size={18} /><span>Meus bebês</span></Link>
               <Link className={`mobile-nav-link ${location.pathname === '/jornadas-desenvolvimento' ? 'mobile-nav-link-active' : ''}`} to="/jornadas-desenvolvimento"><Sparkles size={18} /><span>Jornadas de desenvolvimento</span></Link>
               <Link className={`mobile-nav-link ${location.pathname === '/jornada-crianca' ? 'mobile-nav-link-active' : ''}`} to="/jornada-crianca"><CalendarDays size={18} /><span>Acompanhamento até 5 anos</span></Link>
 
               <p className="mobile-nav-heading">Vacinas</p>
               <Link className={`mobile-nav-link ${location.pathname.startsWith('/vacinas') ? 'mobile-nav-link-active' : ''}`} to="/vacinas"><Syringe size={18} /><span>Vacinas da mãe e do bebê</span></Link>
+
+              <p className="mobile-nav-heading">Memórias</p>
+              <Link className={`mobile-nav-link ${location.pathname === '/registros' ? 'mobile-nav-link-active' : ''}`} to="/registros"><ClipboardList size={18} /><span>Registros e galeria</span></Link>
 
               <p className="mobile-nav-heading">Sua Conta</p>
               <Link className={`mobile-nav-link ${location.pathname === '/perfil' ? 'mobile-nav-link-active' : ''}`} to="/perfil"><CircleUserRound size={18} /><span>Meu perfil</span></Link>
@@ -156,6 +162,7 @@ function AppLayout() {
           <Route path="/cadastrar-usuario" element={<CadastroUsuario />} />
           <Route path="/continuar-cadastro" element={<ProtectedRoute><ContinuarCadastro /></ProtectedRoute>} />
           <Route path="/cadastrar-bebe" element={<ProtectedRoute><CadastroBebe /></ProtectedRoute>} />
+          <Route path="/bebes/:id" element={<ProtectedRoute><PerfilBebe /></ProtectedRoute>} />
           <Route path="/cadastrar-gestacao" element={<ProtectedRoute><CadastroGestacao /></ProtectedRoute>} />
           <Route path="/jornadas-desenvolvimento" element={<ProtectedRoute><JornadaDesenvolvimento /></ProtectedRoute>} />
           <Route path="/jornada-gestacao" element={<ProtectedRoute><JornadaGestacao /></ProtectedRoute>} />
@@ -164,6 +171,7 @@ function AppLayout() {
           <Route path="/vacinas-gestante" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/foruns" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
+          <Route path="/registros" element={<ProtectedRoute><Registros /></ProtectedRoute>} />
           <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
           <Route path="/jornada-crianca" element={<ProtectedRoute><JornadaCrianca /></ProtectedRoute>} />
         </Routes>
@@ -174,7 +182,7 @@ function AppLayout() {
           <Link className={`mobile-bottom-link ${location.pathname === '/' ? 'active' : ''}`} to="/"><Home size={19} strokeWidth={1.8} /><span>Início</span></Link>
           <Link className={`mobile-bottom-link ${location.pathname.startsWith('/cadastrar-gestacao') || location.pathname.startsWith('/jornada-gestacao') ? 'active' : ''}`} to="/cadastrar-gestacao"><CalendarDays size={19} strokeWidth={1.8} /><span>Gestação</span></Link>
           <Link className="mobile-add-button" to="/cadastrar-gestacao" aria-label="Adicionar gestação"><Plus size={23} strokeWidth={1.8} /></Link>
-          <Link className={`mobile-bottom-link ${location.pathname.startsWith('/cadastrar-bebe') || location.pathname.startsWith('/jornada') ? 'active' : ''}`} to="/cadastrar-bebe"><Baby size={19} strokeWidth={1.8} /><span>Bebê</span></Link>
+          <Link className={`mobile-bottom-link ${location.pathname.startsWith('/cadastrar-bebe') || location.pathname.startsWith('/bebes/') || location.pathname.startsWith('/jornada') ? 'active' : ''}`} to="/cadastrar-bebe"><Baby size={19} strokeWidth={1.8} /><span>Bebê</span></Link>
           <Link className={`mobile-bottom-link ${location.pathname === '/perfil' ? 'active' : ''}`} to="/perfil"><CircleUserRound size={19} strokeWidth={1.8} /><span>Perfil</span></Link>
         </nav>
       )}
@@ -193,7 +201,8 @@ function NavDropdown({
 }) {
   const [aberto, setAberto] = useState(false);
   const location = useLocation();
-  const ativo = itens.some((item) => location.pathname === item.to);
+  const ativo = itens.some((item) => location.pathname === item.to
+    || (item.to === '/cadastrar-bebe' && location.pathname.startsWith('/bebes/')));
 
   return (
     <div
@@ -219,7 +228,7 @@ function NavDropdown({
               <Link
                 key={item.to}
                 to={item.to}
-                className={`nav-dropdown-item ${location.pathname === item.to ? 'nav-dropdown-item-active' : ''}`}
+                className={`nav-dropdown-item ${location.pathname === item.to || (item.to === '/cadastrar-bebe' && location.pathname.startsWith('/bebes/')) ? 'nav-dropdown-item-active' : ''}`}
                 role="menuitem"
                 onClick={() => setAberto(false)}
               >
