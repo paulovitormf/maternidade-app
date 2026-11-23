@@ -1,7 +1,7 @@
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Baby, Bell, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, ClipboardList, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
+import { Baby, Bell, BookOpen, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, ClipboardList, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
 import { listarNotificacoes, marcarNotificacoesComoLidas } from './services/notificacaoService';
 import type { Notificacao } from './services/notificacaoService';
 
@@ -20,6 +20,7 @@ import Registros from './pages/Registros';
 import PerfilBebe from './pages/PerfilBebe';
 import Calendario from './pages/Calendario';
 import api from './services/api';
+import Artigos from './pages/Artigos';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
 
 export default function App() {
@@ -34,6 +35,7 @@ function AppLayout() {
   const location = useLocation();
   const [, setAuthVersion] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<'notifications' | 'profile' | null>(null);
   const isAuthenticated = hasValidSession();
   const usuario = getStoredUser();
 
@@ -91,11 +93,20 @@ function AppLayout() {
             {isAuthenticated && <Link className={`nav-link ${location.pathname === '/registros' ? 'nav-link-active' : ''}`} to="/registros"><ClipboardList size={16} strokeWidth={1.8} />Registros</Link>}
             {isAuthenticated && <Link className={`nav-link ${location.pathname === '/calendario' ? 'nav-link-active' : ''}`} to="/calendario"><CalendarDays size={16} strokeWidth={1.8} />Calendário</Link>}
             {isAuthenticated && <Link className={`nav-link ${location.pathname === '/foruns' ? 'nav-link-active' : ''}`} to="/foruns"><MessageCircle size={16} strokeWidth={1.8} />Fóruns</Link>}
+            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/artigos' ? 'nav-link-active' : ''}`} to="/artigos"><BookOpen size={16} strokeWidth={1.8} />Artigos</Link>}
           </div>
           {isAuthenticated && usuario ? (
             <div className="nav-user-actions">
-              <NotificationCenter />
-              <ProfileMenu usuario={usuario} />
+              <NotificationCenter
+                open={openMenu === 'notifications'}
+                onOpenChange={(open) => setOpenMenu(open ? 'notifications' : null)}
+              />
+              <ProfileMenu
+                usuario={usuario}
+                compact={openMenu === 'notifications'}
+                open={openMenu === 'profile'}
+                onOpenChange={(open) => setOpenMenu(open ? 'profile' : null)}
+              />
             </div>
           ) : (
             <Link className="nav-login-button" to="/login"><CircleUserRound size={18} />Entrar</Link>
@@ -136,6 +147,7 @@ function AppLayout() {
             <div className="space-y-1.5 pb-6">
               <Link className={`mobile-nav-link ${location.pathname === '/' ? 'mobile-nav-link-active' : ''}`} to="/"><Home size={18} /><span>Início</span></Link>
               <Link className={`mobile-nav-link ${location.pathname === '/foruns' ? 'mobile-nav-link-active' : ''}`} to="/foruns"><MessageCircle size={18} /><span>Fóruns</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/artigos' ? 'mobile-nav-link-active' : ''}`} to="/artigos"><BookOpen size={18} /><span>Artigos & leituras</span></Link>
 
               <p className="mobile-nav-heading">Gestação</p>
               <Link className={`mobile-nav-link ${location.pathname === '/cadastrar-gestacao' ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-gestacao"><CalendarDays size={18} /><span>Minhas gestações</span></Link>
@@ -178,6 +190,8 @@ function AppLayout() {
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/foruns" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
           <Route path="/registros" element={<ProtectedRoute><Registros /></ProtectedRoute>} />
+          <Route path="/foruns/:topicId" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
+          <Route path="/artigos" element={<ProtectedRoute><Artigos /></ProtectedRoute>} />
           <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
           <Route path="/jornada-crianca" element={<ProtectedRoute><JornadaCrianca /></ProtectedRoute>} />
         </Routes>
@@ -255,8 +269,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
     : <Navigate to="/login" replace />;
 }
 
-function NotificationCenter() {
-  const [aberto, setAberto] = useState(false);
+function NotificationCenter({ open: aberto, onOpenChange }: { open: boolean; onOpenChange: (aberto: boolean) => void }) {
   const [animacoesAtivas, setAnimacoesAtivas] = useState(false);
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
   const [erro, setErro] = useState(false);
@@ -272,17 +285,17 @@ function NotificationCenter() {
     const fecharAoClicarFora = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target.closest('.notification-menu-wrap')) {
-        setAberto(false);
+        onOpenChange(false);
       }
     };
     document.addEventListener('click', fecharAoClicarFora);
     return () => document.removeEventListener('click', fecharAoClicarFora);
-  }, [aberto]);
+  }, [aberto, onOpenChange]);
 
   const alternarNotificacoes = () => {
     setAnimacoesAtivas(true);
     const novoEstado = !aberto;
-    setAberto(novoEstado);
+    onOpenChange(novoEstado);
     if (novoEstado && notificacoes.some((notificacao) => notificacao.status !== 'LIDA')) {
       marcarNotificacoesComoLidas()
         .then(() => setNotificacoes((atuais) => atuais.map((notificacao) => ({ ...notificacao, status: 'LIDA' }))))
@@ -304,7 +317,6 @@ function NotificationCenter() {
           {aberto && (
             <span className="notification-trigger-copy">
               <strong>Notificações</strong>
-              <span>Avisos importantes aparecerão aqui.</span>
             </span>
           )}
           {notificacoes.some((notificacao) => notificacao.status !== 'LIDA') && (
@@ -349,8 +361,17 @@ function NotificationCenter() {
   );
 }
 
-function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
-  const [aberto, setAberto] = useState(false);
+function ProfileMenu({
+  usuario,
+  compact,
+  open: aberto,
+  onOpenChange,
+}: {
+  usuario: UsuarioPublico;
+  compact: boolean;
+  open: boolean;
+  onOpenChange: (aberto: boolean) => void;
+}) {
   const primeiroNome = usuario.nome.trim().split(/\s+/)[0];
 
   useEffect(() => {
@@ -358,12 +379,12 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
     const fecharAoClicarFora = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (!target.closest('.profile-menu-wrap')) {
-        setAberto(false);
+        onOpenChange(false);
       }
     };
     document.addEventListener('click', fecharAoClicarFora);
     return () => document.removeEventListener('click', fecharAoClicarFora);
-  }, [aberto]);
+  }, [aberto, onOpenChange]);
 
   const sair = () => {
     localStorage.removeItem('access_token');
@@ -373,7 +394,7 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
   };
 
   return (
-    <div className={`profile-menu-wrap ${aberto ? 'profile-menu-wrap-open' : ''}`}>
+    <div className={`profile-menu-wrap ${aberto ? 'profile-menu-wrap-open' : ''} ${compact ? 'profile-menu-wrap-compact' : ''}`}>
       <div className={`profile-morph-container ${aberto ? 'profile-morph-expanded' : 'profile-morph-collapsed'}`}>
         <button
           className={`profile-morph-header ${aberto ? 'profile-morph-header-open' : ''}`}
@@ -382,7 +403,7 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
           aria-haspopup="menu"
           onClick={(e) => {
             e.stopPropagation();
-            setAberto((val) => !val);
+            onOpenChange(!aberto);
           }}
         >
           <span className="profile-photo shrink-0">{getInitials(usuario.nome)}</span>
@@ -394,7 +415,7 @@ function ProfileMenu({ usuario }: { usuario: UsuarioPublico }) {
         </button>
 
         <div className={`profile-morph-menu ${aberto ? 'profile-morph-menu-open' : 'profile-morph-menu-closed'}`} role="menu" aria-hidden={!aberto}>
-          <Link to="/perfil" className="profile-dropdown-link" role="menuitem" onClick={() => setAberto(false)}>
+          <Link to="/perfil" className="profile-dropdown-link" role="menuitem" onClick={() => onOpenChange(false)}>
             <CircleUserRound size={17} />
             <span>Meu perfil</span>
           </Link>

@@ -50,4 +50,25 @@ describe('App Navigation and Layout', () => {
 
     expect(localStorage.getItem('access_token')).toBeNull();
   });
+
+  it('deve abrir a pagina de artigos e permitir filtrar por categoria', () => {
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({ sub: 'maria@example.com', exp: Math.floor(Date.now() / 1000) + 3600 }));
+    const token = `${header}.${payload}.signature`;
+
+    localStorage.setItem('access_token', token);
+    localStorage.setItem('id_usuario', '1');
+    localStorage.setItem(
+      'usuario_autenticado',
+      JSON.stringify({ id_usuario: 1, nome: 'Maria Silva', email: 'maria@example.com' }),
+    );
+
+    render(<App />);
+    fireEvent.click(screen.getByRole('link', { name: /Artigos/i }));
+
+    expect(screen.getByRole('heading', { name: /Artigos & leituras para mães/i })).toBeInTheDocument();
+    const mains = screen.getAllByRole('main');
+    fireEvent.click(within(mains[mains.length - 1]).getByRole('button', { name: 'Gestação' }));
+    expect(screen.getByText('Preparando um espaço emocional para o parto')).toBeInTheDocument();
+  });
 });
