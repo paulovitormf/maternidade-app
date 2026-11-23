@@ -38,6 +38,29 @@ describe('CadastroCrianca Component', () => {
     });
   });
 
+  it('abre o perfil individual ao selecionar o nome da criança', async () => {
+    vi.spyOn(api, 'get').mockResolvedValueOnce({
+      data: [{
+        idCrianca: 7,
+        nome: 'Sofia',
+        dataNascimento: '2025-06-10',
+        horaNascimento: '08:30:00',
+        tipoAcesso: 'PRINCIPAL',
+        podeEditar: true,
+      }],
+    });
+
+    render(
+      <MemoryRouter>
+        <CadastroCrianca />
+      </MemoryRouter>,
+    );
+
+    const link = await screen.findByRole('link', { name: 'Sofia' });
+    expect(link).toHaveAttribute('href', '/bebes/7');
+    expect(screen.getByRole('link', { name: 'Ver perfil individual' })).toHaveAttribute('href', '/bebes/7');
+  });
+
   it('deve submeter formulário de cadastro de bebê com sucesso', async () => {
     vi.spyOn(api, 'get').mockResolvedValueOnce({ data: [] });
     vi.spyOn(api, 'post').mockResolvedValueOnce({ data: { idCrianca: 1 } });

@@ -95,7 +95,7 @@ docker compose up --build
 
 > `docker compose down -v` remove os dados persistidos do volume. Use somente quando isso for intencional.
 
-Ao iniciar a API, o Flyway aplica as migrações versionadas antes da validação do Hibernate. Em bancos existentes sem histórico do Flyway, a versão inicial é registrada como baseline e as migrações adicionam somente as alterações ausentes, preservando os registros. A estrutura inicial do fórum é criada pela migração `V2__adicionar_forum_discussao.sql`.
+O arquivo `database/maternidade.sql` cria o schema completo quando o volume MySQL é inicializado pela primeira vez. A API usa `spring.jpa.hibernate.ddl-auto=validate`: ela valida as tabelas, mas não cria nem atualiza a estrutura do banco. O Flyway está disponível, mas desativado neste ambiente. Durante o desenvolvimento, integre mudanças de schema no arquivo SQL e recrie o volume para aplicá-las.
 
 ## ⚡ 4. Opção B — banco no Docker e aplicações no host
 
@@ -160,7 +160,7 @@ Em execução híbrida, a API deve usar `DB_HOST=localhost` e `MYSQL_PORT=3306`.
 
 ### Alterações no SQL não aparecem
 
-O script inicial não é reaplicado em um volume existente. Alterações versionadas em `backend/src/main/resources/db/migration` são aplicadas pela API na inicialização; para alterações feitas somente em `database/maternidade.sql`, em desenvolvimento, recrie o volume com `docker compose down -v` e suba a stack novamente.
+O script inicial não é reaplicado em um volume existente. Para aplicar alterações em `database/maternidade.sql`, recrie o volume de desenvolvimento com `docker compose down -v` e suba a stack novamente. Esse comando apaga os dados do banco.
 
 ### Dependências do front-end inconsistentes
 

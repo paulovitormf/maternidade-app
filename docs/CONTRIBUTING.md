@@ -128,7 +128,10 @@ Evite commits genéricos, como `ajustes`, `mudanças` ou `final`, e não misture
 ### Banco e infraestrutura
 
 - Documente alterações estruturais no [schema SQL](../database/maternidade.sql).
+- No fluxo atual de desenvolvimento, não use migrações incrementais: o schema completo é mantido em `database/maternidade.sql`.
+- O Flyway está disponível, mas desativado; sua ativação futura deve ser acordada pela equipe e documentada antes de adicionar migrações.
 - Lembre-se de que o SQL é inicializado apenas na criação do volume MySQL.
+- Durante o desenvolvimento, aplique mudanças estruturais recriando o volume local após confirmar que os dados podem ser descartados.
 - Se alterar portas ou variáveis, atualize `.env.example`, `docker-compose.yml` e este guia quando necessário.
 
 ## ✅ Checklist antes de abrir uma revisão

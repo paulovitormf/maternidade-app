@@ -40,6 +40,16 @@ public class GestacaoController {
         return ResponseEntity.ok(gestacoes);
     }
 
+    @GetMapping("/usuario/{idUsuario}/mais-recente")
+    public ResponseEntity<?> buscarMaisRecente(@PathVariable Integer idUsuario) {
+        try {
+            return ResponseEntity.ok(GestacaoPublicaDTO.from(
+                    gestacaoService.buscarMaisRecentePorUsuario(idUsuario)));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @PutMapping("/{idGestacao}")
     public ResponseEntity<?> atualizar(@PathVariable Integer idGestacao, @RequestBody GestacaoDTO dto, Authentication authentication) {
         try {

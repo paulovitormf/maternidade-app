@@ -1,7 +1,7 @@
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Baby, Bell, BookOpen, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
+import { Baby, Bell, BookOpen, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, ClipboardList, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
 import { listarNotificacoes, marcarNotificacoesComoLidas } from './services/notificacaoService';
 import type { Notificacao } from './services/notificacaoService';
 
@@ -16,6 +16,10 @@ import Vacinas from './pages/Vacinas';
 import Perfil from './pages/Perfil';
 import JornadaCrianca from './pages/JornadaCrianca';
 import Foruns from './pages/Foruns';
+import Registros from './pages/Registros';
+import PerfilBebe from './pages/PerfilBebe';
+import Calendario from './pages/Calendario';
+import api from './services/api';
 import Artigos from './pages/Artigos';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
 
@@ -76,8 +80,8 @@ function AppLayout() {
                 icone={<Baby size={16} strokeWidth={1.8} />}
                 itens={[
                   { to: '/cadastrar-bebe', rotulo: 'Meus bebês', icone: <Baby size={15} /> },
-                  { to: '/jornadas-desenvolvimento', rotulo: 'Jornada por fases', icone: <Sparkles size={15} /> },
-                  { to: '/jornada-crianca', rotulo: 'Acompanhamento até 5 anos', icone: <CalendarDays size={15} /> },
+                  { to: '/jornada-bebe', rotulo: 'Jornada do bebê — 0 a 2 anos', icone: <Sparkles size={15} /> },
+                  { to: '/jornada-crianca', rotulo: 'Jornada da criança — 2 a 12 anos', icone: <CalendarDays size={15} /> },
                 ]}
               />
             )}
@@ -86,6 +90,8 @@ function AppLayout() {
                 <Syringe size={16} strokeWidth={1.8} />Vacinas
               </Link>
             )}
+            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/registros' ? 'nav-link-active' : ''}`} to="/registros"><ClipboardList size={16} strokeWidth={1.8} />Registros</Link>}
+            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/calendario' ? 'nav-link-active' : ''}`} to="/calendario"><CalendarDays size={16} strokeWidth={1.8} />Calendário</Link>}
             {isAuthenticated && <Link className={`nav-link ${location.pathname === '/foruns' ? 'nav-link-active' : ''}`} to="/foruns"><MessageCircle size={16} strokeWidth={1.8} />Fóruns</Link>}
             {isAuthenticated && <Link className={`nav-link ${location.pathname === '/artigos' ? 'nav-link-active' : ''}`} to="/artigos"><BookOpen size={16} strokeWidth={1.8} />Artigos</Link>}
           </div>
@@ -148,12 +154,16 @@ function AppLayout() {
               <Link className={`mobile-nav-link ${location.pathname === '/jornada-gestacao' ? 'mobile-nav-link-active' : ''}`} to="/jornada-gestacao"><Sparkles size={18} /><span>Jornada da gestação</span></Link>
 
               <p className="mobile-nav-heading">Bebê e Criança</p>
-              <Link className={`mobile-nav-link ${location.pathname === '/cadastrar-bebe' ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-bebe"><Baby size={18} /><span>Meus bebês</span></Link>
-              <Link className={`mobile-nav-link ${location.pathname === '/jornadas-desenvolvimento' ? 'mobile-nav-link-active' : ''}`} to="/jornadas-desenvolvimento"><Sparkles size={18} /><span>Jornadas de desenvolvimento</span></Link>
-              <Link className={`mobile-nav-link ${location.pathname === '/jornada-crianca' ? 'mobile-nav-link-active' : ''}`} to="/jornada-crianca"><CalendarDays size={18} /><span>Acompanhamento até 5 anos</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname.startsWith('/cadastrar-bebe') || location.pathname.startsWith('/bebes/') ? 'mobile-nav-link-active' : ''}`} to="/cadastrar-bebe"><Baby size={18} /><span>Meus bebês</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/jornada-bebe' ? 'mobile-nav-link-active' : ''}`} to="/jornada-bebe"><Sparkles size={18} /><span>Jornada do bebê — 0 a 2 anos</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/jornada-crianca' ? 'mobile-nav-link-active' : ''}`} to="/jornada-crianca"><CalendarDays size={18} /><span>Jornada da criança — 2 a 12 anos</span></Link>
 
               <p className="mobile-nav-heading">Vacinas</p>
               <Link className={`mobile-nav-link ${location.pathname.startsWith('/vacinas') ? 'mobile-nav-link-active' : ''}`} to="/vacinas"><Syringe size={18} /><span>Vacinas da mãe e do bebê</span></Link>
+
+              <p className="mobile-nav-heading">Memórias</p>
+              <Link className={`mobile-nav-link ${location.pathname === '/registros' ? 'mobile-nav-link-active' : ''}`} to="/registros"><ClipboardList size={18} /><span>Registros e galeria</span></Link>
+              <Link className={`mobile-nav-link ${location.pathname === '/calendario' ? 'mobile-nav-link-active' : ''}`} to="/calendario"><CalendarDays size={18} /><span>Calendário</span></Link>
 
               <p className="mobile-nav-heading">Sua Conta</p>
               <Link className={`mobile-nav-link ${location.pathname === '/perfil' ? 'mobile-nav-link-active' : ''}`} to="/perfil"><CircleUserRound size={18} /><span>Meu perfil</span></Link>
@@ -168,14 +178,18 @@ function AppLayout() {
           <Route path="/cadastrar-usuario" element={<CadastroUsuario />} />
           <Route path="/continuar-cadastro" element={<ProtectedRoute><ContinuarCadastro /></ProtectedRoute>} />
           <Route path="/cadastrar-bebe" element={<ProtectedRoute><CadastroBebe /></ProtectedRoute>} />
+          <Route path="/bebes/:id" element={<ProtectedRoute><PerfilBebe /></ProtectedRoute>} />
           <Route path="/cadastrar-gestacao" element={<ProtectedRoute><CadastroGestacao /></ProtectedRoute>} />
           <Route path="/jornadas-desenvolvimento" element={<ProtectedRoute><JornadaDesenvolvimento /></ProtectedRoute>} />
+          <Route path="/jornada-bebe" element={<ProtectedRoute><JornadaCrianca faixa="bebe" /></ProtectedRoute>} />
+          <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
           <Route path="/jornada-gestacao" element={<ProtectedRoute><JornadaGestacao /></ProtectedRoute>} />
           <Route path="/vacinas" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
           <Route path="/vacinas-bebe" element={<ProtectedRoute><Vacinas publicoInicial="bebe" /></ProtectedRoute>} />
           <Route path="/vacinas-gestante" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/foruns" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
+          <Route path="/registros" element={<ProtectedRoute><Registros /></ProtectedRoute>} />
           <Route path="/foruns/:topicId" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
           <Route path="/artigos" element={<ProtectedRoute><Artigos /></ProtectedRoute>} />
           <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
@@ -188,7 +202,7 @@ function AppLayout() {
           <Link className={`mobile-bottom-link ${location.pathname === '/' ? 'active' : ''}`} to="/"><Home size={19} strokeWidth={1.8} /><span>Início</span></Link>
           <Link className={`mobile-bottom-link ${location.pathname.startsWith('/cadastrar-gestacao') || location.pathname.startsWith('/jornada-gestacao') ? 'active' : ''}`} to="/cadastrar-gestacao"><CalendarDays size={19} strokeWidth={1.8} /><span>Gestação</span></Link>
           <Link className="mobile-add-button" to="/cadastrar-gestacao" aria-label="Adicionar gestação"><Plus size={23} strokeWidth={1.8} /></Link>
-          <Link className={`mobile-bottom-link ${location.pathname.startsWith('/cadastrar-bebe') || location.pathname.startsWith('/jornada') ? 'active' : ''}`} to="/cadastrar-bebe"><Baby size={19} strokeWidth={1.8} /><span>Bebê</span></Link>
+          <Link className={`mobile-bottom-link ${location.pathname.startsWith('/cadastrar-bebe') || location.pathname.startsWith('/bebes/') || location.pathname.startsWith('/jornada') ? 'active' : ''}`} to="/cadastrar-bebe"><Baby size={19} strokeWidth={1.8} /><span>Bebê</span></Link>
           <Link className={`mobile-bottom-link ${location.pathname === '/perfil' ? 'active' : ''}`} to="/perfil"><CircleUserRound size={19} strokeWidth={1.8} /><span>Perfil</span></Link>
         </nav>
       )}
@@ -207,7 +221,8 @@ function NavDropdown({
 }) {
   const [aberto, setAberto] = useState(false);
   const location = useLocation();
-  const ativo = itens.some((item) => location.pathname === item.to);
+  const ativo = itens.some((item) => location.pathname === item.to
+    || (item.to === '/cadastrar-bebe' && location.pathname.startsWith('/bebes/')));
 
   return (
     <div
@@ -233,7 +248,7 @@ function NavDropdown({
               <Link
                 key={item.to}
                 to={item.to}
-                className={`nav-dropdown-item ${location.pathname === item.to ? 'nav-dropdown-item-active' : ''}`}
+                className={`nav-dropdown-item ${location.pathname === item.to || (item.to === '/cadastrar-bebe' && location.pathname.startsWith('/bebes/')) ? 'nav-dropdown-item-active' : ''}`}
                 role="menuitem"
                 onClick={() => setAberto(false)}
               >
@@ -459,6 +474,46 @@ function WelcomeScreen() {
 function HomeDashboard() {
   const usuario = getStoredUser();
   const nome = usuario?.nome?.trim().split(/\s+/)[0];
+  const [resumo, setResumo] = useState<{
+    criancas: number;
+    vacinas: number;
+    consultas: number;
+    registros: number;
+    proximo: { titulo: string; data: string } | null;
+    recentes: Array<{ titulo: string; data: string }>;
+    faseGestacao: string;
+  }>({ criancas: 0, vacinas: 0, consultas: 0, registros: 0, proximo: null, recentes: [], faseGestacao: 'Não cadastrada' });
+
+  useEffect(() => {
+    const idUsuario = Number(localStorage.getItem('id_usuario'));
+    if (!idUsuario) return;
+    Promise.all([
+      api.get<Array<{ idCrianca: number }>>('/criancas'),
+      api.get<Array<{ id_registro: number; tipo: string; titulo: string; confirmado: boolean; data_registro: string }>>(`/registros/usuario/${idUsuario}`),
+      api.get<{ ultima_mestruacao: string }>(`/gestacoes/usuario/${idUsuario}/mais-recente`).catch(() => null),
+    ]).then(([criancas, registros, gestacao]) => {
+      const dados = registros.data;
+      const pendentes = dados
+        .filter((registro) => ['CONSULTA', 'EXAME', 'VACINA', 'OUTRO'].includes(registro.tipo) && !registro.confirmado)
+        .sort((a, b) => a.data_registro.localeCompare(b.data_registro));
+      setResumo({
+        criancas: criancas.data.length,
+        vacinas: dados.filter((registro) => registro.tipo === 'VACINA' && registro.confirmado).length,
+        consultas: dados.filter((registro) => registro.tipo === 'CONSULTA').length,
+        registros: dados.length,
+        proximo: pendentes[0] ? { titulo: pendentes[0].titulo, data: pendentes[0].data_registro } : null,
+        recentes: dados.slice(0, 4).map((registro) => ({ titulo: registro.titulo, data: registro.data_registro })),
+        faseGestacao: gestacao?.data?.ultima_mestruacao
+          ? (() => {
+              const inicio = new Date(`${gestacao.data.ultima_mestruacao}T00:00:00`);
+              const hoje = new Date();
+              const semana = Math.max(0, Math.floor((hoje.getTime() - inicio.getTime()) / 604800000));
+              return `${Math.min(42, semana)}ª semana`;
+            })()
+          : 'Não cadastrada',
+      });
+    }).catch(() => undefined);
+  }, []);
 
   return (
     <section className="dashboard">
@@ -482,6 +537,29 @@ function HomeDashboard() {
         <div className="dashboard-hero-illustration" aria-hidden="true"><HeartHandshake size={112} strokeWidth={1.15} /></div>
       </div>
 
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Resumo da família">
+        <article className="card"><p className="text-sm text-slate-500">Crianças cadastradas</p><strong className="mt-1 block text-2xl text-slate-800">{resumo.criancas}</strong></article>
+        <article className="card"><p className="text-sm text-slate-500">Vacinas registradas</p><strong className="mt-1 block text-2xl text-slate-800">{resumo.vacinas}</strong></article>
+        <article className="card"><p className="text-sm text-slate-500">Consultas registradas</p><strong className="mt-1 block text-2xl text-slate-800">{resumo.consultas}</strong></article>
+        <article className="card"><p className="text-sm text-slate-500">Próximo compromisso</p><strong className="mt-1 block text-sm text-slate-800">{resumo.proximo ? resumo.proximo.titulo : 'Nenhum agendado'}</strong></article>
+        <article className="card"><p className="text-sm text-slate-500">Fase atual da gestação</p><strong className="mt-1 block text-sm text-slate-800">{resumo.faseGestacao}</strong></article>
+      </section>
+
+      {resumo.recentes.length > 0 && (
+        <section className="card" aria-label="Últimos registros">
+          <p className="eyebrow">Atualizações recentes</p>
+          <h2 className="section-title">Últimos registros</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {resumo.recentes.map((registro, indice) => (
+              <article key={`${registro.titulo}-${indice}`} className="rounded-xl border border-slate-200 p-3">
+                <strong className="block text-sm text-slate-800">{registro.titulo}</strong>
+                <time className="mt-1 block text-xs text-slate-500">{new Date(`${registro.data}T00:00:00`).toLocaleDateString('pt-BR')}</time>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="space-y-6">
         <div>
           <div className="section-heading">
@@ -497,6 +575,11 @@ function HomeDashboard() {
             <Link to="/jornada-gestacao" className="quick-action quick-action-pink group">
               <span className="quick-action-icon"><Sparkles size={23} strokeWidth={1.7} /></span>
               <span><strong>Jornada da gestação</strong><small>Acompanhe as semanas e marcos estimados</small></span>
+              <ChevronRight size={18} />
+            </Link>
+            <Link to="/calendario" className="quick-action quick-action-pink group">
+              <span className="quick-action-icon"><CalendarDays size={23} strokeWidth={1.7} /></span>
+              <span><strong>Calendário da família</strong><small>Veja próximas consultas, exames e vacinas</small></span>
               <ChevronRight size={18} />
             </Link>
           </div>

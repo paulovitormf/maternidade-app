@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Baby,
   CalendarDays,
@@ -8,6 +8,7 @@ import {
   Syringe,
   ClipboardList,
 } from 'lucide-react';
+import api from '../services/api';
 
 type Vacina = {
   nome: string;
@@ -17,6 +18,18 @@ type Vacina = {
 type Etapa = {
   idade: string;
   vacinas: Vacina[];
+};
+
+type Crianca = { idCrianca: number; nome: string; podeEditar: boolean };
+type RegistroVacina = {
+  id_registro: number;
+  id_crianca: number | null;
+  tipo: string;
+  titulo: string;
+  dose?: string;
+  confirmado: boolean;
+  data_registro: string;
+  pode_editar: boolean;
 };
 
 const etapas: Etapa[] = [
@@ -108,6 +121,30 @@ const totalVacinas = etapas.reduce(
 
 export default function CalendarioVacinaBebe() {
   const [busca, setBusca] = useState('');
+  const [criancas, setCriancas] = useState<Crianca[]>([]);
+  const [criancaId, setCriancaId] = useState<number>();
+  const [vacinasRegistradas, setVacinasRegistradas] = useState<RegistroVacina[]>([]);
+  const [erro, setErro] = useState('');
+  const idUsuario = Number(localStorage.getItem('id_usuario'));
+
+  useEffect(() => {
+    api.get<Crianca[]>('/criancas')
+      .then(({ data }) => {
+        setCriancas(data);
+        setCriancaId(data[0]?.idCrianca);
+      })
+      .catch(() => setErro('Não foi possível carregar a lista de crianças.'));
+  }, []);
+
+  useEffect(() => {
+    if (!criancaId) {
+      setVacinasRegistradas([]);
+      return;
+    }
+    api.get<RegistroVacina[]>(`/registros/crianca/${criancaId}`)
+      .then(({ data }) => setVacinasRegistradas(data.filter((registro) => registro.tipo === 'VACINA')))
+      .catch(() => setErro('Não foi possível carregar as vacinas desta criança.'));
+  }, [criancaId]);
 
   const etapasFiltradas = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -138,10 +175,70 @@ export default function CalendarioVacinaBebe() {
       .filter((etapa): etapa is Etapa => etapa !== null);
   }, [busca]);
 
+  const vacinaTomada = (vacina: Vacina) =>
+    vacinasRegistradas.some((registro) =>
+      registro.confirmado &&
+      registro.titulo.trim().toLowerCase() === vacina.nome.trim().toLowerCase() &&
+      (!registro.dose || registro.dose.trim().toLowerCase() === vacina.doses.trim().toLowerCase()),
+    );
+
+  const alternarVacina = async (vacina: Vacina, fase: string) => {
+    if (!criancaId) return;
+    const crianca = criancas.find((item) => item.idCrianca === criancaId);
+    if (!crianca?.podeEditar) {
+      setErro('Você não tem permissão para editar as vacinas desta criança.');
+      return;
+    }
+    const existente = vacinasRegistradas.find((registro) =>
+      registro.confirmado &&
+      registro.titulo.trim().toLowerCase() === vacina.nome.trim().toLowerCase() &&
+      (!registro.dose || registro.dose.trim().toLowerCase() === vacina.doses.trim().toLowerCase()),
+    );
+    try {
+      if (existente) {
+        await api.delete(`/registros/${existente.id_registro}`);
+      } else {
+        await api.post('/registros', {
+          id_usuario: idUsuario,
+          id_crianca: criancaId,
+          id_gestacao: null,
+          tipo: 'VACINA',
+          titulo: vacina.nome,
+          descricao: `Vacina registrada na carteira individual: ${vacina.doses}.`,
+          dose: vacina.doses,
+          confirmado: true,
+          data_registro: new Date().toISOString().slice(0, 10),
+          responsavel_nome: JSON.parse(localStorage.getItem('usuario_autenticado') || '{}').nome || null,
+          fase_jornada: fase,
+        });
+      }
+      const atualizados = await api.get<RegistroVacina[]>(`/registros/crianca/${criancaId}`);
+      setVacinasRegistradas(atualizados.data.filter((registro) => registro.tipo === 'VACINA'));
+      setErro('');
+    } catch {
+      setErro('Não foi possível atualizar a vacina.');
+    }
+  };
+
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[300px_minmax(0,1fr)]">
         {/* Resumo lateral */}
         <aside className="space-y-4">
+          {criancas.length > 0 && (
+            <section className="rounded-2xl border border-slate-200 bg-white p-5">
+              <label className="field">
+                <span className="field-label">Criança</span>
+                <select className="field-control" value={criancaId || ''} onChange={(event) => setCriancaId(Number(event.target.value))}>
+                  {criancas.map((crianca) => <option key={crianca.idCrianca} value={crianca.idCrianca}>{crianca.nome}</option>)}
+                </select>
+              </label>
+              {criancaId && (
+                <a className="secondary-button mt-4 !w-auto" href={`/calendario?tipo=VACINA&crianca=${criancaId}`}>
+                  Agendar vacina
+                </a>
+              )}
+            </section>
+          )}
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#EBF3F5] text-[#3B7280]">
               <ClipboardList size={23} />
@@ -168,9 +265,10 @@ export default function CalendarioVacinaBebe() {
                 </span>
 
                 <span className="font-semibold text-slate-800">
-                  {totalVacinas}
+                  {vacinasRegistradas.length}/{totalVacinas}
                 </span>
               </div>
+              {erro && <div className="alert-error" role="alert">{erro}</div>}
 
               <div className="flex items-center justify-between gap-3 py-3">
                 <span className="text-sm text-slate-600">
@@ -264,7 +362,7 @@ export default function CalendarioVacinaBebe() {
                   <div className="mt-3 divide-y divide-slate-100 rounded-xl border border-slate-200">
                     {etapa.vacinas.map((vacina) => (
                       <div
-                        key={vacina.nome}
+                        key={`${vacina.nome}-${vacina.doses}`}
                         className="flex items-start gap-3 p-4"
                       >
                         <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#FDF7F8] text-[#C8526B]">
@@ -280,6 +378,17 @@ export default function CalendarioVacinaBebe() {
                             {vacina.doses}
                           </p>
                         </div>
+                        {criancaId && (
+                          <button
+                            type="button"
+                            role="checkbox"
+                            aria-checked={vacinaTomada(vacina)}
+                            onClick={() => alternarVacina(vacina, etapa.idade)}
+                            className={`ml-auto min-w-24 rounded-xl border px-3 py-2 text-xs font-bold transition ${vacinaTomada(vacina) ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-600 hover:border-[#C8526B]'}`}
+                          >
+                            {vacinaTomada(vacina) ? 'Tomada' : 'Marcar tomada'}
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>

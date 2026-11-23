@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import br.com.maternidade.dto.CriancaCadastroDTO;
 import br.com.maternidade.dto.ResponsavelCriancaDTO;
 import br.com.maternidade.dto.CriancaAcessoDTO;
+import br.com.maternidade.dto.CriancaDetalheDTO;
 import br.com.maternidade.services.CriancaService;
 import org.springframework.security.core.Authentication;
 import java.util.List;
@@ -22,10 +23,24 @@ public class CriancaController {
     }
 
     @GetMapping("/usuario/{idUsuario}")
-    public ResponseEntity<?> listarPorUsuario(@PathVariable Long idUsuario) {
-        return ResponseEntity.ok(criancaService.listarEntidadesPorUsuario(idUsuario).stream()
+    public ResponseEntity<?> listarPorUsuario(@PathVariable Long idUsuario, Authentication authentication) {
+        return ResponseEntity.ok(criancaService.listarEntidadesPorUsuario(idUsuario, authentication.getName()).stream()
             .map(br.com.maternidade.dto.CriancaPublicaDTO::from)
             .toList());
+    }
+
+    @GetMapping("/{idCrianca}")
+    public ResponseEntity<?> buscarDetalhe(
+            @PathVariable Integer idCrianca,
+            Authentication authentication) {
+        try {
+            CriancaDetalheDTO detalhe = criancaService.buscarDetalhe(idCrianca, authentication.getName());
+            return ResponseEntity.ok(detalhe);
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping

@@ -7,7 +7,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Executando testes do frontend..."
-npm.cmd --prefix frontend test
+(cd frontend && npm test)
 
 if [ $? -ne 0 ]; then
   echo "ERRO: Os testes do frontend falharam. Commit cancelado."
