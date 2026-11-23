@@ -1,16 +1,48 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Baby, Heart, Printer } from 'lucide-react';
+import { Navigate } from 'react-router-dom';
 import CalendarioVacinaBebe from './VacinaBebe';
 import CalendarioVacinaGestante from './VacinaGestante';
+import api from '../services/api';
 
 type PublicoVacina = 'mae' | 'bebe';
 
 type VacinasProps = {
   publicoInicial?: PublicoVacina;
+  somenteGestante?: boolean;
 };
 
-export default function Vacinas({ publicoInicial = 'mae' }: VacinasProps) {
+export default function Vacinas({ publicoInicial = 'mae', somenteGestante = false }: VacinasProps) {
   const [publico, setPublico] = useState<PublicoVacina>(publicoInicial);
+  const [temGestacao, setTemGestacao] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    api.get<unknown[]>('/gestacoes')
+      .then(({ data }) => setTemGestacao(data.length > 0))
+      .catch(() => setTemGestacao(false));
+  }, []);
+
+  useEffect(() => {
+    if (temGestacao === false) {
+      setPublico('bebe');
+    }
+  }, [temGestacao]);
+
+  if (temGestacao === null) {
+    return (
+      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <section className="card" role="status" aria-live="polite">
+          <p className="text-sm text-slate-500">Verificando informações da gestação...</p>
+        </section>
+      </main>
+    );
+  }
+
+  if (somenteGestante && !temGestacao) {
+    return <Navigate to="/vacinas-bebe" replace />;
+  }
+
+  const mostrarVacinasGestante = temGestacao;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
@@ -34,24 +66,26 @@ export default function Vacinas({ publicoInicial = 'mae' }: VacinasProps) {
         role="group"
         aria-label="Selecione de quem são as vacinas"
       >
-        <button
-          type="button"
-          aria-pressed={publico === 'mae'}
-          onClick={() => setPublico('mae')}
-          className={`flex min-h-24 items-center justify-center gap-3 rounded-2xl border-2 px-4 py-5 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FADCE1] sm:min-h-28 sm:gap-4 sm:px-6 ${
-            publico === 'mae'
-              ? 'border-[#C8526B] bg-[#FADCE1]/60 text-[#8F344A] shadow-sm'
-              : 'border-slate-200 bg-white text-slate-600 hover:border-[#FECDD3] hover:bg-[#FDF7F8]'
-          }`}
-        >
-          <Heart className="shrink-0" size={27} aria-hidden="true" />
-          <span>
-            <span className="block text-lg font-bold sm:text-xl">Mãe</span>
-            <span className="mt-1 hidden text-sm sm:block">
-              Vacinação materna
+        {mostrarVacinasGestante && (
+          <button
+            type="button"
+            aria-pressed={publico === 'mae'}
+            onClick={() => setPublico('mae')}
+            className={`flex min-h-24 items-center justify-center gap-3 rounded-2xl border-2 px-4 py-5 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FADCE1] sm:min-h-28 sm:gap-4 sm:px-6 ${
+              publico === 'mae'
+                ? 'border-[#C8526B] bg-[#FADCE1]/60 text-[#8F344A] shadow-sm'
+                : 'border-slate-200 bg-white text-slate-600 hover:border-[#FECDD3] hover:bg-[#FDF7F8]'
+            }`}
+          >
+            <Heart className="shrink-0" size={27} aria-hidden="true" />
+            <span>
+              <span className="block text-lg font-bold sm:text-xl">Mãe</span>
+              <span className="mt-1 hidden text-sm sm:block">
+                Vacinação materna
+              </span>
             </span>
-          </span>
-        </button>
+          </button>
+        )}
 
         <button
           type="button"

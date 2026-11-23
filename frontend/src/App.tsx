@@ -186,7 +186,7 @@ function AppLayout() {
           <Route path="/jornada-gestacao" element={<ProtectedRoute><JornadaGestacao /></ProtectedRoute>} />
           <Route path="/vacinas" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
           <Route path="/vacinas-bebe" element={<ProtectedRoute><Vacinas publicoInicial="bebe" /></ProtectedRoute>} />
-          <Route path="/vacinas-gestante" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
+          <Route path="/vacinas-gestante" element={<ProtectedRoute><Vacinas publicoInicial="mae" somenteGestante /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/foruns" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
           <Route path="/registros" element={<ProtectedRoute><Registros /></ProtectedRoute>} />

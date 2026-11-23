@@ -69,7 +69,7 @@ O schema contempla entidades de diferentes frentes do produto. A existência de 
 
 O fórum utiliza `forum_categoria`, `forum_topico`, `forum_resposta` e `forum_topico_curtida`. Categorias podem representar interesses ou faixas etárias em meses; tópicos e respostas preservam autoria, status de moderação e timestamps.
 
-O arquivo `database/maternidade.sql` é a fonte do schema no fluxo atual de desenvolvimento. O Hibernate valida a estrutura existente, mas não cria nem atualiza tabelas. O Flyway está disponível no projeto, mas desativado; mudanças no schema devem ser integradas ao SQL e aplicadas recriando o banco local até que a equipe decida ativar migrações.
+Alterações do schema são mantidas diretamente em `database/maternidade.sql`, que é a referência para a criação de um banco novo. O Hibernate utiliza `ddl-auto=validate` e não altera automaticamente a estrutura.
 
 ## 🔐 Fluxo de autenticação
 
