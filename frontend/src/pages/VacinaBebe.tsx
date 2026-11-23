@@ -182,7 +182,7 @@ export default function CalendarioVacinaBebe() {
       (!registro.dose || registro.dose.trim().toLowerCase() === vacina.doses.trim().toLowerCase()),
     );
 
-  const alternarVacina = async (vacina: Vacina) => {
+  const alternarVacina = async (vacina: Vacina, fase: string) => {
     if (!criancaId) return;
     const crianca = criancas.find((item) => item.idCrianca === criancaId);
     if (!crianca?.podeEditar) {
@@ -208,6 +208,8 @@ export default function CalendarioVacinaBebe() {
           dose: vacina.doses,
           confirmado: true,
           data_registro: new Date().toISOString().slice(0, 10),
+          responsavel_nome: JSON.parse(localStorage.getItem('usuario_autenticado') || '{}').nome || null,
+          fase_jornada: fase,
         });
       }
       const atualizados = await api.get<RegistroVacina[]>(`/registros/crianca/${criancaId}`);
@@ -230,6 +232,11 @@ export default function CalendarioVacinaBebe() {
                   {criancas.map((crianca) => <option key={crianca.idCrianca} value={crianca.idCrianca}>{crianca.nome}</option>)}
                 </select>
               </label>
+              {criancaId && (
+                <a className="secondary-button mt-4 !w-auto" href={`/calendario?tipo=VACINA&crianca=${criancaId}`}>
+                  Agendar vacina
+                </a>
+              )}
             </section>
           )}
           <section className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -376,7 +383,7 @@ export default function CalendarioVacinaBebe() {
                             type="button"
                             role="checkbox"
                             aria-checked={vacinaTomada(vacina)}
-                            onClick={() => alternarVacina(vacina)}
+                            onClick={() => alternarVacina(vacina, etapa.idade)}
                             className={`ml-auto min-w-24 rounded-xl border px-3 py-2 text-xs font-bold transition ${vacinaTomada(vacina) ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-600 hover:border-[#C8526B]'}`}
                           >
                             {vacinaTomada(vacina) ? 'Tomada' : 'Marcar tomada'}

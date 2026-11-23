@@ -100,7 +100,8 @@ class RegistroServiceTest {
     private static RegistroCadastroDTO dto(Integer idUsuario, Integer idCrianca) {
         return new RegistroCadastroDTO(
                 idUsuario, idCrianca, null, "CONSULTA", " Consulta ", null,
-                null, null, null, false, LocalDate.of(2026, 11, 20), null, null);
+                null, null, null, false, LocalDate.of(2026, 11, 20),
+                null, null, null, null, null, null);
     }
 
     private static Usuario usuario(Integer id, String email) {

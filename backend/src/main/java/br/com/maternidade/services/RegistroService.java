@@ -15,7 +15,11 @@ import java.util.List;
 
 @Service
 public class RegistroService {
-    private static final List<String> TIPOS = List.of("VACINA", "PESO", "ALTURA", "INTRODUCAO_ALIMENTAR", "FOTO", "INTERACAO", "PRIMEIRA_PALAVRA", "CONSULTA", "EXAME", "OUTRO");
+    private static final List<String> TIPOS = List.of(
+            "VACINA", "PESO", "ALTURA", "PERIMETRO_CEFALICO",
+            "INTRODUCAO_ALIMENTAR", "FOTO", "INTERACAO",
+            "PRIMEIRA_PALAVRA", "MARCO_DESENVOLVIMENTO",
+            "CONSULTA", "EXAME", "OUTRO");
     private final RegistroRepository registros; private final UsuarioRepository usuarios; private final CriancaRepository criancas; private final GestacaoRepository gestacoes; private final UsuarioCriancaRepository vinculos;
     public RegistroService(RegistroRepository registros, UsuarioRepository usuarios, CriancaRepository criancas, GestacaoRepository gestacoes, UsuarioCriancaRepository vinculos) { this.registros = registros; this.usuarios = usuarios; this.criancas = criancas; this.gestacoes = gestacoes; this.vinculos = vinculos; }
 
@@ -120,6 +124,10 @@ public class RegistroService {
         registro.setDataRegistro(dto.data_registro());
         registro.setHorario(dto.horario());
         registro.setFotoBase64(dto.foto_base64());
+        registro.setLocalEvento(dto.local_evento());
+        registro.setProfissional(dto.profissional());
+        registro.setResponsavelNome(dto.responsavel_nome());
+        registro.setFaseJornada(dto.fase_jornada());
     }
 
     private void validarAcessoCrianca(Integer idUsuario, Integer idCrianca, boolean exigeEdicao) {

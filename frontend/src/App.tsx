@@ -19,6 +19,7 @@ import Foruns from './pages/Foruns';
 import Registros from './pages/Registros';
 import PerfilBebe from './pages/PerfilBebe';
 import Calendario from './pages/Calendario';
+import api from './services/api';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
 
 export default function App() {
@@ -452,6 +453,46 @@ function WelcomeScreen() {
 function HomeDashboard() {
   const usuario = getStoredUser();
   const nome = usuario?.nome?.trim().split(/\s+/)[0];
+  const [resumo, setResumo] = useState<{
+    criancas: number;
+    vacinas: number;
+    consultas: number;
+    registros: number;
+    proximo: { titulo: string; data: string } | null;
+    recentes: Array<{ titulo: string; data: string }>;
+    faseGestacao: string;
+  }>({ criancas: 0, vacinas: 0, consultas: 0, registros: 0, proximo: null, recentes: [], faseGestacao: 'Não cadastrada' });
+
+  useEffect(() => {
+    const idUsuario = Number(localStorage.getItem('id_usuario'));
+    if (!idUsuario) return;
+    Promise.all([
+      api.get<Array<{ idCrianca: number }>>('/criancas'),
+      api.get<Array<{ id_registro: number; tipo: string; titulo: string; confirmado: boolean; data_registro: string }>>(`/registros/usuario/${idUsuario}`),
+      api.get<{ ultima_mestruacao: string }>(`/gestacoes/usuario/${idUsuario}/mais-recente`).catch(() => null),
+    ]).then(([criancas, registros, gestacao]) => {
+      const dados = registros.data;
+      const pendentes = dados
+        .filter((registro) => ['CONSULTA', 'EXAME', 'VACINA', 'OUTRO'].includes(registro.tipo) && !registro.confirmado)
+        .sort((a, b) => a.data_registro.localeCompare(b.data_registro));
+      setResumo({
+        criancas: criancas.data.length,
+        vacinas: dados.filter((registro) => registro.tipo === 'VACINA' && registro.confirmado).length,
+        consultas: dados.filter((registro) => registro.tipo === 'CONSULTA').length,
+        registros: dados.length,
+        proximo: pendentes[0] ? { titulo: pendentes[0].titulo, data: pendentes[0].data_registro } : null,
+        recentes: dados.slice(0, 4).map((registro) => ({ titulo: registro.titulo, data: registro.data_registro })),
+        faseGestacao: gestacao?.data?.ultima_mestruacao
+          ? (() => {
+              const inicio = new Date(`${gestacao.data.ultima_mestruacao}T00:00:00`);
+              const hoje = new Date();
+              const semana = Math.max(0, Math.floor((hoje.getTime() - inicio.getTime()) / 604800000));
+              return `${Math.min(42, semana)}ª semana`;
+            })()
+          : 'Não cadastrada',
+      });
+    }).catch(() => undefined);
+  }, []);
 
   return (
     <section className="dashboard">
@@ -475,6 +516,29 @@ function HomeDashboard() {
         <div className="dashboard-hero-illustration" aria-hidden="true"><HeartHandshake size={112} strokeWidth={1.15} /></div>
       </div>
 
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Resumo da família">
+        <article className="card"><p className="text-sm text-slate-500">Crianças cadastradas</p><strong className="mt-1 block text-2xl text-slate-800">{resumo.criancas}</strong></article>
+        <article className="card"><p className="text-sm text-slate-500">Vacinas registradas</p><strong className="mt-1 block text-2xl text-slate-800">{resumo.vacinas}</strong></article>
+        <article className="card"><p className="text-sm text-slate-500">Consultas registradas</p><strong className="mt-1 block text-2xl text-slate-800">{resumo.consultas}</strong></article>
+        <article className="card"><p className="text-sm text-slate-500">Próximo compromisso</p><strong className="mt-1 block text-sm text-slate-800">{resumo.proximo ? resumo.proximo.titulo : 'Nenhum agendado'}</strong></article>
+        <article className="card"><p className="text-sm text-slate-500">Fase atual da gestação</p><strong className="mt-1 block text-sm text-slate-800">{resumo.faseGestacao}</strong></article>
+      </section>
+
+      {resumo.recentes.length > 0 && (
+        <section className="card" aria-label="Últimos registros">
+          <p className="eyebrow">Atualizações recentes</p>
+          <h2 className="section-title">Últimos registros</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {resumo.recentes.map((registro, indice) => (
+              <article key={`${registro.titulo}-${indice}`} className="rounded-xl border border-slate-200 p-3">
+                <strong className="block text-sm text-slate-800">{registro.titulo}</strong>
+                <time className="mt-1 block text-xs text-slate-500">{new Date(`${registro.data}T00:00:00`).toLocaleDateString('pt-BR')}</time>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="space-y-6">
         <div>
           <div className="section-heading">
@@ -490,6 +554,11 @@ function HomeDashboard() {
             <Link to="/jornada-gestacao" className="quick-action quick-action-pink group">
               <span className="quick-action-icon"><Sparkles size={23} strokeWidth={1.7} /></span>
               <span><strong>Jornada da gestação</strong><small>Acompanhe as semanas e marcos estimados</small></span>
+              <ChevronRight size={18} />
+            </Link>
+            <Link to="/calendario" className="quick-action quick-action-pink group">
+              <span className="quick-action-icon"><CalendarDays size={23} strokeWidth={1.7} /></span>
+              <span><strong>Calendário da família</strong><small>Veja próximas consultas, exames e vacinas</small></span>
               <ChevronRight size={18} />
             </Link>
           </div>

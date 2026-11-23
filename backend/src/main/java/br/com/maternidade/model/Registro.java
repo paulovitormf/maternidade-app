@@ -27,6 +27,10 @@ public class Registro {
     @Column(name = "data_registro", nullable = false) private LocalDate dataRegistro;
     private LocalTime horario;
     @Lob @Column(name = "foto_base64", columnDefinition = "LONGTEXT") private String fotoBase64;
+    @Column(name = "local_evento", length = 180) private String localEvento;
+    @Column(name = "profissional", length = 180) private String profissional;
+    @Column(name = "responsavel_nome", length = 250) private String responsavelNome;
+    @Column(name = "fase_jornada", length = 80) private String faseJornada;
     @Column(name = "criado_em", nullable = false) private LocalDateTime criadoEm;
 
     @PrePersist void antesDeSalvar() { if (criadoEm == null) criadoEm = LocalDateTime.now(); if (confirmado == null) confirmado = false; }
@@ -57,5 +61,13 @@ public class Registro {
     public void setHorario(LocalTime horario) { this.horario = horario; }
     public String getFotoBase64() { return fotoBase64; }
     public void setFotoBase64(String fotoBase64) { this.fotoBase64 = fotoBase64; }
+    public String getLocalEvento() { return localEvento; }
+    public void setLocalEvento(String localEvento) { this.localEvento = localEvento; }
+    public String getProfissional() { return profissional; }
+    public void setProfissional(String profissional) { this.profissional = profissional; }
+    public String getResponsavelNome() { return responsavelNome; }
+    public void setResponsavelNome(String responsavelNome) { this.responsavelNome = responsavelNome; }
+    public String getFaseJornada() { return faseJornada; }
+    public void setFaseJornada(String faseJornada) { this.faseJornada = faseJornada; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
 }

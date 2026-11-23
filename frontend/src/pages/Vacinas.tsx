@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Baby, Heart } from 'lucide-react';
+import { Baby, Heart, Printer } from 'lucide-react';
 import CalendarioVacinaBebe from './VacinaBebe';
 import CalendarioVacinaGestante from './VacinaGestante';
 
@@ -24,6 +24,9 @@ export default function Vacinas({ publicoInicial = 'mae' }: VacinasProps) {
         <p className="mt-2 max-w-2xl text-slate-600">
           Consulte os calendários de vacinação da mãe e do bebê em um só lugar.
         </p>
+        <button type="button" className="secondary-button mt-4 !w-auto" onClick={() => window.print()}>
+          <Printer size={17} /> Exportar / imprimir carteira
+        </button>
       </header>
 
       <div

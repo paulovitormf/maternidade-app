@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { CalendarDays, Clock3, Edit3, Plus, Trash2, X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 
 type Crianca = { idCrianca: number; nome: string; podeEditar: boolean };
@@ -17,6 +18,10 @@ type Registro = {
   horario?: string;
   confirmado: boolean;
   pode_editar: boolean;
+  local_evento?: string;
+  profissional?: string;
+  responsavel_nome?: string;
+  fase_jornada?: string;
 };
 
 type Formulario = {
@@ -26,6 +31,9 @@ type Formulario = {
   descricao: string;
   data_registro: string;
   horario: string;
+  local_evento: string;
+  profissional: string;
+  responsavel_nome: string;
 };
 
 const vazio = (criancas: Crianca[], gestacoes: Gestacao[]): Formulario => ({
@@ -35,10 +43,14 @@ const vazio = (criancas: Crianca[], gestacoes: Gestacao[]): Formulario => ({
   descricao: '',
   data_registro: new Date().toISOString().slice(0, 10),
   horario: '',
+  local_evento: '',
+  profissional: '',
+  responsavel_nome: '',
 });
 
 export default function Calendario() {
   const idUsuario = Number(localStorage.getItem('id_usuario'));
+  const [searchParams] = useSearchParams();
   const [criancas, setCriancas] = useState<Crianca[]>([]);
   const [gestacoes, setGestacoes] = useState<Gestacao[]>([]);
   const [eventos, setEventos] = useState<Registro[]>([]);
@@ -46,6 +58,7 @@ export default function Calendario() {
   const [editando, setEditando] = useState<number | null>(null);
   const [form, setForm] = useState<Formulario>(vazio([], []));
   const [filtro, setFiltro] = useState('');
+  const [filtroTipo, setFiltroTipo] = useState('');
   const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(true);
 
@@ -76,9 +89,16 @@ export default function Calendario() {
   };
 
   useEffect(() => { carregar(); }, [idUsuario]);
+  useEffect(() => {
+    const crianca = searchParams.get('crianca');
+    const tipo = searchParams.get('tipo');
+    if (crianca) setFiltro(crianca);
+    if (tipo) setFiltroTipo(tipo);
+  }, [searchParams]);
 
   const futuros = useMemo(() => eventos
-    .filter((evento) => !filtro || String(evento.id_crianca) === filtro || (filtro === 'gestacao' && evento.id_gestacao))
+    .filter((evento) => (!filtro || String(evento.id_crianca) === filtro || (filtro === 'gestacao' && evento.id_gestacao)))
+    .filter((evento) => !filtroTipo || evento.tipo === filtroTipo)
     .sort((a, b) => `${a.data_registro} ${a.horario || ''}`.localeCompare(`${b.data_registro} ${b.horario || ''}`)),
   [eventos, filtro]);
 
@@ -98,6 +118,9 @@ export default function Calendario() {
       descricao: evento.descricao || '',
       data_registro: evento.data_registro,
       horario: evento.horario || '',
+      local_evento: evento.local_evento || '',
+      profissional: evento.profissional || '',
+      responsavel_nome: evento.responsavel_nome || '',
     });
     setErro('');
     setAberto(true);
@@ -119,6 +142,9 @@ export default function Calendario() {
       descricao: form.descricao.trim(),
       data_registro: form.data_registro,
       horario: form.horario || null,
+      local_evento: form.local_evento || null,
+      profissional: form.profissional || null,
+      responsavel_nome: form.responsavel_nome || JSON.parse(localStorage.getItem('usuario_autenticado') || '{}').nome || null,
       confirmado: false,
     };
     try {
@@ -157,6 +183,9 @@ export default function Calendario() {
         confirmado: true,
         data_registro: evento.data_registro,
         horario: evento.horario,
+        local_evento: evento.local_evento,
+        profissional: evento.profissional,
+        responsavel_nome: evento.responsavel_nome,
       });
       await carregar();
     } catch {
@@ -184,6 +213,16 @@ export default function Calendario() {
             <option value="">Todas</option>
             {gestacoes.length > 0 && <option value="gestacao">Gestação</option>}
             {criancas.map((crianca) => <option key={crianca.idCrianca} value={String(crianca.idCrianca)}>{crianca.nome}</option>)}
+          </select>
+        </label>
+        <label className="field">
+          <span className="field-label">Tipo</span>
+          <select className="field-control" value={filtroTipo} onChange={(event) => setFiltroTipo(event.target.value)}>
+            <option value="">Todos</option>
+            <option value="CONSULTA">Consultas</option>
+            <option value="EXAME">Exames</option>
+            <option value="VACINA">Vacinas</option>
+            <option value="OUTRO">Outros eventos</option>
           </select>
         </label>
       </div>
@@ -214,6 +253,9 @@ export default function Calendario() {
               </p>
               {evento.nome_crianca && <p className="mt-2 text-sm font-semibold text-[#3B7280]">{evento.nome_crianca}</p>}
               {evento.descricao && <p className="mt-3 text-sm leading-6 text-slate-600">{evento.descricao}</p>}
+              {evento.local_evento && <p className="mt-2 text-sm text-slate-600">Local: {evento.local_evento}</p>}
+              {evento.profissional && <p className="mt-1 text-sm text-slate-600">Profissional: {evento.profissional}</p>}
+              {evento.responsavel_nome && <p className="mt-1 text-sm text-slate-500">Responsável: {evento.responsavel_nome}</p>}
               {evento.pode_editar && (
                 <div className="mt-5 flex flex-wrap gap-2">
                   {!evento.confirmado && <button type="button" className="secondary-button !w-auto" onClick={() => concluir(evento)}>Marcar concluído</button>}
@@ -252,6 +294,11 @@ export default function Calendario() {
               <label>Data<input className="field-control" type="date" value={form.data_registro} onChange={(e) => setForm({ ...form, data_registro: e.target.value })} required /></label>
               <label>Hora (opcional)<input className="field-control" type="time" value={form.horario} onChange={(e) => setForm({ ...form, horario: e.target.value })} /></label>
             </div>
+            <div className="record-form-grid">
+              <label>Local<input className="field-control" value={form.local_evento} onChange={(e) => setForm({ ...form, local_evento: e.target.value })} placeholder="Unidade ou endereço" /></label>
+              <label>Profissional<input className="field-control" value={form.profissional} onChange={(e) => setForm({ ...form, profissional: e.target.value })} placeholder="Nome do profissional" /></label>
+            </div>
+            <label>Responsável pelo registro<input className="field-control" value={form.responsavel_nome} onChange={(e) => setForm({ ...form, responsavel_nome: e.target.value })} placeholder="Nome de quem cadastrou" /></label>
             <label>Título<input className="field-control" value={form.titulo} onChange={(e) => setForm({ ...form, titulo: e.target.value })} placeholder="Ex.: Consulta pediátrica" required /></label>
             <label>Observações<textarea className="field-control" rows={3} value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} /></label>
             {erro && <div className="alert-error" role="alert">{erro}</div>}

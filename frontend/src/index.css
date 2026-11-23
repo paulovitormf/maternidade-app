@@ -1090,3 +1090,10 @@
 .record-file input { @apply mt-2 block w-full rounded-xl border border-dashed border-[#E8B9C5] p-3 text-sm; }
 .record-file img { @apply mt-3 max-h-40 rounded-2xl object-cover; }
 @media (max-width: 640px) { .record-photo { @apply h-32 w-32; } }
+
+@media print {
+  .app-nav, .mobile-drawer-overlay, .dashboard-hero-button, .secondary-button, .record-action-button, button { display: none !important; }
+  .page-main { padding: 0 !important; }
+  .card, .record-card, .child-milestone-card { break-inside: avoid; box-shadow: none !important; }
+  body { background: white !important; }
+}

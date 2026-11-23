@@ -165,6 +165,8 @@ export default function CalendarioVacinaGestante() {
           descricao: 'Vacina materna registrada na jornada da gestação.',
           confirmado: true,
           data_registro: new Date().toISOString().slice(0, 10),
+          responsavel_nome: JSON.parse(localStorage.getItem('usuario_autenticado') || '{}').nome || null,
+          fase_jornada: 'Gestação',
         });
       }
       const atualizados = await api.get<Array<{ id_registro: number; tipo: string; titulo: string; confirmado: boolean }>>(`/registros/usuario/${idUsuario}`);
@@ -210,6 +212,11 @@ export default function CalendarioVacinaGestante() {
               </div>
             </div>
           </section>
+          {gestacaoId && (
+            <a className="secondary-button !w-auto" href="/calendario?tipo=VACINA">
+              Agendar vacina materna
+            </a>
+          )}
 
           <div className="flex gap-3 rounded-xl border border-[#D5E7EB] bg-[#EBF3F5] p-4">
             <Info

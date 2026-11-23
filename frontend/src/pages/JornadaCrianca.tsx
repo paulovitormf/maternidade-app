@@ -50,14 +50,9 @@ const JORNADAS: JornadaCriancaResumo[] = [
 ];
 
 JORNADAS.push(
-  { meses: 24, desenvolvimento: 'Frases simples, brincadeiras imaginárias e maior autonomia em atividades conhecidas.', alimentacao: 'Refeições da família, com variedade e respeito aos sinais de fome e saciedade.', crescimento: 'Acompanhe peso, altura e desenvolvimento em consultas periódicas.', vacinas: 'Revise reforços da rotina e consulte a caderneta na UBS.', cuidados: 'Escovação, sono, segurança doméstica e estímulo à conversa.' },
-  { meses: 36, desenvolvimento: 'Formas de brincar em grupo, palavras mais completas e perguntas frequentes.', alimentacao: 'Alimentos variados, pouca adição de açúcar e água nas refeições.', crescimento: 'Registre altura e peso; compare a tendência da curva pelo pediatra.', vacinas: 'Confira vacinas atrasadas e reforços previstos pelo calendário vigente.', cuidados: 'Atividade física livre, segurança, escovação e visitas regulares.' },
-  { meses: 48, desenvolvimento: 'Maior contagem, reconhecimento de cores e cooperação em brincadeiras.', alimentacao: 'Rotina de refeições e lanches, incentivando autonomia sem pressão.', crescimento: 'Avaliação periódica da altura, peso e desenvolvimento global.', vacinas: 'Revise reforços previstos aos 4 anos e mantenha a caderneta atualizada.', cuidados: 'Saúde bucal, sono suficiente, brincadeiras educativas e limites com afeto.' },
-  { meses: 60, desenvolvimento: 'Pode seguir regras simples, reconhecer emoções e se comunicar com mais clareza.', alimentacao: 'Refeições em família, variedade e incentivo à experimentação.', crescimento: 'Acompanhe crescimento, visão, audição e coordenação na consulta escolar.', vacinas: 'Confira os reforços da rotina e vacinas sazonais com a equipe de saúde.', cuidados: 'Preparação para a escola, higiene, sono e proteção em atividades físicas.' },
   { meses: 72, desenvolvimento: 'Expande leitura, escrita e raciocínio em brincadeiras e tarefas escolares.', alimentacao: 'Alimentação equilibrada e participação das crianças no preparo seguro.', crescimento: 'Avaliação anual de crescimento, saúde física e emocional.', vacinas: 'Verifique vacinas faltantes antes de novos ciclos escolares.', cuidados: 'Higiene, atividade física, sono adequado e acompanhamento escolar.' },
   { meses: 96, desenvolvimento: 'Amplia interesse, amizades, responsabilidade e raciocínio de situações cotidianas.', alimentacao: 'Privilegie alimentos naturais e ajude a construir escolhas saudáveis.', crescimento: 'Converse sobre mudanças corporais e acompanhe consultas anuais.', vacinas: 'Confira reforços e campanhas do calendário nacional.', cuidados: 'Escuta ativa, saúde mental, exercícios, sono e limites claros.' },
   { meses: 120, desenvolvimento: 'Maior autonomia, pensamento abstrato, identidade e relações sociais.', alimentacao: 'Estimule escolhas balanceadas, sem rótulos de “bom” ou “ruim”.', crescimento: 'Acompanhe puberdade, postura e curvas de crescimento com o pediatra.', vacinas: 'Revise HPV, meningocócica e demais vacinas na faixa de 9 a 12 anos.', cuidados: 'Saúde emocional, internet segura, atividade física e educação em saúde.' },
-  { meses: 144, desenvolvimento: 'Aumenta capacidade de planejamento, valores pessoais e comunicação adulta.', alimentacao: 'Oriente refeições regulares, água e equilíbrio sem dietas restritivas.', crescimento: 'Consulta anual e acompanhamento da maturação puberal.', vacinas: 'Mantenha a carteira atualizada e confirme reforços conforme a idade.', cuidados: 'Privacidade, apoio emocional, sono, escola e acesso a atendimento adequado.' },
 );
 
 function idadeEmMeses(dataNascimento: string) {
@@ -72,6 +67,12 @@ export default function JornadaCrianca({ faixa = 'crianca' }: { faixa?: 'bebe' |
   const [criancas, setCriancas] = useState<CriancaResumo[]>([]);
   const [idSelecionado, setIdSelecionado] = useState<number>();
   const [carregando, setCarregando] = useState(true);
+  const [marcos, setMarcos] = useState<Array<{ id_registro: number; titulo: string; confirmado: boolean }>>([]);
+  const [erroMarco, setErroMarco] = useState('');
+  const [marcoModal, setMarcoModal] = useState<JornadaCriancaResumo | null>(null);
+  const [marcoData, setMarcoData] = useState(new Date().toISOString().slice(0, 10));
+  const [marcoDescricao, setMarcoDescricao] = useState('');
+  const [marcoFoto, setMarcoFoto] = useState('');
   const idUsuario = Number(localStorage.getItem('id_usuario'));
 
   useEffect(() => {
@@ -80,16 +81,75 @@ export default function JornadaCrianca({ faixa = 'crianca' }: { faixa?: 'bebe' |
       .finally(() => setCarregando(false));
   }, [idUsuario]);
 
+  useEffect(() => {
+    if (!idSelecionado) {
+      setMarcos([]);
+      return;
+    }
+    api.get<Array<{ id_registro: number; titulo: string; confirmado: boolean }>>(`/registros/crianca/${idSelecionado}`)
+      .then(({ data }) => setMarcos(data.filter((registro) => registro.titulo.startsWith('Marco observado:') && registro.confirmado)))
+      .catch(() => setErroMarco('Não foi possível carregar os marcos observados.'));
+  }, [idSelecionado]);
+
   const crianca = criancas.find((item) => item.id_crianca === idSelecionado) ?? criancas[0];
   const meses = crianca ? idadeEmMeses(crianca.data_nascimento) : 0;
   const jornadasExibidas = useMemo(
-    () => JORNADAS.filter((jornada) => faixa === 'bebe' ? jornada.meses <= 24 : jornada.meses >= 24),
+    () => JORNADAS.filter((jornada) => faixa === 'bebe'
+      ? [0, 3, 6, 12, 18, 24].includes(jornada.meses)
+      : [24, 36, 48, 60, 72, 96, 120].includes(jornada.meses)),
     [faixa],
   );
   const jornadaAtual = useMemo(() => {
     const jornadasAcompanhadas = jornadasExibidas.filter((jornada) => jornada.meses <= meses);
     return jornadasAcompanhadas[jornadasAcompanhadas.length - 1];
   }, [meses, jornadasExibidas]);
+
+  const marcoObservado = (jornada: JornadaCriancaResumo) =>
+    marcos.some((marco) => marco.titulo === `Marco observado: ${jornada.meses} meses`);
+
+  const alternarMarco = async (jornada: JornadaCriancaResumo) => {
+    if (!crianca) return;
+    const existente = marcos.find((marco) => marco.titulo === `Marco observado: ${jornada.meses} meses`);
+    try {
+      if (existente) {
+        await api.delete(`/registros/${existente.id_registro}`);
+        const atualizados = await api.get<Array<{ id_registro: number; titulo: string; confirmado: boolean }>>(`/registros/crianca/${crianca.id_crianca}`);
+        setMarcos(atualizados.data.filter((registro) => registro.titulo.startsWith('Marco observado:') && registro.confirmado));
+        setErroMarco('');
+        return;
+      }
+      setMarcoData(new Date().toISOString().slice(0, 10));
+      setMarcoDescricao(jornada.desenvolvimento);
+      setMarcoFoto('');
+      setMarcoModal(jornada);
+    } catch {
+      setErroMarco('Não foi possível remover o marco observado.');
+    }
+  };
+
+  const salvarMarcoObservado = async () => {
+    if (!crianca || !marcoModal) return;
+    try {
+      await api.post('/registros', {
+        id_usuario: idUsuario,
+        id_crianca: crianca.id_crianca,
+        id_gestacao: null,
+        tipo: 'MARCO_DESENVOLVIMENTO',
+        titulo: `Marco observado: ${marcoModal.meses} meses`,
+        descricao: marcoDescricao.trim() || marcoModal.desenvolvimento,
+        confirmado: true,
+        data_registro: marcoData,
+        foto_base64: marcoFoto || null,
+        fase_jornada: `${Math.floor(marcoModal.meses / 12)} anos`,
+      });
+      const atualizados = await api.get<Array<{ id_registro: number; titulo: string; confirmado: boolean }>>(`/registros/crianca/${crianca.id_crianca}`);
+      setMarcos(atualizados.data.filter((registro) => registro.titulo.startsWith('Marco observado:') && registro.confirmado));
+      setMarcoModal(null);
+      setErroMarco('');
+    } catch {
+      setErroMarco('Não foi possível salvar o marco observado.');
+    }
+  };
 
   if (carregando) return <section className="child-milestones-section"><p className="text-sm text-slate-500">Carregando acompanhamento da criança...</p></section>;
   if (!crianca) {
@@ -103,6 +163,35 @@ export default function JornadaCrianca({ faixa = 'crianca' }: { faixa?: 'bebe' |
         <Baby size={30} strokeWidth={1.7} aria-hidden="true" />
       </div>
       {criancas.length > 1 && <label className="child-selector"><span>Criança acompanhada</span><select className="field-control" value={crianca.id_crianca} onChange={(e) => setIdSelecionado(Number(e.target.value))}>{criancas.map((item) => <option key={item.id_crianca} value={item.id_crianca}>{item.nome}</option>)}</select></label>}
+      {erroMarco && <div className="alert-error" role="alert">{erroMarco}</div>}
+      {marcoModal && (
+        <div className="record-modal-backdrop" role="presentation">
+          <form className="record-modal" onSubmit={(event) => { event.preventDefault(); void salvarMarcoObservado(); }}>
+            <div className="record-modal-heading">
+              <div><p className="eyebrow">Marco observado</p><h2>{marcoModal.meses === 0 ? 'Nascimento' : marcoModal.meses < 24 ? `${marcoModal.meses} meses` : `${marcoModal.meses / 12} anos`}</h2></div>
+              <button type="button" aria-label="Fechar" onClick={() => setMarcoModal(null)}>×</button>
+            </div>
+            <label>Quando aconteceu
+              <input className="field-control" type="date" value={marcoData} onChange={(event) => setMarcoData(event.target.value)} required />
+            </label>
+            <label>Observação da responsável
+              <textarea className="field-control" rows={3} value={marcoDescricao} onChange={(event) => setMarcoDescricao(event.target.value)} />
+            </label>
+            <label className="record-file">Foto <span>(opcional)</span>
+              <input type="file" accept="image/*" onChange={(event) => {
+                const arquivo = event.target.files?.[0];
+                if (!arquivo) return;
+                if (arquivo.size > 5 * 1024 * 1024) { setErroMarco('A foto deve ter no máximo 5 MB.'); return; }
+                const leitor = new FileReader();
+                leitor.onload = () => setMarcoFoto(String(leitor.result));
+                leitor.readAsDataURL(arquivo);
+              }} />
+            </label>
+            {marcoFoto && <img src={marcoFoto} alt="Prévia do marco" className="record-photo" />}
+            <button className="dashboard-hero-button record-submit" type="submit"><CheckCircle2 size={17} />Salvar marco observado</button>
+          </form>
+        </div>
+      )}
       <div className="child-summary-grid">
         <div><span>Idade aproximada</span><strong>{meses < 24 ? `${meses} meses` : `${Math.floor(meses / 12)} anos`}</strong></div>
         <div><span>Próximo foco</span><strong>{jornadaAtual ? `Até ${jornadaAtual.meses} meses` : 'Nascimento'}</strong></div>
@@ -128,13 +217,22 @@ export default function JornadaCrianca({ faixa = 'crianca' }: { faixa?: 'bebe' |
                   <strong>Registro</strong>
                   <p><CalendarCheck2 size={15} className="inline mr-1" />Leve a caderneta nas consultas.</p>
                   <Link to={`/registros?crianca=${crianca.id_crianca}&tipo=MARCO_DESENVOLVIMENTO`} className="inline-flex items-center gap-1 text-sm font-bold text-[#B0435B]">Registrar nesta fase <ChevronRight size={14} /></Link>
+                  <button
+                    type="button"
+                    className={`mt-3 inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold ${marcoObservado(jornada) ? 'border-emerald-300 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-600 hover:border-[#C8526B]'}`}
+                    aria-pressed={marcoObservado(jornada)}
+                    onClick={() => void alternarMarco(jornada)}
+                  >
+                    <CheckCircle2 size={15} />
+                    {marcoObservado(jornada) ? 'Marco observado' : 'Marcar como observado'}
+                  </button>
                 </div>
               </div>
             </article>
           );
         })}
       </div>
-      <p className="milestones-disclaimer">Conteúdo educativo baseado em orientações do Ministério da Saúde. Vacinas, peso, alimentação e desenvolvimento devem ser confirmados com a equipe que acompanha a criança. <a href="https://www.gov.br/saude/pt-br/vacinacao/calendario" target="_blank" rel="noreferrer">Consultar calendário oficial</a>.</p>
+      <p className="milestones-disclaimer">Cada criança tem seu próprio ritmo: diferenças pequenas entre marcos podem ser normais. Este conteúdo é educativo e não substitui avaliação profissional. Vacinas, peso, alimentação e desenvolvimento devem ser confirmados com a equipe que acompanha a criança. <a href="https://www.gov.br/saude/pt-br/vacinacao/calendario" target="_blank" rel="noreferrer">Consultar calendário oficial</a>.</p>
     </section>
   );
 }
