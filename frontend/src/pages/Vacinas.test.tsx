@@ -17,6 +17,8 @@ describe('Vacinas', () => {
 
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Vacinas' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Exportar carteira' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Exportar / imprimir carteira' })).not.toBeInTheDocument();
     });
     expect(screen.getByRole('heading', { name: 'Vacinas' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Mãe/i })).toHaveAttribute(

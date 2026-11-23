@@ -64,7 +64,8 @@ describe('App Navigation and Layout', () => {
     );
 
     render(<App />);
-    fireEvent.click(screen.getByRole('link', { name: /Artigos/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Comunidade/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /Artigos/i }));
 
     expect(screen.getByRole('heading', { name: /Artigos & leituras para mães/i })).toBeInTheDocument();
     const mains = screen.getAllByRole('main');

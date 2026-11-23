@@ -238,13 +238,36 @@ function ForumDetail({ topicId }: { topicId: number }) {
   );
 }
 
-function formatTime(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'recentemente';
-  const minutes = Math.max(0, Math.floor((Date.now() - date.getTime()) / 60000));
+function formatTime(value: unknown) {
+  const date = parseForumDate(value);
+  if (!date) return 'recentemente';
+  const elapsedMilliseconds = Date.now() - date.getTime();
+  if (elapsedMilliseconds < -60000) return 'recentemente';
+  const minutes = Math.max(0, Math.floor(elapsedMilliseconds / 60000));
   if (minutes < 1) return 'agora';
   if (minutes < 60) return `há ${minutes} min`;
   if (minutes < 1440) return `há ${Math.floor(minutes / 60)} h`;
   const days = Math.floor(minutes / 1440);
   return days === 1 ? 'ontem' : `há ${days} dias`;
+}
+
+function parseForumDate(value: unknown): Date | null {
+  if (!value) return null;
+
+  if (Array.isArray(value)) {
+    const [year, month, day, hour = 0, minute = 0, second = 0] = value as unknown as number[];
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day, hour, minute, second);
+  }
+
+  if (typeof value === 'number') {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  if (typeof value !== 'string') return null;
+
+  const isoLike = /^\d{4}-\d{2}-\d{2}T/.test(value);
+  const date = new Date(isoLike || value.endsWith('Z') ? value : `${value}Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
