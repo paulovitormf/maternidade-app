@@ -67,9 +67,9 @@ O schema inicial fica em [database/maternidade.sql](../database/maternidade.sql)
 
 O schema contempla entidades de diferentes frentes do produto. A existência de uma tabela não significa que já exista uma tela ou endpoint correspondente; a implementação disponível deve ser consultada nos controllers e services.
 
-O núcleo inicial do fórum está em `forum_categoria`, `forum_topico` e `forum_resposta`. Categorias podem representar interesses ou faixas etárias em meses; tópicos e respostas preservam autoria, status de moderação e timestamps. As tabelas ainda não possuem entidades JPA ou endpoints e serão integradas em uma etapa posterior.
+O fórum utiliza `forum_categoria`, `forum_topico`, `forum_resposta` e `forum_topico_curtida`. Categorias podem representar interesses ou faixas etárias em meses; tópicos e respostas preservam autoria, status de moderação e timestamps.
 
-Alterações incrementais do schema são versionadas em `backend/src/main/resources/db/migration` e aplicadas pelo Flyway antes da validação do Hibernate. O script `database/maternidade.sql` continua sendo a referência para a criação de um banco novo.
+O arquivo `database/maternidade.sql` é a fonte do schema no fluxo atual de desenvolvimento. O Hibernate valida a estrutura existente, mas não cria nem atualiza tabelas. O Flyway está disponível no projeto, mas desativado; mudanças no schema devem ser integradas ao SQL e aplicadas recriando o banco local até que a equipe decida ativar migrações.
 
 ## 🔐 Fluxo de autenticação
 

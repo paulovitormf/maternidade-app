@@ -572,6 +572,43 @@ CREATE TABLE gestacao (
     INDEX idx_gestacao_parto (data_parto)
 ) ENGINE=InnoDB;
 
+/* registros unificados de gestação e criança */
+CREATE TABLE registro (
+    id_registro BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL,
+    id_crianca INT NULL,
+    id_gestacao INT NULL,
+    tipo VARCHAR(40) NOT NULL,
+    titulo VARCHAR(180) NOT NULL,
+    descricao TEXT,
+    valor DECIMAL(10,2),
+    unidade VARCHAR(30),
+    dose VARCHAR(80),
+    confirmado BOOLEAN NOT NULL DEFAULT FALSE,
+    data_registro DATE NOT NULL,
+    horario TIME NULL,
+    foto_base64 LONGTEXT NULL,
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    local_evento VARCHAR(180) NULL,
+    profissional VARCHAR(180) NULL,
+    responsavel_nome VARCHAR(250) NULL,
+    fase_jornada VARCHAR(80) NULL,
+    CONSTRAINT fk_registro_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT fk_registro_crianca FOREIGN KEY (id_crianca) REFERENCES crianca(id_crianca) ON DELETE CASCADE,
+    CONSTRAINT fk_registro_gestacao FOREIGN KEY (id_gestacao) REFERENCES gestacao(id_gestacao) ON DELETE CASCADE,
+    CONSTRAINT ck_registro_tipo CHECK (
+        tipo IN (
+            'VACINA','PESO','ALTURA','PERIMETRO_CEFALICO',
+            'INTRODUCAO_ALIMENTAR','FOTO','INTERACAO',
+            'PRIMEIRA_PALAVRA','MARCO_DESENVOLVIMENTO',
+            'CONSULTA','EXAME','OUTRO'
+        )
+    ),
+    INDEX idx_registro_usuario_data (id_usuario, data_registro, horario),
+    INDEX idx_registro_crianca_data (id_crianca, data_registro),
+    INDEX idx_registro_gestacao_data (id_gestacao, data_registro)
+) ENGINE=InnoDB;
+
 /* trilha visual de jornada do desenvolvimento */
 CREATE TABLE jornada_desenvolvimento (
     id_jornada INT AUTO_INCREMENT PRIMARY KEY,
@@ -843,6 +880,23 @@ CREATE TABLE forum_resposta (
     INDEX idx_forum_resposta_topico_lista (id_topico, status, data_criacao),
     INDEX idx_forum_resposta_usuario_data (id_usuario, data_criacao)
 ) ENGINE=InnoDB;
+
+CREATE TABLE forum_topico_curtida (
+    id_topico BIGINT NOT NULL,
+    id_usuario INT NOT NULL,
+    data_curtida DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_topico, id_usuario),
+    CONSTRAINT fk_forum_curtida_topico
+        FOREIGN KEY (id_topico) REFERENCES forum_topico(id_topico) ON DELETE CASCADE,
+    CONSTRAINT fk_forum_curtida_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+INSERT IGNORE INTO forum_categoria (nome, descricao, tipo) VALUES
+('Gestação', 'Dúvidas e descobertas de cada fase', 'INTERESSE'),
+('Bebês e recém-nascidos', 'Os primeiros cuidados e desafios', 'INTERESSE'),
+('Amamentação', 'Trocas de experiências e apoio', 'INTERESSE'),
+('Pós-parto e bem-estar', 'Cuidar de si também importa', 'INTERESSE');
 
 /* produtos: alergênicos, avaliações e código de barras */
 ALTER TABLE produto
