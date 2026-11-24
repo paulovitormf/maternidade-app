@@ -166,6 +166,37 @@ class CriancaServiceTest {
     }
 
     @Test
+    void deveExcluirCriancaParaResponsavelComPermissao() {
+        Usuario usuario = usuario(10);
+        UsuarioCrianca vinculo = new UsuarioCrianca(10, 20, "RESPONSAVEL", "RESPONSAVEL", 11, true);
+        Crianca crianca = new Crianca();
+        crianca.setIdCrianca(20);
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(vinculoRepository.findByIdUsuarioAndIdCriancaAndAtivo(10, 20, true))
+                .thenReturn(Optional.of(vinculo));
+        when(criancaRepository.findById(20)).thenReturn(Optional.of(crianca));
+
+        criancaService.excluirCrianca(20, "maria@example.com");
+
+        verify(criancaRepository).delete(crianca);
+    }
+
+    @Test
+    void deveImpedirExclusaoPorResponsavelSemPermissao() {
+        Usuario usuario = usuario(10);
+        UsuarioCrianca vinculo = new UsuarioCrianca(10, 20, "RESPONSAVEL", "RESPONSAVEL", 11, false);
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(vinculoRepository.findByIdUsuarioAndIdCriancaAndAtivo(10, 20, true))
+                .thenReturn(Optional.of(vinculo));
+
+        assertThatThrownBy(() -> criancaService.excluirCrianca(20, "maria@example.com"))
+                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+                .hasMessage("Você não tem permissão para excluir os dados desta criança.");
+        verify(criancaRepository, never()).findById(20);
+        verify(criancaRepository, never()).delete(any(Crianca.class));
+    }
+
+    @Test
     void deveAdicionarResponsavelAoPerfilDaCriancaCriadaPeloUsuario() {
         Usuario usuario = usuario(10);
         Usuario responsavel = usuario(11);

@@ -115,6 +115,24 @@ public class CriancaService {
     }
 
     @Transactional
+    public void excluirCrianca(Integer idCrianca, String emailAutenticado) {
+        if (idCrianca == null || emailAutenticado == null || emailAutenticado.isBlank()) {
+            throw new IllegalArgumentException("Criança e usuário autenticado são obrigatórios.");
+        }
+        var usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new AccessDeniedException("Usuário autenticado não encontrado."));
+        var vinculo = vinculoRepository.findByIdUsuarioAndIdCriancaAndAtivo(
+                        usuario.getIdUsuario(), idCrianca, true)
+                .orElseThrow(() -> new AccessDeniedException("Você não tem acesso aos dados desta criança."));
+        if (!vinculo.isPodeEditar()) {
+            throw new AccessDeniedException("Você não tem permissão para excluir os dados desta criança.");
+        }
+        Crianca crianca = criancaRepository.findById(idCrianca)
+                .orElseThrow(() -> new IllegalArgumentException("Criança não encontrada."));
+        criancaRepository.delete(crianca);
+    }
+
+    @Transactional
     public void adicionarResponsavel(Integer idCrianca, Integer idResponsavel, String emailAutenticado) {
         if (idCrianca == null || idResponsavel == null || emailAutenticado == null || emailAutenticado.isBlank()) {
             throw new IllegalArgumentException("Criança, responsável e usuário autenticado são obrigatórios.");

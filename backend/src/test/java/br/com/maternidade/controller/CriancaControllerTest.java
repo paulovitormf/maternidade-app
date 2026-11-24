@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -136,6 +137,29 @@ class CriancaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.idCrianca").value(1))
                 .andExpect(jsonPath("$.nome").value("Lucas atualizado"));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/criancas/{id} - Deve excluir criança autorizada")
+    void deveExcluirCriancaAutorizada() throws Exception {
+        doNothing().when(criancaService).excluirCrianca(1, "maria@example.com");
+        var auth = new UsernamePasswordAuthenticationToken("maria@example.com", null, List.of());
+
+        mockMvc.perform(delete("/api/criancas/1").principal(auth))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/criancas/{id} - Deve negar exclusão sem permissão")
+    void deveNegarExclusaoDeCriancaSemPermissao() throws Exception {
+        org.mockito.Mockito.doThrow(new org.springframework.security.access.AccessDeniedException(
+                "Você não tem permissão para excluir os dados desta criança."))
+                .when(criancaService).excluirCrianca(1, "maria@example.com");
+        var auth = new UsernamePasswordAuthenticationToken("maria@example.com", null, List.of());
+
+        mockMvc.perform(delete("/api/criancas/1").principal(auth))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$").value("Você não tem permissão para excluir os dados desta criança."));
     }
 
     @Test

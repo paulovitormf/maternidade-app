@@ -1,9 +1,10 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import type React from 'react';
 import axios from 'axios';
-import { CalendarDays, CheckCircle2, Clock3, Edit3, HeartPulse, Plus, RotateCcw } from 'lucide-react';
+import { CalendarDays, CheckCircle2, Clock3, Edit3, HeartPulse, Plus, RotateCcw, Trash2 } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { mostrarToast } from '../services/toastService';
 
 type Gestacao = {
   id_gestacao: number;
@@ -46,6 +47,8 @@ export default function CadastroGestacao() {
   const [mensagemSucesso, setMensagemSucesso] = useState('');
   const [erroApi, setErroApi] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
+  const [mostrarConfirmacaoExclusao, setMostrarConfirmacaoExclusao] = useState(false);
   const [gestacaoEditando, setGestacaoEditando] = useState<number | null>(null);
   const tipoMultiplo = formData.tipo_gestacao === 'GEMEOS' || formData.tipo_gestacao === 'TRIGEMEOS_OU_MAIS';
 
@@ -117,6 +120,7 @@ export default function CadastroGestacao() {
         await api.put(`/gestacoes/${gestacaoEditando}`, payload);
       } else {
         await api.post('/gestacoes', payload);
+        mostrarToast('Gestação cadastrada com sucesso!');
       }
       const novaGestacao = gestacaoEditando === null;
       setMensagemSucesso(gestacaoEditando ? 'Gestação atualizada com sucesso.' : 'Gestação salva! A previsão de parto foi calculada automaticamente.');
@@ -124,11 +128,13 @@ export default function CadastroGestacao() {
       setGestacaoEditando(null);
       await carregarGestacoes();
       setMostrarFormulario(false);
-      if (novaGestacao) {
+      if (novaGestacao && estadoCadastro?.origemCadastro === 'inicio') {
         navigate('/continuar-cadastro', {
-          state: { etapa: estadoCadastro?.origemCadastro === 'inicio' ? 'crianca' : 'mais' },
+          state: { etapa: 'crianca' },
           replace: true,
         });
+      } else if (novaGestacao) {
+        navigate('/', { replace: true });
       }
     } catch (error) {
       const resposta = axios.isAxiosError(error) ? error.response?.data : null;
@@ -155,6 +161,32 @@ export default function CadastroGestacao() {
     setMensagemSucesso('');
     setErroApi('');
     setMostrarFormulario(true);
+  };
+
+  const excluirGestacao = async () => {
+    if (gestacaoEditando === null || excluindo || carregando) return;
+    setErroApi('');
+    setExcluindo(true);
+    try {
+      await api.delete(`/gestacoes/${gestacaoEditando}`);
+      setMostrarConfirmacaoExclusao(false);
+      setGestacaoEditando(null);
+      setFormData(initialForm);
+      setMostrarFormulario(false);
+      await carregarGestacoes();
+      mostrarToast('Gestação e registros vinculados excluídos com sucesso.');
+    } catch (error) {
+      const resposta = axios.isAxiosError(error) ? error.response?.data : null;
+      const mensagem = typeof resposta === 'string'
+        ? resposta
+        : resposta && typeof resposta.message === 'string'
+          ? resposta.message
+          : 'Não foi possível excluir esta gestação. Tente novamente.';
+      setMostrarConfirmacaoExclusao(false);
+      setErroApi(mensagem);
+    } finally {
+      setExcluindo(false);
+    }
   };
 
   if (!mostrarFormulario) {
@@ -201,7 +233,7 @@ export default function CadastroGestacao() {
   return (
     <section className="form-card card">
       <div className="mb-8">
-        <button className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-[#B0435B] hover:underline" type="button" onClick={() => setMostrarFormulario(false)}>
+        <button className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-[#B0435B] hover:underline" type="button" onClick={() => { setMostrarFormulario(false); setGestacaoEditando(null); setFormData(initialForm); }}>
           <RotateCcw size={16} /> Voltar para minhas gestações
         </button>
         <span className="form-icon form-icon-blue mb-4"><HeartPulse size={28} strokeWidth={1.65} /></span>
@@ -265,6 +297,67 @@ export default function CadastroGestacao() {
           {carregando ? 'Salvando gestação...' : gestacaoEditando ? 'Salvar alterações' : 'Salvar dados da gestação'}
         </button>
       </form>
+      {gestacaoEditando !== null && (
+        <div className="mt-8 border-t border-rose-100 pt-5">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-xl border border-rose-200 px-4 py-2.5 text-sm font-bold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => { setErroApi(''); setMostrarConfirmacaoExclusao(true); }}
+            disabled={excluindo || carregando}
+          >
+            <Trash2 size={16} />
+            {excluindo ? 'Excluindo gestação...' : 'Excluir gestação'}
+          </button>
+        </div>
+      )}
+      {mostrarConfirmacaoExclusao && gestacaoEditando !== null && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/40 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !excluindo) {
+              setMostrarConfirmacaoExclusao(false);
+            }
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="titulo-confirmar-exclusao-gestacao"
+            className="w-full max-w-lg space-y-5 rounded-2xl bg-white p-6 shadow-xl"
+          >
+            <div>
+              <p className="eyebrow text-rose-700">Ação permanente</p>
+              <h2 id="titulo-confirmar-exclusao-gestacao" className="text-xl font-extrabold text-slate-800">
+                Excluir esta gestação?
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                A gestação e todos os registros vinculados, como consultas e exames, serão removidos. Esta ação não pode ser desfeita.
+              </p>
+            </div>
+            <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
+              <button
+                type="button"
+                autoFocus
+                className="secondary-button sm:!w-auto"
+                onClick={() => setMostrarConfirmacaoExclusao(false)}
+                disabled={excluindo}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => void excluirGestacao()}
+                disabled={excluindo}
+              >
+                <Trash2 size={16} />
+                {excluindo ? 'Excluindo gestação...' : 'Sim, excluir gestação'}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </section>
   );
 }

@@ -1,8 +1,8 @@
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import axios from 'axios';
-import { Baby, Bell, BookOpen, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, ClipboardList, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, MoreHorizontal, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
+import { Baby, Bell, BookOpen, CalendarDays, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, ClipboardList, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, MoreHorizontal, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
 import { listarNotificacoes, marcarNotificacoesComoLidas } from './services/notificacaoService';
 import type { Notificacao } from './services/notificacaoService';
 
@@ -22,6 +22,7 @@ import PerfilBebe from './pages/PerfilBebe';
 import Calendario from './pages/Calendario';
 import api from './services/api';
 import Artigos from './pages/Artigos';
+import { APP_TOAST_EVENT } from './services/toastService';
 import { calcularSemanaAtual, formatarDataBrasileira } from './utils/gestacaoUtils';
 import { AUTH_CHANGED_EVENT, USUARIO_STORAGE_KEY, UsuarioPublico } from './services/usuarioService';
 
@@ -38,8 +39,26 @@ function AppLayout() {
   const [, setAuthVersion] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<'notifications' | 'profile' | null>(null);
+  const [toast, setToast] = useState<{ id: number; mensagem: string } | null>(null);
+  const toastSequence = useRef(0);
   const isAuthenticated = hasValidSession();
   const usuario = getStoredUser();
+
+  useEffect(() => {
+    const exibirToast = (event: Event) => {
+      if (!(event instanceof CustomEvent) || typeof event.detail !== 'string' || !event.detail.trim()) return;
+      toastSequence.current += 1;
+      setToast({ id: toastSequence.current, mensagem: event.detail });
+    };
+    window.addEventListener(APP_TOAST_EVENT, exibirToast);
+    return () => window.removeEventListener(APP_TOAST_EVENT, exibirToast);
+  }, []);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timeout = window.setTimeout(() => setToast(null), 4500);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
 
   useEffect(() => {
     const refresh = () => setAuthVersion((version) => version + 1);
@@ -209,6 +228,16 @@ function AppLayout() {
           <Route path="/" element={isAuthenticated ? <HomeDashboard /> : <WelcomeScreen />} />
         </Routes>
       </main>
+
+      {toast && (
+        <div key={toast.id} className="app-toast" role="status" aria-live="polite" aria-atomic="true">
+          <CheckCircle2 size={20} aria-hidden="true" />
+          <span>{toast.mensagem}</span>
+          <button type="button" className="app-toast-close" aria-label="Fechar notificação" onClick={() => setToast(null)}>
+            <X size={17} aria-hidden="true" />
+          </button>
+        </div>
+      )}
 
       {isAuthenticated && (
         <nav className="mobile-bottom-nav" aria-label="Navegação principal">

@@ -1,8 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import App from './App';
 import api from './services/api';
+import { mostrarToast } from './services/toastService';
 
 function autenticarUsuario() {
   const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
@@ -32,6 +33,20 @@ describe('App Navigation and Layout', () => {
     const welcome = within(screen.getByRole('main'));
     expect(welcome.getByRole('link', { name: /^Entrar$/i })).toBeInTheDocument();
     expect(welcome.getByRole('link', { name: /Cadastre-se/i })).toBeInTheDocument();
+  });
+
+  it('exibe o toast e o remove automaticamente após alguns segundos', () => {
+    vi.useFakeTimers();
+    try {
+      render(<App />);
+      act(() => mostrarToast('Conta criada com sucesso!'));
+
+      expect(screen.getByRole('status')).toHaveTextContent('Conta criada com sucesso!');
+      act(() => { vi.advanceTimersByTime(4500); });
+      expect(screen.queryByText('Conta criada com sucesso!')).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('deve exibir o dashboard e menu de perfil para usuário autenticado', async () => {

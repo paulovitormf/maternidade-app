@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -192,5 +193,15 @@ class GestacaoControllerTest {
                         .content(json))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").value("Gestação não encontrada."));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/gestacoes/{id} - Deve excluir gestação própria")
+    void deveExcluirGestacaoPropria() throws Exception {
+        org.mockito.Mockito.doNothing().when(gestacaoService).excluirGestacao(10, "maria@example.com");
+        var auth = new UsernamePasswordAuthenticationToken("maria@example.com", null, List.of());
+
+        mockMvc.perform(delete("/api/gestacoes/10").principal(auth))
+                .andExpect(status().isNoContent());
     }
 }

@@ -1,8 +1,9 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Baby, CalendarDays, Pencil, Plus, RotateCcw, MoreVertical, Search, X } from 'lucide-react';
+import { Baby, CalendarDays, Pencil, Plus, RotateCcw, MoreVertical, Search, Trash2, X } from 'lucide-react';
 import axios from 'axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { mostrarToast } from '../services/toastService';
 
 type Form = {
   nome: string;
@@ -56,7 +57,7 @@ const initial: Form = {
 export default function CadastroCrianca() {
   const navigate = useNavigate();
   const location = useLocation();
-  const estadoCadastro = location.state as { abrirFormulario?: boolean } | null;
+  const estadoCadastro = location.state as { abrirFormulario?: boolean; origemCadastro?: 'inicio' | 'mais' } | null;
   const [criancas, setCriancas] = useState<Crianca[]>([]);
   const [carregandoLista, setCarregandoLista] = useState(true);
   const [erroLista, setErroLista] = useState('');
@@ -64,9 +65,10 @@ export default function CadastroCrianca() {
   const [mostrarFormulario, setMostrarFormulario] = useState(Boolean(estadoCadastro?.abrirFormulario));
   const [form, setForm] = useState(initial);
   const [criancaEditando, setCriancaEditando] = useState<Crianca | null>(null);
-  const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
   const [carregandoEdicao, setCarregandoEdicao] = useState(false);
+  const [excluindoCrianca, setExcluindoCrianca] = useState(false);
+  const [mostrarConfirmacaoExclusao, setMostrarConfirmacaoExclusao] = useState(false);
   const [menuAberto, setMenuAberto] = useState<number | null>(null);
   const [criancaParaResponsavel, setCriancaParaResponsavel] = useState<Crianca | null>(null);
   const [buscaResponsavel, setBuscaResponsavel] = useState('');
@@ -190,7 +192,6 @@ export default function CadastroCrianca() {
         tipo_relacao: 'MAE',
       });
       setErro('');
-      setMensagem('');
       setMostrarFormulario(true);
     } catch (error) {
       const resposta = axios.isAxiosError(error) ? error.response?.data : null;
@@ -205,7 +206,6 @@ export default function CadastroCrianca() {
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setErro('');
-    setMensagem('');
     setSalvandoCrianca(true);
     const idUsuario = Number(localStorage.getItem('id_usuario'));
     if (!Number.isInteger(idUsuario) || idUsuario <= 0) {
@@ -237,12 +237,16 @@ export default function CadastroCrianca() {
         id_usuario: idUsuario,
         tipo_relacao: form.tipo_relacao,
       });
-      setMensagem('Registro salvo com sucesso!');
+      mostrarToast('Bebê cadastrado com sucesso!');
       setForm(initial);
       setMensagemLista('');
       await carregarCriancas();
       setMostrarFormulario(false);
-      navigate('/continuar-cadastro', { state: { etapa: 'mais' }, replace: true });
+      if (estadoCadastro?.origemCadastro === 'inicio') {
+        navigate('/continuar-cadastro', { state: { etapa: 'mais' }, replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch (error) {
       const resposta = axios.isAxiosError(error) ? error.response?.data : null;
       const mensagem = typeof resposta === 'string'
@@ -253,6 +257,32 @@ export default function CadastroCrianca() {
       setErro(mensagem);
     } finally {
       setSalvandoCrianca(false);
+    }
+  };
+
+  const excluirCrianca = async () => {
+    if (!criancaEditando || excluindoCrianca || salvandoCrianca) return;
+    setErro('');
+    setExcluindoCrianca(true);
+    try {
+      await api.delete(`/criancas/${criancaEditando.idCrianca}`);
+      setMostrarConfirmacaoExclusao(false);
+      setCriancaEditando(null);
+      setForm(initial);
+      setMostrarFormulario(false);
+      await carregarCriancas();
+      mostrarToast('Bebê e registros vinculados excluídos com sucesso.');
+    } catch (error) {
+      const resposta = axios.isAxiosError(error) ? error.response?.data : null;
+      const mensagem = typeof resposta === 'string'
+        ? resposta
+        : resposta && typeof resposta.message === 'string'
+          ? resposta.message
+          : 'Não foi possível excluir os dados deste bebê. Tente novamente.';
+      setMostrarConfirmacaoExclusao(false);
+      setErro(mensagem);
+    } finally {
+      setExcluindoCrianca(false);
     }
   };
 
@@ -494,7 +524,6 @@ export default function CadastroCrianca() {
         <h1 className="display-title !text-3xl">{criancaEditando ? 'Editar dados do bebê' : 'Cadastro do bebê'}</h1>
         <p className="page-subtitle">{criancaEditando ? `Atualize os dados de ${criancaEditando.nome}.` : 'Registre os dados do nascimento para acompanhar essa nova fase.'}</p>
       </div>
-      {mensagem && <div className="alert-success mb-5">{mensagem}</div>}
       {erro && <div className="alert-error mb-5">{erro}</div>}
       <form onSubmit={submit} className="form-grid">
         <label className="field field-wide">
@@ -542,6 +571,67 @@ export default function CadastroCrianca() {
           {salvandoCrianca ? 'Salvando dados...' : criancaEditando ? 'Salvar alterações' : 'Salvar dados do bebê'}
         </button>
       </form>
+      {criancaEditando && (
+        <div className="mt-8 border-t border-rose-100 pt-5">
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-xl border border-rose-200 px-4 py-2.5 text-sm font-bold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() => { setErro(''); setMostrarConfirmacaoExclusao(true); }}
+            disabled={excluindoCrianca || salvandoCrianca}
+          >
+            <Trash2 size={16} />
+            {excluindoCrianca ? 'Excluindo bebê...' : 'Excluir bebê'}
+          </button>
+        </div>
+      )}
+      {mostrarConfirmacaoExclusao && criancaEditando && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-900/40 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !excluindoCrianca) {
+              setMostrarConfirmacaoExclusao(false);
+            }
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="titulo-confirmar-exclusao-crianca"
+            className="w-full max-w-lg space-y-5 rounded-2xl bg-white p-6 shadow-xl"
+          >
+            <div>
+              <p className="eyebrow text-rose-700">Ação permanente</p>
+              <h2 id="titulo-confirmar-exclusao-crianca" className="text-xl font-extrabold text-slate-800">
+                Excluir o perfil de {criancaEditando.nome}?
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                O perfil e todos os registros vinculados, incluindo informações de crescimento, alimentação, vacinas e desenvolvimento, serão removidos para todos os responsáveis. Esta ação não pode ser desfeita.
+              </p>
+            </div>
+            <div className="flex flex-col-reverse justify-end gap-3 sm:flex-row">
+              <button
+                type="button"
+                autoFocus
+                className="secondary-button sm:!w-auto"
+                onClick={() => setMostrarConfirmacaoExclusao(false)}
+                disabled={excluindoCrianca}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => void excluirCrianca()}
+                disabled={excluindoCrianca}
+              >
+                <Trash2 size={16} />
+                {excluindoCrianca ? 'Excluindo bebê...' : 'Sim, excluir bebê'}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
     </section>
   );
 }

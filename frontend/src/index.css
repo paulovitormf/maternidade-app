@@ -487,6 +487,24 @@
     @apply rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700;
   }
 
+  .app-toast {
+    @apply fixed left-1/2 top-4 z-[70] flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-2xl border border-emerald-200 bg-white/95 px-4 py-3 text-sm font-semibold text-slate-700 shadow-[0_8px_24px_-16px_rgba(16,185,129,0.5)] backdrop-blur;
+    animation: toast-appear 180ms ease-out;
+  }
+
+  .app-toast > svg {
+    @apply shrink-0 text-emerald-600;
+  }
+
+  .app-toast-close {
+    @apply ml-auto shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-700;
+  }
+
+  @keyframes toast-appear {
+    from { opacity: 0; transform: translate(-50%, -0.5rem); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+
   .alert-error {
     @apply rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700;
   }

@@ -9,6 +9,7 @@ import {
   loginUsuario,
   USUARIO_STORAGE_KEY,
 } from '../services/usuarioService';
+import { mostrarToast } from '../services/toastService';
 
 export default function CadastroUsuario() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function CadastroUsuario() {
     try {
       const payload: CadastroUsuarioPayload = { usuario: { ...form, qnt_gestacao: 0 } };
       await cadastrarUsuario(payload);
+      mostrarToast('Conta criada com sucesso!');
     } catch (error) {
       setErro(obterMensagemErro(error));
       return;

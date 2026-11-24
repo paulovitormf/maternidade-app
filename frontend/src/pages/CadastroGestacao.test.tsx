@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CadastroGestacao from './CadastroGestacao';
 import api from '../services/api';
+import { APP_TOAST_EVENT } from '../services/toastService';
 
 const mockedNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -19,6 +20,7 @@ describe('CadastroGestacao Component', () => {
     localStorage.clear();
     localStorage.setItem('id_usuario', '1');
     vi.restoreAllMocks();
+    mockedNavigate.mockReset();
   });
 
   it('deve exibir estado vazio quando o usuário não tiver gestações cadastradas', async () => {
@@ -75,8 +77,9 @@ describe('CadastroGestacao Component', () => {
   });
 
   it('deve abrir formulário ao clicar em Cadastrar gestação e salvar registro', async () => {
-    vi.spyOn(api, 'get').mockResolvedValueOnce({ data: [] });
+    vi.spyOn(api, 'get').mockResolvedValue({ data: [] });
     vi.spyOn(api, 'post').mockResolvedValueOnce({ data: { id_gestacao: 10 } });
+    const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 
     render(
       <MemoryRouter>
@@ -106,5 +109,39 @@ describe('CadastroGestacao Component', () => {
         ultima_mestruacao: '2026-01-01',
       }));
     });
+    expect(dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({
+      type: APP_TOAST_EVENT,
+      detail: 'Gestação cadastrada com sucesso!',
+    }));
+    await waitFor(() => expect(mockedNavigate).toHaveBeenCalledWith('/', { replace: true }));
+  });
+
+  it('exclui gestação e registros vinculados após confirmação', async () => {
+    let gestacoes = [{
+      id_gestacao: 10,
+      ultima_mestruacao: '2026-01-01',
+      idade_gestacional: 12,
+      data_parto: '2099-10-08',
+      tipo_gestacao: 'UNICA',
+      pre_natal: true,
+    }];
+    vi.spyOn(api, 'get').mockImplementation(() => Promise.resolve({ data: gestacoes }));
+    const excluir = vi.spyOn(api, 'delete').mockImplementation(async () => {
+      gestacoes = [];
+      return { data: {} };
+    });
+
+    render(<MemoryRouter><CadastroGestacao /></MemoryRouter>);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Excluir gestação' }));
+
+    const dialog = await screen.findByRole('dialog', { name: 'Excluir esta gestação?' });
+    expect(dialog).toHaveTextContent(/todos os registros vinculados/i);
+    expect(excluir).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Sim, excluir gestação' }));
+
+    await waitFor(() => expect(excluir).toHaveBeenCalledWith('/gestacoes/10'));
+    expect(await screen.findByText(/Nenhuma gestação cadastrada/i)).toBeInTheDocument();
   });
 });

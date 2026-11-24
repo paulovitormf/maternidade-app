@@ -68,6 +68,20 @@ public class CriancaController {
         }
     }
 
+    @DeleteMapping("/{idCrianca}")
+    public ResponseEntity<?> excluir(
+            @PathVariable Integer idCrianca,
+            Authentication authentication) {
+        try {
+            criancaService.excluirCrianca(idCrianca, authentication.getName());
+            return ResponseEntity.noContent().build();
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping
     public ResponseEntity<List<CriancaAcessoDTO>> listar(Authentication authentication) {
         return ResponseEntity.ok(criancaService.listarPorUsuario(authentication.getName()));
