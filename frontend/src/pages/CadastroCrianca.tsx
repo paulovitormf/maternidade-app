@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
-import { Baby, CalendarDays, Pencil, Plus, RotateCcw, MoreVertical, Search, Trash2, X } from 'lucide-react';
+import { Baby, CalendarDays, Eye, Pencil, Plus, RotateCcw, MoreVertical, Search, Trash2, X } from 'lucide-react';
 import axios from 'axios';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -350,7 +350,7 @@ export default function CadastroCrianca() {
                         </Link>
                       </h2>
                     </div>
-                    {crianca.podeEditar && (
+                    {crianca.podeEditar && crianca.tipoAcesso === 'PRINCIPAL' && (
                       <div className="relative">
                         <button
                           type="button"
@@ -363,14 +363,9 @@ export default function CadastroCrianca() {
                         </button>
                         {menuAberto === crianca.idCrianca && (
                           <div className="absolute right-0 top-full z-10 mt-1 w-52 rounded-lg border bg-white py-1 shadow-lg">
-                            <button type="button" onClick={() => void iniciarEdicao(crianca)} className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm hover:bg-slate-100">
-                              <Pencil size={15} /> Editar bebê
+                            <button type="button" onClick={() => abrirVinculoResponsavel(crianca)} className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100">
+                              Adicionar Responsável
                             </button>
-                            {crianca.tipoAcesso === 'PRINCIPAL' && (
-                              <button type="button" onClick={() => abrirVinculoResponsavel(crianca)} className="w-full px-4 py-2 text-left text-sm hover:bg-slate-100">
-                                Adicionar Responsável
-                              </button>
-                            )}
                           </div>
                         )}
                       </div>
@@ -385,9 +380,25 @@ export default function CadastroCrianca() {
                     <CalendarDays size={16} className="text-[#C8526B]" />
                     Nascimento: {formatarData(crianca.dataNascimento)}
                   </p>
-                  <Link className="mt-4 inline-flex text-sm font-bold text-[#B0435B] hover:underline" to={`/bebes/${crianca.idCrianca}`}>
-                    Ver perfil individual
-                  </Link>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Link
+                      className="secondary-button !w-auto !gap-2 !rounded-xl !px-3 !py-2 text-sm"
+                      to={`/bebes/${crianca.idCrianca}`}
+                      aria-label={`Ver perfil de ${crianca.nome}`}
+                    >
+                      <Eye size={16} /> Ver perfil
+                    </Link>
+                    {crianca.podeEditar && (
+                      <button
+                        className="record-action-button"
+                        type="button"
+                        onClick={() => void iniciarEdicao(crianca)}
+                        aria-label={`Editar ${crianca.nome}`}
+                      >
+                        <Pencil size={15} /> Editar
+                      </button>
+                    )}
+                  </div>
                 </article>
 
 

@@ -60,7 +60,7 @@ describe('CadastroCrianca Component', () => {
 
     const link = await screen.findByRole('link', { name: 'Sofia' });
     expect(link).toHaveAttribute('href', '/bebes/7');
-    expect(screen.getByRole('link', { name: 'Ver perfil individual' })).toHaveAttribute('href', '/bebes/7');
+    expect(screen.getByRole('link', { name: 'Ver perfil de Sofia' })).toHaveAttribute('href', '/bebes/7');
   });
 
   it('não mostra editar para outro responsável sem permissão', async () => {
@@ -79,6 +79,7 @@ describe('CadastroCrianca Component', () => {
 
     expect(await screen.findByRole('link', { name: 'Sofia' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Opções de Sofia' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Editar Sofia' })).not.toBeInTheDocument();
   });
 
   it('permite editar os dados de um bebê cadastrado', async () => {
@@ -111,8 +112,7 @@ describe('CadastroCrianca Component', () => {
 
     render(<MemoryRouter><CadastroCrianca /></MemoryRouter>);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Opções de Sofia' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Editar bebê' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar Sofia' }));
     expect(await screen.findByRole('heading', { name: 'Editar dados do bebê' })).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText(/Ex.: Clara Silva/i), { target: { value: 'Sofia Oliveira' } });
@@ -162,8 +162,7 @@ describe('CadastroCrianca Component', () => {
 
     render(<MemoryRouter><CadastroCrianca /></MemoryRouter>);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Opções de Sofia' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Editar bebê' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar Sofia' }));
     fireEvent.click(await screen.findByRole('button', { name: 'Excluir bebê' }));
 
     const dialog = await screen.findByRole('dialog', { name: 'Excluir o perfil de Sofia?' });

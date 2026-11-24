@@ -1262,6 +1262,8 @@
 .records-tabs { @apply flex gap-2 border-b border-[#FADCE1]; }
 .records-tabs button { @apply inline-flex items-center gap-2 border-b-2 border-transparent px-4 py-3 text-sm font-bold text-slate-500 transition; }
 .records-tabs button:hover, .records-tabs .records-tab-active { @apply border-[#C8526B] text-[#B0435B]; }
+.record-action-button { @apply inline-flex items-center gap-1.5 rounded-xl border border-[#FECDD3] bg-white px-3 py-2 text-sm font-bold text-[#B0435B] transition hover:border-[#C8526B] hover:bg-[#FADCE1]/60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#FADCE1]; }
+.record-action-danger { @apply border-rose-200 bg-[#FFF8F9] text-rose-700 hover:border-rose-400 hover:bg-rose-50; }
 .records-list { @apply grid gap-4; }
 .record-card { @apply flex overflow-hidden rounded-3xl border border-[#F0E3E7] bg-white shadow-[0_14px_30px_-25px_rgba(130,49,72,0.8)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-24px_rgba(130,49,72,0.55)]; }
 .records-gallery { @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3; }
