@@ -248,6 +248,40 @@ class GestacaoServiceTest {
     }
 
     @Test
+    @DisplayName("Deve excluir gestação própria e atualizar quantidade")
+    void deveExcluirGestacaoPropria() {
+        Usuario usuario = usuario(7, 2);
+        Gestacao gestacao = new Gestacao();
+        gestacao.setIdGestacao(10);
+        gestacao.setUsuario(usuario);
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(gestacaoRepository.findById(10)).thenReturn(Optional.of(gestacao));
+
+        gestacaoService.excluirGestacao(10, "maria@example.com");
+
+        assertThat(usuario.getQntGestacao()).isEqualTo(1);
+        verify(usuarioRepository).save(usuario);
+        verify(gestacaoRepository).delete(gestacao);
+    }
+
+    @Test
+    @DisplayName("Deve impedir exclusão de gestação pertencente a outro usuário")
+    void deveImpedirExclusaoDeGestacaoDeOutroUsuario() {
+        Usuario usuario = usuario(7, 1);
+        Gestacao gestacao = new Gestacao();
+        gestacao.setIdGestacao(10);
+        gestacao.setUsuario(usuario(8, 1));
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(gestacaoRepository.findById(10)).thenReturn(Optional.of(gestacao));
+
+        assertThatThrownBy(() -> gestacaoService.excluirGestacao(10, "maria@example.com"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Gestação não encontrada.");
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+        verify(gestacaoRepository, never()).delete(any(Gestacao.class));
+    }
+
+    @Test
     @DisplayName("Deve listar gestações ordenadas por usuário")
     void deveListarPorUsuario() {
         Gestacao g1 = new Gestacao();

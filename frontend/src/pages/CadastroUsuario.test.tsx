@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CadastroUsuario from './CadastroUsuario';
 import * as usuarioService from '../services/usuarioService';
+import { APP_TOAST_EVENT } from '../services/toastService';
 
 const mockedNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -62,6 +63,7 @@ describe('CadastroUsuario Component', () => {
       token: 'jwt-novo-usuario',
       usuario: { id_usuario: 1, nome: 'Maria Silva', email: 'maria@example.com' },
     });
+    const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 
     render(
       <MemoryRouter>
@@ -87,5 +89,9 @@ describe('CadastroUsuario Component', () => {
         replace: true,
       });
     });
+    expect(dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({
+      type: APP_TOAST_EVENT,
+      detail: 'Conta criada com sucesso!',
+    }));
   });
 });

@@ -107,6 +107,19 @@ public class GestacaoService {
         return gestacaoRepository.save(gestacao);
     }
 
+    @Transactional
+    public void excluirGestacao(Integer idGestacao, String emailAutenticado) {
+        Usuario usuario = buscarUsuarioAutenticado(emailAutenticado);
+        Gestacao gestacao = gestacaoRepository.findById(idGestacao)
+                .filter(item -> item.getUsuario().getIdUsuario().equals(usuario.getIdUsuario()))
+                .orElseThrow(() -> new IllegalArgumentException("Gestação não encontrada."));
+
+        int quantidadeGestacoes = usuario.getQntGestacao() != null ? usuario.getQntGestacao() : 0;
+        usuario.setQntGestacao(Math.max(0, quantidadeGestacoes - 1));
+        usuarioRepository.save(usuario);
+        gestacaoRepository.delete(gestacao);
+    }
+
     private void validarTipo(String tipo, String detalhe) {
         if (tipo == null || !tipo.matches("UNICA|GEMEOS|TRIGEMEOS_OU_MAIS|AINDA_NAO_SEI")) {
             throw new IllegalArgumentException("Tipo de gestação inválido.");

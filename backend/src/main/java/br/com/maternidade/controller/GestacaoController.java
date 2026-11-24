@@ -59,4 +59,14 @@ public class GestacaoController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @DeleteMapping("/{idGestacao}")
+    public ResponseEntity<?> excluir(@PathVariable Integer idGestacao, Authentication authentication) {
+        try {
+            gestacaoService.excluirGestacao(idGestacao, authentication.getName());
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

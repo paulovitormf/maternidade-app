@@ -24,9 +24,12 @@ describe('JornadaCrianca', () => {
       return Promise.resolve({ data: [] });
     });
 
-    render(<MemoryRouter><JornadaCrianca faixa="bebe" /></MemoryRouter>);
+    render(<MemoryRouter><JornadaCrianca /></MemoryRouter>);
 
     await waitFor(() => expect(screen.getByText('Jornada de Sofia')).toBeInTheDocument());
+    expect(screen.getByText('Acompanhe o desenvolvimento do nascimento aos 12 anos.')).toBeInTheDocument();
+    expect(screen.getByText('3 meses')).toBeInTheDocument();
+    expect(screen.getByText('12 anos', { exact: true })).toBeInTheDocument();
     const botoes = screen.getAllByRole('button', { name: /Marcar como observado/i });
     fireEvent.click(botoes[0]);
     expect(await screen.findByText('Marco observado')).toBeInTheDocument();

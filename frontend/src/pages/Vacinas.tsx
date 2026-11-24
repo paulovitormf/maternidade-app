@@ -46,7 +46,7 @@ export default function Vacinas({ publicoInicial = 'mae', somenteGestante = fals
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <header className="mb-6 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 sm:flex sm:items-end sm:justify-between sm:gap-4">
         <div>
           <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#B84A62]">
             Saúde da família
@@ -58,9 +58,16 @@ export default function Vacinas({ publicoInicial = 'mae', somenteGestante = fals
             Consulte os calendários de vacinação da mãe e do bebê em um só lugar.
           </p>
         </div>
-        <button type="button" className="secondary-button inline-flex shrink-0 !w-full items-center justify-center gap-2 sm:!w-auto" onClick={() => window.print()}>
-          <Printer size={17} aria-hidden="true" />
-          <span>Exportar carteira</span>
+        <button
+          type="button"
+          aria-label="Exportar carteira"
+          title="Exportar carteira"
+          className="secondary-button inline-flex !w-auto shrink-0 items-center justify-center gap-2 !px-2.5 !py-2 text-xs sm:!px-4 sm:!py-3 sm:text-sm"
+          onClick={() => window.print()}
+        >
+          <Printer size={16} aria-hidden="true" />
+          <span className="sm:hidden">Exportar</span>
+          <span className="hidden sm:inline">Exportar carteira</span>
         </button>
       </header>
 

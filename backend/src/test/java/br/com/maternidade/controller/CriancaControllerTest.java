@@ -6,6 +6,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import br.com.maternidade.dto.CriancaAcessoDTO;
+import br.com.maternidade.dto.CriancaAtualizacaoDTO;
 import br.com.maternidade.dto.CriancaCadastroDTO;
 import br.com.maternidade.dto.CriancaDetalheDTO;
 import br.com.maternidade.model.Crianca;
@@ -104,6 +107,59 @@ class CriancaControllerTest {
                         .content(json))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").value("Nome, data e hora de nascimento são obrigatórios."));
+    }
+
+    @Test
+    @DisplayName("PUT /api/criancas/{id} - Deve atualizar os dados autorizados")
+    void deveAtualizarCriancaAutorizada() throws Exception {
+        Crianca crianca = new Crianca();
+        crianca.setIdCrianca(1);
+        crianca.setNome("Lucas atualizado");
+        crianca.setDataNascimento(LocalDate.of(2025, 5, 10));
+        crianca.setHoraNascimento(LocalTime.of(10, 30));
+        when(criancaService.atualizarCrianca(eq(1), any(CriancaAtualizacaoDTO.class), eq("maria@example.com")))
+                .thenReturn(crianca);
+
+        var auth = new UsernamePasswordAuthenticationToken("maria@example.com", null, List.of());
+        String json = """
+            {
+                "nome": "Lucas atualizado",
+                "data_nascimento": "2025-05-10",
+                "hora_nascimento": "10:30:00",
+                "sexo": "M"
+            }
+        """;
+
+        mockMvc.perform(put("/api/criancas/1")
+                        .principal(auth)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.idCrianca").value(1))
+                .andExpect(jsonPath("$.nome").value("Lucas atualizado"));
+    }
+
+    @Test
+    @DisplayName("DELETE /api/criancas/{id} - Deve excluir criança autorizada")
+    void deveExcluirCriancaAutorizada() throws Exception {
+        doNothing().when(criancaService).excluirCrianca(1, "maria@example.com");
+        var auth = new UsernamePasswordAuthenticationToken("maria@example.com", null, List.of());
+
+        mockMvc.perform(delete("/api/criancas/1").principal(auth))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/criancas/{id} - Deve negar exclusão sem permissão")
+    void deveNegarExclusaoDeCriancaSemPermissao() throws Exception {
+        org.mockito.Mockito.doThrow(new org.springframework.security.access.AccessDeniedException(
+                "Você não tem permissão para excluir os dados desta criança."))
+                .when(criancaService).excluirCrianca(1, "maria@example.com");
+        var auth = new UsernamePasswordAuthenticationToken("maria@example.com", null, List.of());
+
+        mockMvc.perform(delete("/api/criancas/1").principal(auth))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$").value("Você não tem permissão para excluir os dados desta criança."));
     }
 
     @Test

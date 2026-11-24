@@ -53,6 +53,7 @@ JORNADAS.push(
   { meses: 72, desenvolvimento: 'Expande leitura, escrita e raciocínio em brincadeiras e tarefas escolares.', alimentacao: 'Alimentação equilibrada e participação das crianças no preparo seguro.', crescimento: 'Avaliação anual de crescimento, saúde física e emocional.', vacinas: 'Verifique vacinas faltantes antes de novos ciclos escolares.', cuidados: 'Higiene, atividade física, sono adequado e acompanhamento escolar.' },
   { meses: 96, desenvolvimento: 'Amplia interesse, amizades, responsabilidade e raciocínio de situações cotidianas.', alimentacao: 'Privilegie alimentos naturais e ajude a construir escolhas saudáveis.', crescimento: 'Converse sobre mudanças corporais e acompanhe consultas anuais.', vacinas: 'Confira reforços e campanhas do calendário nacional.', cuidados: 'Escuta ativa, saúde mental, exercícios, sono e limites claros.' },
   { meses: 120, desenvolvimento: 'Maior autonomia, pensamento abstrato, identidade e relações sociais.', alimentacao: 'Estimule escolhas balanceadas, sem rótulos de “bom” ou “ruim”.', crescimento: 'Acompanhe puberdade, postura e curvas de crescimento com o pediatra.', vacinas: 'Revise HPV, meningocócica e demais vacinas na faixa de 9 a 12 anos.', cuidados: 'Saúde emocional, internet segura, atividade física e educação em saúde.' },
+  { meses: 144, desenvolvimento: 'Consolida autonomia, raciocínio abstrato, identidade e habilidades sociais, cada um no seu ritmo.', alimentacao: 'Incentive refeições variadas e uma relação positiva com a alimentação, sem dietas restritivas.', crescimento: 'Acompanhe crescimento, puberdade, sono e bem-estar nas consultas de rotina.', vacinas: 'Confira a caderneta e as vacinas recomendadas para a idade com a equipe de saúde.', cuidados: 'Converse sobre saúde emocional, relações, segurança digital e autonomia.' },
 );
 
 function idadeEmMeses(dataNascimento: string) {
@@ -63,7 +64,7 @@ function idadeEmMeses(dataNascimento: string) {
   return Math.max(0, meses);
 }
 
-export default function JornadaCrianca({ faixa = 'crianca' }: { faixa?: 'bebe' | 'crianca' }) {
+export default function JornadaCrianca() {
   const [criancas, setCriancas] = useState<CriancaResumo[]>([]);
   const [idSelecionado, setIdSelecionado] = useState<number>();
   const [carregando, setCarregando] = useState(true);
@@ -94,10 +95,8 @@ export default function JornadaCrianca({ faixa = 'crianca' }: { faixa?: 'bebe' |
   const crianca = criancas.find((item) => item.id_crianca === idSelecionado) ?? criancas[0];
   const meses = crianca ? idadeEmMeses(crianca.data_nascimento) : 0;
   const jornadasExibidas = useMemo(
-    () => JORNADAS.filter((jornada) => faixa === 'bebe'
-      ? [0, 3, 6, 12, 18, 24].includes(jornada.meses)
-      : [24, 36, 48, 60, 72, 96, 120].includes(jornada.meses)),
-    [faixa],
+    () => JORNADAS.filter((jornada) => [0, 3, 6, 12, 18, 24, 36, 48, 60, 72, 96, 120, 144].includes(jornada.meses)),
+    [],
   );
   const jornadaAtual = useMemo(() => {
     const jornadasAcompanhadas = jornadasExibidas.filter((jornada) => jornada.meses <= meses);
@@ -153,13 +152,13 @@ export default function JornadaCrianca({ faixa = 'crianca' }: { faixa?: 'bebe' |
 
   if (carregando) return <section className="child-milestones-section"><p className="text-sm text-slate-500">Carregando acompanhamento da criança...</p></section>;
   if (!crianca) {
-    return <section className="child-milestones-section"><p className="eyebrow">Acompanhamento infantil</p><h2 className="section-title">Jornada do bebê e da criança</h2><p className="milestones-subtitle">Cadastre uma criança para liberar o acompanhamento personalizado até os 5 anos.</p><Link to="/cadastrar-bebe" className="dashboard-hero-button">Cadastrar criança <ChevronRight size={17} /></Link></section>;
+    return <section className="child-milestones-section"><p className="eyebrow">Acompanhamento infantil</p><h2 className="section-title">Jornada do bebê e da criança</h2><p className="milestones-subtitle">Cadastre uma criança para liberar o acompanhamento personalizado do nascimento aos 12 anos.</p><Link to="/cadastrar-bebe" className="dashboard-hero-button">Cadastrar criança <ChevronRight size={17} /></Link></section>;
   }
 
   return (
     <section className="child-milestones-section" aria-labelledby="child-milestones-title">
       <div className="section-heading milestones-heading">
-        <div><p className="eyebrow">{faixa === 'bebe' ? 'Primeira infância' : 'Desenvolvimento infantil'}</p><h2 id="child-milestones-title" className="section-title">Jornada de {crianca.nome}</h2><p className="milestones-subtitle">{faixa === 'bebe' ? 'Desenvolvimento organizado dos 0 aos 2 anos.' : 'Desenvolvimento organizado dos 2 aos 12 anos.'}</p></div>
+        <div><p className="eyebrow">Acompanhamento infantil</p><h2 id="child-milestones-title" className="section-title">Jornada de {crianca.nome}</h2><p className="milestones-subtitle">Acompanhe o desenvolvimento do nascimento aos 12 anos.</p></div>
         <Baby size={30} strokeWidth={1.7} aria-hidden="true" />
       </div>
       {criancas.length > 1 && <label className="child-selector"><span>Criança acompanhada</span><select className="field-control" value={crianca.id_crianca} onChange={(e) => setIdSelecionado(Number(e.target.value))}>{criancas.map((item) => <option key={item.id_crianca} value={item.id_crianca}>{item.nome}</option>)}</select></label>}
@@ -197,7 +196,7 @@ export default function JornadaCrianca({ faixa = 'crianca' }: { faixa?: 'bebe' |
         <div><span>Próximo foco</span><strong>{jornadaAtual ? `Até ${jornadaAtual.meses} meses` : 'Nascimento'}</strong></div>
       </div>
       <div className="child-topic-legend"><span><Ruler size={15} />Crescimento</span><span><Syringe size={15} />Vacinas</span><span><Utensils size={15} />Alimentação</span><span><ShieldCheck size={15} />Cuidados</span></div>
-      <div className="child-milestones-scroll" tabIndex={0} aria-label={`Jornada de ${crianca.nome} ${faixa === 'bebe' ? 'até 2 anos' : 'dos 2 aos 12 anos'}`}>
+      <div className="child-milestones-scroll" tabIndex={0} aria-label={`Jornada de ${crianca.nome} do nascimento aos 12 anos`}>
         {jornadasExibidas.map((jornada) => {
           const concluido = jornada.meses <= meses;
           const idade = jornada.meses === 0 ? 'Nascimento' : jornada.meses < 24 ? `${jornada.meses} meses` : `${jornada.meses / 12} anos`;
