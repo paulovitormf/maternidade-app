@@ -191,14 +191,14 @@ export default function PerfilBebe() {
       )}
 
       <section className="space-y-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="card flex flex-wrap items-end justify-between gap-3">
           <div>
             <p className="eyebrow">Histórico individual</p>
             <h2 className="section-title">Registros de {crianca.nome}</h2>
             <p className="text-sm text-slate-500">Medidas, vacinas, consultas, fotos e outros momentos deste bebê.</p>
           </div>
           {crianca.pode_editar && (
-            <Link className="dashboard-hero-button" to={`/registros?crianca=${crianca.id_crianca}`}>
+            <Link className="dashboard-hero-button !mt-0" to={`/registros?crianca=${crianca.id_crianca}`}>
               Adicionar registro
             </Link>
           )}
