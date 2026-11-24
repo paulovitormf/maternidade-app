@@ -3,6 +3,7 @@ package br.com.maternidade.services;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.maternidade.dto.CriancaAtualizacaoDTO;
 import br.com.maternidade.dto.CriancaCadastroDTO;
 import br.com.maternidade.dto.CriancaAcessoDTO;
 import br.com.maternidade.dto.CriancaDetalheDTO;
@@ -73,6 +74,44 @@ public class CriancaService {
                 usuario.getIdUsuario(), criancaSalva.getIdCrianca(), dto.tipo_relacao()));
 
         return criancaSalva;
+    }
+
+    @Transactional
+    public Crianca atualizarCrianca(Integer idCrianca, CriancaAtualizacaoDTO dto, String emailAutenticado) {
+        if (idCrianca == null || dto == null || emailAutenticado == null || emailAutenticado.isBlank()) {
+            throw new IllegalArgumentException("Criança, dados e usuário autenticado são obrigatórios.");
+        }
+        if (dto.nome() == null || dto.nome().isBlank()
+                || dto.data_nascimento() == null || dto.hora_nascimento() == null) {
+            throw new IllegalArgumentException("Nome, data e hora de nascimento são obrigatórios.");
+        }
+        if (dto.data_nascimento().isAfter(java.time.LocalDate.now())) {
+            throw new IllegalArgumentException("A data de nascimento não pode estar no futuro.");
+        }
+        if ((dto.peso_nascimento() != null && dto.peso_nascimento().signum() < 0)
+                || (dto.altura_nascimento() != null && dto.altura_nascimento().signum() < 0)) {
+            throw new IllegalArgumentException("Peso e altura não podem ser negativos.");
+        }
+
+        var usuario = usuarioRepository.findByEmail(emailAutenticado)
+                .orElseThrow(() -> new AccessDeniedException("Usuário autenticado não encontrado."));
+        var vinculo = vinculoRepository.findByIdUsuarioAndIdCriancaAndAtivo(
+                        usuario.getIdUsuario(), idCrianca, true)
+                .orElseThrow(() -> new AccessDeniedException("Você não tem acesso aos dados desta criança."));
+        if (!vinculo.isPodeEditar()) {
+            throw new AccessDeniedException("Você não tem permissão para editar os dados desta criança.");
+        }
+        Crianca crianca = criancaRepository.findById(idCrianca)
+                .orElseThrow(() -> new IllegalArgumentException("Criança não encontrada."));
+
+        crianca.setNome(dto.nome());
+        crianca.setDataNascimento(dto.data_nascimento());
+        crianca.setHoraNascimento(dto.hora_nascimento());
+        crianca.setSexo(dto.sexo());
+        crianca.setPesoNascimento(dto.peso_nascimento());
+        crianca.setAlturaNascimento(dto.altura_nascimento());
+        crianca.setObservacoes(dto.observacoes());
+        return criancaRepository.save(crianca);
     }
 
     @Transactional

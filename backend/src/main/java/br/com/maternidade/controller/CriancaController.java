@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import br.com.maternidade.dto.CriancaCadastroDTO;
+import br.com.maternidade.dto.CriancaAtualizacaoDTO;
 import br.com.maternidade.dto.ResponsavelCriancaDTO;
 import br.com.maternidade.dto.CriancaAcessoDTO;
 import br.com.maternidade.dto.CriancaDetalheDTO;
@@ -52,6 +53,21 @@ public class CriancaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @PutMapping("/{idCrianca}")
+    public ResponseEntity<?> atualizar(
+            @PathVariable Integer idCrianca,
+            @RequestBody CriancaAtualizacaoDTO dto,
+            Authentication authentication) {
+        try {
+            return ResponseEntity.ok(criancaService.atualizarCrianca(idCrianca, dto, authentication.getName()));
+        } catch (org.springframework.security.access.AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @GetMapping
     public ResponseEntity<List<CriancaAcessoDTO>> listar(Authentication authentication) {
         return ResponseEntity.ok(criancaService.listarPorUsuario(authentication.getName()));

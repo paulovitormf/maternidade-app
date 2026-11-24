@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import br.com.maternidade.dto.CriancaCadastroDTO;
+import br.com.maternidade.dto.CriancaAtualizacaoDTO;
 import br.com.maternidade.dto.CriancaAcessoDTO;
 import br.com.maternidade.model.Crianca;
 import br.com.maternidade.model.Usuario;
@@ -120,6 +121,48 @@ class CriancaServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Tipo de relação inválido.");
         verify(usuarioRepository, never()).findByEmail(any(String.class));
+    }
+
+    @Test
+    void deveAtualizarCriancaParaUsuarioComPermissao() {
+        Usuario usuario = usuario(10);
+        UsuarioCrianca vinculo = new UsuarioCrianca(10, 20, "RESPONSAVEL", "RESPONSAVEL", 11, true);
+        Crianca crianca = new Crianca();
+        crianca.setIdCrianca(20);
+        crianca.setNome("Ana");
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(vinculoRepository.findByIdUsuarioAndIdCriancaAndAtivo(10, 20, true))
+                .thenReturn(Optional.of(vinculo));
+        when(criancaRepository.findById(20)).thenReturn(Optional.of(crianca));
+        when(criancaRepository.save(any(Crianca.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        CriancaAtualizacaoDTO dto = new CriancaAtualizacaoDTO(
+                "Ana atualizada", LocalDate.now().minusMonths(3), LocalTime.of(9, 15),
+                "F", new BigDecimal("3.40"), new BigDecimal("50.00"), "Observação atualizada");
+
+        Crianca resultado = criancaService.atualizarCrianca(20, dto, "maria@example.com");
+
+        assertThat(resultado.getNome()).isEqualTo("Ana atualizada");
+        assertThat(resultado.getHoraNascimento()).isEqualTo(LocalTime.of(9, 15));
+        assertThat(resultado.getObservacoes()).isEqualTo("Observação atualizada");
+        verify(criancaRepository).save(crianca);
+    }
+
+    @Test
+    void deveImpedirEdicaoPorResponsavelSemPermissao() {
+        Usuario usuario = usuario(10);
+        UsuarioCrianca vinculo = new UsuarioCrianca(10, 20, "RESPONSAVEL", "RESPONSAVEL", 11, false);
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(vinculoRepository.findByIdUsuarioAndIdCriancaAndAtivo(10, 20, true))
+                .thenReturn(Optional.of(vinculo));
+        CriancaAtualizacaoDTO dto = new CriancaAtualizacaoDTO(
+                "Ana atualizada", LocalDate.now().minusMonths(3), LocalTime.NOON,
+                "F", null, null, null);
+
+        assertThatThrownBy(() -> criancaService.atualizarCrianca(20, dto, "maria@example.com"))
+                .isInstanceOf(org.springframework.security.access.AccessDeniedException.class)
+                .hasMessage("Você não tem permissão para editar os dados desta criança.");
+        verify(criancaRepository, never()).findById(20);
+        verify(criancaRepository, never()).save(any(Crianca.class));
     }
 
     @Test
