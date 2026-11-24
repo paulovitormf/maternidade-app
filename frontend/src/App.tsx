@@ -1,7 +1,7 @@
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { Baby, Bell, BookOpen, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, ClipboardList, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, Plus, Sparkles, Syringe, UserPlus, X } from 'lucide-react';
+import { Baby, Bell, BookOpen, CalendarDays, ChevronDown, ChevronRight, ChevronUp, CircleUserRound, ClipboardList, Heart, HeartHandshake, Home, LogOut, Menu, MessageCircle, Plus, Sparkles, Syringe, UserPlus, UsersRound, X } from 'lucide-react';
 import { listarNotificacoes, marcarNotificacoesComoLidas } from './services/notificacaoService';
 import type { Notificacao } from './services/notificacaoService';
 
@@ -86,14 +86,26 @@ function AppLayout() {
               />
             )}
             {isAuthenticated && (
-              <Link className={`nav-link ${location.pathname.startsWith('/vacinas') ? 'nav-link-active' : ''}`} to="/vacinas">
-                <Syringe size={16} strokeWidth={1.8} />Vacinas
-              </Link>
+              <NavDropdown
+                titulo="Saúde"
+                icone={<Syringe size={16} strokeWidth={1.8} />}
+                itens={[
+                  { to: '/vacinas', rotulo: 'Vacinas', icone: <Syringe size={15} /> },
+                  { to: '/registros', rotulo: 'Registros', icone: <ClipboardList size={15} /> },
+                  { to: '/calendario', rotulo: 'Calendário', icone: <CalendarDays size={15} /> },
+                ]}
+              />
             )}
-            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/registros' ? 'nav-link-active' : ''}`} to="/registros"><ClipboardList size={16} strokeWidth={1.8} />Registros</Link>}
-            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/calendario' ? 'nav-link-active' : ''}`} to="/calendario"><CalendarDays size={16} strokeWidth={1.8} />Calendário</Link>}
-            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/foruns' ? 'nav-link-active' : ''}`} to="/foruns"><MessageCircle size={16} strokeWidth={1.8} />Fóruns</Link>}
-            {isAuthenticated && <Link className={`nav-link ${location.pathname === '/artigos' ? 'nav-link-active' : ''}`} to="/artigos"><BookOpen size={16} strokeWidth={1.8} />Artigos</Link>}
+            {isAuthenticated && (
+              <NavDropdown
+                titulo="Comunidade"
+                icone={<UsersRound size={16} strokeWidth={1.8} />}
+                itens={[
+                  { to: '/foruns', rotulo: 'Fóruns', icone: <MessageCircle size={15} /> },
+                  { to: '/artigos', rotulo: 'Artigos', icone: <BookOpen size={15} /> },
+                ]}
+              />
+            )}
           </div>
           {isAuthenticated && usuario ? (
             <div className="nav-user-actions">
@@ -127,7 +139,7 @@ function AppLayout() {
 
       {/* Gaveta de navegação Mobile */}
       {isAuthenticated && mobileMenuOpen && (
-        <aside className="mobile-drawer-overlay sm:hidden" onClick={() => setMobileMenuOpen(false)}>
+        <aside className="mobile-drawer-overlay xl:hidden" onClick={() => setMobileMenuOpen(false)}>
           <div className="mobile-drawer-content" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b border-[#FADCE1] pb-4 mb-4">
               <div className="flex items-center gap-2.5">
@@ -186,7 +198,7 @@ function AppLayout() {
           <Route path="/jornada-gestacao" element={<ProtectedRoute><JornadaGestacao /></ProtectedRoute>} />
           <Route path="/vacinas" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
           <Route path="/vacinas-bebe" element={<ProtectedRoute><Vacinas publicoInicial="bebe" /></ProtectedRoute>} />
-          <Route path="/vacinas-gestante" element={<ProtectedRoute><Vacinas /></ProtectedRoute>} />
+          <Route path="/vacinas-gestante" element={<ProtectedRoute><Vacinas publicoInicial="mae" somenteGestante /></ProtectedRoute>} />
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
           <Route path="/foruns" element={<ProtectedRoute><Foruns /></ProtectedRoute>} />
           <Route path="/registros" element={<ProtectedRoute><Registros /></ProtectedRoute>} />

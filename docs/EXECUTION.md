@@ -160,7 +160,7 @@ Em execução híbrida, a API deve usar `DB_HOST=localhost` e `MYSQL_PORT=3306`.
 
 ### Alterações no SQL não aparecem
 
-O script inicial não é reaplicado em um volume existente. Para aplicar alterações em `database/maternidade.sql`, recrie o volume de desenvolvimento com `docker compose down -v` e suba a stack novamente. Esse comando apaga os dados do banco.
+O script inicial não é reaplicado em um volume existente. Para aplicar alterações feitas em `database/maternidade.sql`, recrie o volume com `docker compose down -v` e suba a stack novamente.
 
 ### Dependências do front-end inconsistentes
 
