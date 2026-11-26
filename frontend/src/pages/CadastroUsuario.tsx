@@ -3,13 +3,10 @@ import axios from 'axios';
 import { Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  AUTH_CHANGED_EVENT,
   cadastrarUsuario,
   CadastroUsuarioPayload,
-  loginUsuario,
-  USUARIO_STORAGE_KEY,
+  CONTINUAR_CADASTRO_STORAGE_KEY,
 } from '../services/usuarioService';
-import { mostrarToast } from '../services/toastService';
 
 export default function CadastroUsuario() {
   const navigate = useNavigate();
@@ -28,23 +25,10 @@ export default function CadastroUsuario() {
     try {
       const payload: CadastroUsuarioPayload = { usuario: { ...form, qnt_gestacao: 0 } };
       await cadastrarUsuario(payload);
-      mostrarToast('Conta criada com sucesso!');
+      localStorage.setItem(CONTINUAR_CADASTRO_STORAGE_KEY, 'true');
+      navigate(`/verificar-email?email=${encodeURIComponent(form.email.trim())}`, { replace: true });
     } catch (error) {
       setErro(obterMensagemErro(error));
-      return;
-    }
-
-    try {
-      const respostaLogin = await loginUsuario({ email: form.email, senha: form.senha });
-      localStorage.setItem('access_token', respostaLogin.token);
-      localStorage.setItem('id_usuario', String(respostaLogin.usuario.id_usuario));
-      localStorage.setItem(USUARIO_STORAGE_KEY, JSON.stringify(respostaLogin.usuario));
-      window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
-      navigate('/continuar-cadastro', { state: { etapa: 'gestacao' }, replace: true });
-    } catch (error) {
-      setErro(
-        `Sua conta foi criada, mas não foi possível entrar automaticamente. ${obterMensagemErro(error)} Entre usando seu e-mail e senha.`,
-      );
     }
   };
 

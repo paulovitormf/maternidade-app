@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 
 import br.com.maternidade.dto.UsuarioCadastroDTO;
 import br.com.maternidade.dto.UsuarioBuscaDTO;
@@ -19,14 +20,17 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final GestacaoRepository gestacaoRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificacaoService emailVerificacaoService;
 
     public UsuarioService(
             UsuarioRepository usuarioRepository, 
             GestacaoRepository gestacaoRepository, 
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            EmailVerificacaoService emailVerificacaoService) {
         this.usuarioRepository = usuarioRepository;
         this.gestacaoRepository = gestacaoRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailVerificacaoService = emailVerificacaoService;
     }
 
     @Transactional
@@ -40,8 +44,8 @@ public class UsuarioService {
         if (dto.usuario().senha().length() < 8) {
             throw new IllegalArgumentException("A senha deve ter pelo menos 8 caracteres.");
         }
-        String emailNormalizado = dto.usuario().email().trim().toLowerCase();
-        if (!emailNormalizado.matches("^[\\w.%+-]+@[\\w.-]+\\.[A-Za-z]{2,6}$")) {
+        String emailNormalizado = dto.usuario().email().trim().toLowerCase(Locale.ROOT);
+        if (!emailNormalizado.matches("^[\\w.%+-]+@[\\w.-]+\\.[A-Za-z]{2,63}$")) {
             throw new IllegalArgumentException("E-mail inválido.");
         }
         if (usuarioRepository.existsByEmail(emailNormalizado)) {
@@ -84,14 +88,16 @@ public class UsuarioService {
             usuarioRepository.save(usuario);
         }
 
+        emailVerificacaoService.iniciarVerificacao(usuarioSalvo);
         return usuarioSalvo;
     }
 
     public Usuario autenticar(String email, String senha) {
         if (email == null || senha == null) throw new IllegalArgumentException("E-mail ou senha inválidos.");
-        Usuario usuario = usuarioRepository.findByEmail(email.trim().toLowerCase())
+        Usuario usuario = usuarioRepository.findByEmail(email.trim().toLowerCase(Locale.ROOT))
                 .orElseThrow(() -> new IllegalArgumentException("E-mail ou senha inválidos."));
         if (!passwordEncoder.matches(senha, usuario.getSenha())) throw new IllegalArgumentException("E-mail ou senha inválidos.");
+        if (!usuario.isEmailVerificado()) throw new EmailNaoVerificadoException();
         return usuario;
     }
 

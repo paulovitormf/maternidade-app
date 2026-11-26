@@ -2,7 +2,12 @@ import axios from 'axios';
 import { Eye, EyeOff, Heart } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AUTH_CHANGED_EVENT, loginUsuario, USUARIO_STORAGE_KEY } from '../services/usuarioService';
+import {
+  AUTH_CHANGED_EVENT,
+  CONTINUAR_CADASTRO_STORAGE_KEY,
+  loginUsuario,
+  USUARIO_STORAGE_KEY,
+} from '../services/usuarioService';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -10,11 +15,13 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [erro, setErro] = useState('');
+  const [emailNaoVerificado, setEmailNaoVerificado] = useState(false);
   const [carregando, setCarregando] = useState(false);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     setErro('');
+    setEmailNaoVerificado(false);
     setCarregando(true);
     try {
       const usuario = await loginUsuario({ email, senha });
@@ -22,7 +29,13 @@ export default function Login() {
       localStorage.setItem('id_usuario', String(usuario.usuario.id_usuario));
       localStorage.setItem(USUARIO_STORAGE_KEY, JSON.stringify(usuario.usuario));
       window.dispatchEvent(new Event(AUTH_CHANGED_EVENT));
-      navigate('/');
+      const continuarCadastro = localStorage.getItem(CONTINUAR_CADASTRO_STORAGE_KEY) === 'true';
+      localStorage.removeItem(CONTINUAR_CADASTRO_STORAGE_KEY);
+      if (continuarCadastro) {
+        navigate('/continuar-cadastro', { state: { etapa: 'gestacao' }, replace: true });
+      } else {
+        navigate('/');
+      }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const resposta = error.response?.data;
@@ -31,6 +44,10 @@ export default function Login() {
           : resposta && typeof resposta.message === 'string'
             ? resposta.message
             : null;
+        if (resposta && typeof resposta.codigo === 'string'
+          && resposta.codigo === 'EMAIL_NAO_VERIFICADO') {
+          setEmailNaoVerificado(true);
+        }
         setErro(mensagem || 'Não foi possível conectar ao servidor. Tente novamente.');
       } else {
         setErro('Não foi possível conectar ao servidor. Tente novamente.');
@@ -82,6 +99,14 @@ export default function Login() {
             </div>
           </label>
           {erro && <p className="alert-error">{erro}</p>}
+          {emailNaoVerificado && (
+            <Link
+              className="block text-center text-sm font-bold text-[#3B7280] hover:underline"
+              to={`/verificar-email?email=${encodeURIComponent(email.trim())}`}
+            >
+              Verificar meu e-mail
+            </Link>
+          )}
           <button className="primary-button" disabled={carregando}>{carregando ? 'Entrando...' : 'Entrar'}</button>
         </form>
         <p className="mt-6 text-center text-sm text-slate-500">

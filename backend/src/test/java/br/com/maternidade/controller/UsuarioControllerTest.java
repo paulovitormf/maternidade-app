@@ -27,6 +27,8 @@ import br.com.maternidade.config.JwtService;
 import br.com.maternidade.dto.UsuarioBuscaDTO;
 import br.com.maternidade.dto.UsuarioCadastroDTO;
 import br.com.maternidade.model.Usuario;
+import br.com.maternidade.services.EmailVerificacaoService;
+import br.com.maternidade.services.EmailNaoVerificadoException;
 import br.com.maternidade.services.UsuarioService;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +39,9 @@ class UsuarioControllerTest {
 
     @Mock
     private JwtService jwtService;
+
+    @Mock
+    private EmailVerificacaoService emailVerificacaoService;
 
     @InjectMocks
     private UsuarioController usuarioController;
@@ -55,6 +60,7 @@ class UsuarioControllerTest {
         usuario.setIdUsuario(1);
         usuario.setNome("Maria Silva");
         usuario.setEmail("maria@example.com");
+        usuario.setEmailVerificado(true);
 
         when(usuarioService.cadastrarUsuario(any(UsuarioCadastroDTO.class))).thenReturn(usuario);
 
@@ -107,6 +113,7 @@ class UsuarioControllerTest {
         usuario.setIdUsuario(1);
         usuario.setNome("Maria Silva");
         usuario.setEmail("maria@example.com");
+        usuario.setEmailVerificado(true);
 
         when(usuarioService.autenticar("maria@example.com", "senha-segura-123")).thenReturn(usuario);
         when(jwtService.generateToken("maria@example.com")).thenReturn("token-jwt-falso");
@@ -144,6 +151,21 @@ class UsuarioControllerTest {
                         .content(json))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$").value("E-mail ou senha inválidos."));
+    }
+
+    @Test
+    @DisplayName("POST /api/usuarios/login - Deve exigir confirmação do e-mail (403)")
+    void deveExigirConfirmacaoDoEmailNoLogin() throws Exception {
+        when(usuarioService.autenticar("maria@example.com", "senha-segura-123"))
+                .thenThrow(new EmailNaoVerificadoException());
+
+        mockMvc.perform(post("/api/usuarios/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {"email":"maria@example.com","senha":"senha-segura-123"}
+                            """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.codigo").value("EMAIL_NAO_VERIFICADO"));
     }
 
     @Test

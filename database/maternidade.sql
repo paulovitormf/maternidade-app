@@ -10,7 +10,19 @@ CREATE TABLE usuario (
     telefone VARCHAR(20),
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
     qnt_gestacao INT NOT NULL DEFAULT 0,
+    email_verificado BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT ck_usuario_qnt_gestacao CHECK (qnt_gestacao >= 0)
+) ENGINE=InnoDB;
+
+CREATE TABLE email_verificacao (
+    id_verificacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL UNIQUE,
+    codigo_hash CHAR(64) NOT NULL,
+    expira_em DATETIME NOT NULL,
+    tentativas INT NOT NULL DEFAULT 0,
+    criada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_email_verificacao_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS auditoria_acesso (

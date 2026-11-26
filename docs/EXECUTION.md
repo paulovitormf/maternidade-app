@@ -59,6 +59,31 @@ O `.env` é ignorado pelo Git. Troque os valores de exemplo, principalmente `MYS
 | `CORS_ALLOWED_ORIGINS` | Origens permitidas pela API | `http://localhost:5173,http://127.0.0.1:5173` |
 | `JWT_SECRET` | Chave usada para assinar tokens | definida no `.env.example` |
 | `JWT_EXPIRATION_MS` | Validade do token em milissegundos | `86400000` |
+| `BREVO_API_KEY` | Chave da API transacional da Brevo | obrigatória para enviar e-mails |
+| `BREVO_SENDER_EMAIL` | Remetente validado na Brevo | obrigatório para enviar e-mails |
+| `BREVO_SENDER_NAME` | Nome exibido como remetente | `Maternidade` |
+| `FRONTEND_URL` | URL usada no link de confirmação | `http://localhost:5173` |
+| `EMAIL_VERIFICATION_HASH_SECRET` | Chave para armazenar códigos protegidos | definida no `.env.example` |
+
+Para testar o cadastro com envio real, configure a chave da API Brevo e um endereço remetente validado na sua conta antes de iniciar o back-end. O código expira em 15 minutos; a solicitação de reenvio tem intervalo mínimo de 60 segundos.
+
+O script `database/maternidade.sql` inicializa somente volumes novos. Em um banco existente, aplique a alteração de coluna e crie a tabela de verificação antes de atualizar a API:
+
+```sql
+ALTER TABLE usuario
+    ADD COLUMN email_verificado BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE TABLE email_verificacao (
+    id_verificacao BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario INT NOT NULL UNIQUE,
+    codigo_hash CHAR(64) NOT NULL,
+    expira_em DATETIME NOT NULL,
+    tentativas INT NOT NULL DEFAULT 0,
+    criada_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_email_verificacao_usuario
+        FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
+) ENGINE=InnoDB;
+```
 
 ## 🐳 3. Opção A — stack completa com Docker Compose
 

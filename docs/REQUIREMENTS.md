@@ -52,6 +52,7 @@ O sistema atualmente oferece:
 | RF-08 | Permitir consultar dados básicos do perfil. | ✅ Implementado |
 | RF-09 | Exibir o calendário de vacinação de rotina do bebê até os 5 anos. | ✅ Implementado |
 | RF-10 | Reunir os calendários de vacinação materna e infantil em uma página com seletor entre mãe e bebê, iniciando na vacinação materna. | ✅ Implementado |
+| RF-11 | Enviar código e link para confirmar o e-mail após o cadastro e exigir confirmação antes do primeiro login. | ✅ Implementado |
 
 ## 🎨 Requisitos de experiência
 
@@ -73,6 +74,7 @@ O sistema atualmente oferece:
 - A persistência deve utilizar MySQL 8.0 no ambiente orquestrado pelo projeto.
 - A API deve manter arquitetura em camadas e contratos JSON documentados.
 - Credenciais e segredos devem ser configurados por ambiente, nunca fixados no código.
+- O envio de confirmação de e-mail deve usar a API Brevo configurada por ambiente.
 - Rotas protegidas devem exigir autenticação JWT.
 - Alterações no banco devem ser refletidas no [schema SQL](../database/maternidade.sql) e na documentação.
 

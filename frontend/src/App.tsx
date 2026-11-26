@@ -11,6 +11,7 @@ import CadastroGestacao from './pages/CadastroGestacao';
 import CadastroUsuario from './pages/CadastroUsuario';
 import ContinuarCadastro from './pages/ContinuarCadastro';
 import Login from './pages/Login';
+import VerificarEmail from './pages/VerificarEmail';
 import JornadaGestacao from './pages/JornadaGestacao';
 import JornadaDesenvolvimento from './pages/JornadaDesenvolvimento';
 import Vacinas from './pages/Vacinas';
@@ -207,6 +208,7 @@ function AppLayout() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/cadastrar-usuario" element={<CadastroUsuario />} />
+          <Route path="/verificar-email" element={<VerificarEmail />} />
           <Route path="/continuar-cadastro" element={<ProtectedRoute><ContinuarCadastro /></ProtectedRoute>} />
           <Route path="/cadastrar-bebe" element={<ProtectedRoute><CadastroBebe /></ProtectedRoute>} />
           <Route path="/bebes/:id" element={<ProtectedRoute><PerfilBebe /></ProtectedRoute>} />

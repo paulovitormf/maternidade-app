@@ -36,6 +36,9 @@ public class Usuario {
     @Column(name = "qnt_gestacao")
     private Integer qntGestacao = 0;
 
+    @Column(name = "email_verificado", nullable = false)
+    private boolean emailVerificado;
+
     // Construtor Padrão (Exigido pelo JPA)
     public Usuario() {}
 
@@ -114,5 +117,13 @@ public class Usuario {
 
     public void setQntGestacao(Integer qntGestacao) {
         this.qntGestacao = qntGestacao;
+    }
+
+    public boolean isEmailVerificado() {
+        return emailVerificado;
+    }
+
+    public void setEmailVerificado(boolean emailVerificado) {
+        this.emailVerificado = emailVerificado;
     }
 }

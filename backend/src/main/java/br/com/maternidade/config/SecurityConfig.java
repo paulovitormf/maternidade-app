@@ -42,7 +42,11 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Habilita o suporte a CORS
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/usuarios", "/api/usuarios/login").permitAll()
+                .requestMatchers(
+                    "/api/usuarios",
+                    "/api/usuarios/login",
+                    "/api/usuarios/verificar-email",
+                    "/api/usuarios/reenviar-verificacao").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

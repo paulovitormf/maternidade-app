@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Login from './Login';
 import * as usuarioService from '../services/usuarioService';
+import { CONTINUAR_CADASTRO_STORAGE_KEY } from '../services/usuarioService';
 
 const mockedNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -97,6 +98,61 @@ describe('Login Component', () => {
 
     await waitFor(() => {
       expect(screen.getByText('E-mail ou senha inválidos.')).toBeInTheDocument();
+    });
+  });
+
+  it('deve oferecer verificação quando o servidor informar e-mail não confirmado', async () => {
+    vi.spyOn(usuarioService, 'loginUsuario').mockRejectedValueOnce({
+      isAxiosError: true,
+      response: {
+        data: {
+          codigo: 'EMAIL_NAO_VERIFICADO',
+          mensagem: 'Confirme seu e-mail antes de entrar.',
+        },
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByLabelText(/E-mail/i), { target: { value: 'maria@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/Digite sua senha/i), { target: { value: 'senha-segura' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Entrar$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: 'Verificar meu e-mail' })).toHaveAttribute(
+        'href',
+        '/verificar-email?email=maria%40example.com',
+      );
+    });
+  });
+
+  it('retoma a etapa de cadastro após verificar e entrar', async () => {
+    localStorage.setItem(CONTINUAR_CADASTRO_STORAGE_KEY, 'true');
+    vi.spyOn(usuarioService, 'loginUsuario').mockResolvedValueOnce({
+      token: 'jwt-123',
+      usuario: { id_usuario: 5, nome: 'Maria', email: 'maria@example.com' },
+    });
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>,
+    );
+
+    fireEvent.change(screen.getByLabelText(/E-mail/i), { target: { value: 'maria@example.com' } });
+    fireEvent.change(screen.getByPlaceholderText(/Digite sua senha/i), { target: { value: 'senha-segura' } });
+    fireEvent.click(screen.getByRole('button', { name: /^Entrar$/i }));
+
+    await waitFor(() => {
+      expect(mockedNavigate).toHaveBeenCalledWith('/continuar-cadastro', {
+        state: { etapa: 'gestacao' },
+        replace: true,
+      });
+      expect(localStorage.getItem(CONTINUAR_CADASTRO_STORAGE_KEY)).toBeNull();
     });
   });
 });

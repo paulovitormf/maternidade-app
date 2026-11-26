@@ -3,8 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CadastroUsuario from './CadastroUsuario';
 import * as usuarioService from '../services/usuarioService';
-import { APP_TOAST_EVENT } from '../services/toastService';
-
+import { CONTINUAR_CADASTRO_STORAGE_KEY } from '../services/usuarioService';
 const mockedNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -52,18 +51,12 @@ describe('CadastroUsuario Component', () => {
     });
   });
 
-  it('deve cadastrar e autenticar automaticamente com sucesso', async () => {
+  it('deve cadastrar e encaminhar para a verificação de e-mail', async () => {
     vi.spyOn(usuarioService, 'cadastrarUsuario').mockResolvedValueOnce({
       id_usuario: 1,
       nome: 'Maria Silva',
       email: 'maria@example.com',
     });
-
-    vi.spyOn(usuarioService, 'loginUsuario').mockResolvedValueOnce({
-      token: 'jwt-novo-usuario',
-      usuario: { id_usuario: 1, nome: 'Maria Silva', email: 'maria@example.com' },
-    });
-    const dispatchEvent = vi.spyOn(window, 'dispatchEvent');
 
     render(
       <MemoryRouter>
@@ -79,19 +72,9 @@ describe('CadastroUsuario Component', () => {
 
     await waitFor(() => {
       expect(usuarioService.cadastrarUsuario).toHaveBeenCalled();
-      expect(usuarioService.loginUsuario).toHaveBeenCalledWith({
-        email: 'maria@example.com',
-        senha: 'senha12345',
-      });
-      expect(localStorage.getItem('access_token')).toBe('jwt-novo-usuario');
-      expect(mockedNavigate).toHaveBeenCalledWith('/continuar-cadastro', {
-        state: { etapa: 'gestacao' },
-        replace: true,
-      });
+      expect(localStorage.getItem('access_token')).toBeNull();
+      expect(localStorage.getItem(CONTINUAR_CADASTRO_STORAGE_KEY)).toBe('true');
+      expect(mockedNavigate).toHaveBeenCalledWith('/verificar-email?email=maria%40example.com', { replace: true });
     });
-    expect(dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({
-      type: APP_TOAST_EVENT,
-      detail: 'Conta criada com sucesso!',
-    }));
   });
 });

@@ -39,7 +39,21 @@ Content-Type: application/json
 | --- | --- | --- | --- |
 | `POST` | `/api/usuarios` | pública | cadastra um usuário |
 | `POST` | `/api/usuarios/login` | pública | autentica e retorna JWT |
+| `POST` | `/api/usuarios/verificar-email` | pública | confirma o e-mail com código de 8 dígitos |
+| `POST` | `/api/usuarios/reenviar-verificacao` | pública | solicita o reenvio do código de confirmação |
 | `GET` | `/api/usuarios/busca?q={nome}` | JWT | busca até 8 usuários pelo nome, sem incluir o usuário autenticado |
+
+O cadastro envia um código de uso único, válido por 15 minutos, para o e-mail informado. O usuário não recebe uma sessão até confirmar o endereço. O e-mail contém também um link que abre a tela de confirmação já preenchida.
+
+Exemplo de confirmação:
+
+```bash
+curl -X POST http://localhost:8080/api/usuarios/verificar-email \
+  -H "Content-Type: application/json" \
+  -d '{"email":"pessoa@example.com","codigo":"01234567"}'
+```
+
+O endpoint de reenvio recebe `{"email":"pessoa@example.com"}`. Por segurança, responde com a mesma mensagem quando não existe uma conta pendente; um novo código só é enviado após o intervalo mínimo de 60 segundos.
 
 Exemplo de login:
 
@@ -49,7 +63,7 @@ curl -X POST http://localhost:8080/api/usuarios/login \
   -d '{"email":"pessoa@example.com","senha":"sua-senha"}'
 ```
 
-Uma autenticação bem-sucedida retorna um objeto com o token e os dados públicos do usuário. Credenciais inválidas retornam `401 Unauthorized`.
+Uma autenticação bem-sucedida retorna um objeto com o token e os dados públicos do usuário. Credenciais inválidas retornam `401 Unauthorized`. Se a senha estiver correta, mas o endereço ainda não tiver sido confirmado, o login retorna `403 Forbidden` com `{"codigo":"EMAIL_NAO_VERIFICADO","mensagem":"Confirme seu e-mail antes de entrar."}`.
 
 ## 🤰 Gestações
 

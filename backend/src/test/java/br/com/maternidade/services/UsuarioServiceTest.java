@@ -39,11 +39,15 @@ class UsuarioServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private EmailVerificacaoService emailVerificacaoService;
+
     private UsuarioService usuarioService;
 
     @BeforeEach
     void setUp() {
-        usuarioService = new UsuarioService(usuarioRepository, gestacaoRepository, passwordEncoder);
+        usuarioService = new UsuarioService(
+                usuarioRepository, gestacaoRepository, passwordEncoder, emailVerificacaoService);
     }
 
     @Test
@@ -61,6 +65,7 @@ class UsuarioServiceTest {
         assertThat(usuario.getQntGestacao()).isZero();
         verify(usuarioRepository).existsByEmail("maria@example.com");
         verify(passwordEncoder).encode("senha-segura");
+        verify(emailVerificacaoService).iniciarVerificacao(usuario);
     }
 
     @Test
@@ -169,6 +174,7 @@ class UsuarioServiceTest {
         Usuario usuario = new Usuario();
         usuario.setEmail("maria@example.com");
         usuario.setSenha("senha-criptografada");
+        usuario.setEmailVerificado(true);
         when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("senha-segura", "senha-criptografada")).thenReturn(true);
 
@@ -200,6 +206,19 @@ class UsuarioServiceTest {
         assertThatThrownBy(() -> usuarioService.autenticar("maria@example.com", "senha-incorreta"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("E-mail ou senha inválidos.");
+    }
+
+    @Test
+    void deveBloquearLoginQuandoEmailAindaNaoFoiVerificado() {
+        Usuario usuario = new Usuario();
+        usuario.setEmail("maria@example.com");
+        usuario.setSenha("senha-criptografada");
+        when(usuarioRepository.findByEmail("maria@example.com")).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.matches("senha-segura", "senha-criptografada")).thenReturn(true);
+
+        assertThatThrownBy(() -> usuarioService.autenticar("maria@example.com", "senha-segura"))
+                .isInstanceOf(EmailNaoVerificadoException.class)
+                .hasMessage("Confirme seu e-mail antes de entrar.");
     }
 
     @Test

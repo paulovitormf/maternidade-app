@@ -31,6 +31,7 @@ export interface UsuarioPublico {
 }
 
 export const USUARIO_STORAGE_KEY = 'usuario_autenticado';
+export const CONTINUAR_CADASTRO_STORAGE_KEY = 'maternidade_continuar_cadastro';
 export const AUTH_CHANGED_EVENT = 'maternidade-auth-changed';
 
 export interface LoginResposta {
@@ -45,5 +46,15 @@ export const cadastrarUsuario = async (dadosUsuario: CadastroUsuarioPayload) => 
 
 export const loginUsuario = async (dadosLogin: { email: string; senha: string }) => {
   const response = await api.post<LoginResposta>('/usuarios/login', dadosLogin);
+  return response.data;
+};
+
+export const verificarEmail = async (dados: { email: string; codigo: string }) => {
+  const response = await api.post<{ mensagem: string }>('/usuarios/verificar-email', dados);
+  return response.data;
+};
+
+export const reenviarVerificacaoEmail = async (email: string) => {
+  const response = await api.post<{ mensagem: string }>('/usuarios/reenviar-verificacao', { email });
   return response.data;
 };

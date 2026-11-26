@@ -73,11 +73,15 @@ Alterações do schema são mantidas diretamente em `database/maternidade.sql`, 
 
 ## 🔐 Fluxo de autenticação
 
-1. O usuário envia e-mail e senha para `POST /api/usuarios/login`.
-2. A API autentica o usuário e retorna um JWT junto dos dados públicos.
-3. O front-end armazena o token e o utiliza nas requisições protegidas.
-4. O filtro JWT valida o token antes de permitir o acesso.
-5. Ao sair, o front-end remove os dados locais da sessão.
+1. O cadastro cria a conta pendente e envia um código e um link de confirmação pela API Brevo.
+2. O usuário confirma o endereço na tela `/verificar-email`; o código expira em 15 minutos e é de uso único.
+3. O usuário envia e-mail e senha para `POST /api/usuarios/login`.
+4. A API retorna `403` se o e-mail ainda não estiver confirmado; caso contrário, autentica e retorna um JWT junto dos dados públicos.
+5. O front-end armazena o token e o utiliza nas requisições protegidas.
+6. O filtro JWT valida o token antes de permitir o acesso.
+7. Ao sair, o front-end remove os dados locais da sessão.
+
+A chave da API Brevo, o remetente previamente validado e a URL pública do front-end são configuração de ambiente. Os códigos são armazenados como HMAC, expiram e permitem no máximo cinco tentativas de confirmação.
 
 ## ✨ Princípios de evolução
 
